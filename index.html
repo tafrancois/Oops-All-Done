@@ -1,0 +1,3299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Tally Hoes</title>
+
+<!-- PWA manifest and theme -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#5a2e4e" />
+<meta name="description" content="Do the thing. Get the points. Repeat." />
+
+<!-- iOS-specific (iOS doesn't read manifest.json) -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Tally Hoes" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --cream: #fdf6e8;
+    --cream-deep: #f5ead0;
+    --butter: #f5c96b;
+    --butter-deep: #e8a838;
+    --peach: #f5a978;
+    --plum: #5a2e4e;
+    --plum-soft: #7a4570;
+    --plum-mist: #ab85a0;
+    --sage: #a4b89a;
+    --rose: #e47a7a;
+    --ink: #2a1520;
+    --shadow: rgba(74, 37, 64, 0.18);
+    --shadow-soft: rgba(74, 37, 64, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: 'Nunito', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at top left, rgba(245, 201, 107, 0.5), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(245, 180, 130, 0.35), transparent 55%),
+      radial-gradient(ellipse at center, rgba(255, 230, 170, 0.4), transparent 70%),
+      #faecc8;
+    background-attachment: fixed;
+    padding: 24px 16px 120px;
+  }
+
+  /* Grain overlay for texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.15 0 0 0 0 0.25 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(2.8rem, 9vw, 4.5rem);
+    color: var(--plum);
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    font-style: italic;
+  }
+
+  h1 .dot {
+    color: var(--butter-deep);
+    font-style: normal;
+  }
+
+  .tagline {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--plum-soft);
+    font-size: 1rem;
+    margin-top: 4px;
+    opacity: 0.8;
+  }
+
+  /* ===== PROFILE TOGGLE ===== */
+  .profiles {
+    display: flex;
+    gap: 6px;
+    background: rgba(255,255,255,0.6);
+    padding: 6px;
+    border-radius: 999px;
+    margin: 20px auto 0;
+    max-width: 520px;
+    box-shadow: 0 2px 12px var(--shadow-soft), inset 0 0 0 1px rgba(74,37,64,0.08);
+    backdrop-filter: blur(8px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .profiles::-webkit-scrollbar { display: none; }
+
+  .profile-btn {
+    flex: 1;
+    min-width: 80px;
+    border: none;
+    background: transparent;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--plum-soft);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .profile-btn.active {
+    background: var(--plum);
+    color: var(--cream);
+    box-shadow: 0 4px 12px rgba(90,46,78,0.3);
+  }
+
+  .profile-btn:not(.active):hover {
+    background: rgba(74,37,64,0.08);
+    color: var(--plum);
+  }
+
+  .profile-btn.add-user-btn {
+    flex: 0 0 auto;
+    min-width: 44px;
+    padding: 10px 14px;
+    color: var(--plum-mist);
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .profile-btn.add-user-btn:hover {
+    background: rgba(245,201,107,0.3);
+    color: var(--plum);
+  }
+
+  .profile-btn.add-user-btn.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .profile-btn.add-user-btn.disabled:hover {
+    background: transparent;
+    color: var(--plum-mist);
+  }
+
+  /* ===== POINTS DISPLAY ===== */
+  .points-hero {
+    text-align: center;
+    margin: 32px 0 28px;
+    position: relative;
+  }
+
+  .points-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--plum-soft);
+    letter-spacing: 0.02em;
+  }
+
+  .points-value {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(4rem, 15vw, 6.5rem);
+    color: var(--plum);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .points-value.bump {
+    animation: bump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes bump {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.12); color: var(--butter-deep); }
+    100% { transform: scale(1); }
+  }
+
+  .points-sub {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    color: var(--plum-soft);
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+
+  /* ===== GOAL SECTION ===== */
+  .goal-section {
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(10px);
+    border-radius: 22px;
+    padding: 14px 18px 16px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 14px var(--shadow-soft), inset 0 0 0 1px rgba(74,37,64,0.06);
+  }
+
+  .goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .goal-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--plum);
+    font-size: 1rem;
+  }
+
+  .goal-edit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(74,37,64,0.08);
+    border: none;
+    padding: 5px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--plum);
+    transition: all 0.2s;
+  }
+
+  .goal-edit:hover {
+    background: rgba(74,37,64,0.15);
+    transform: scale(1.03);
+  }
+
+  .goal-pencil {
+    font-size: 0.85rem;
+    opacity: 0.7;
+  }
+
+  .goal-bar-track {
+    position: relative;
+    height: 14px;
+    background: rgba(74,37,64,0.1);
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(74,37,64,0.15);
+  }
+
+  .goal-bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0%;
+    background: linear-gradient(90deg, var(--butter) 0%, var(--peach) 60%, var(--rose) 100%);
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 12px rgba(245,201,107,0.5);
+  }
+
+  .goal-bar-fill.complete {
+    background: linear-gradient(90deg, var(--sage) 0%, var(--butter-deep) 50%, var(--rose) 100%);
+    animation: rainbow-pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes rainbow-pulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(245,201,107,0.6); }
+    50% { box-shadow: 0 0 20px rgba(228,122,122,0.7); }
+  }
+
+  .goal-bar-shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    transform: translateX(-100%);
+    pointer-events: none;
+  }
+
+  .goal-bar-shimmer.animate {
+    animation: shimmer 1.8s ease-in-out;
+  }
+
+  @keyframes shimmer {
+    to { transform: translateX(350%); }
+  }
+
+  .goal-status {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--plum-soft);
+    margin-top: 8px;
+    text-align: right;
+  }
+
+  .goal-status.complete {
+    color: var(--butter-deep);
+    font-weight: 800;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  /* Goal presets */
+  .goal-presets {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+
+  .goal-preset {
+    flex: 1;
+    min-width: 50px;
+    border: 2px solid rgba(74,37,64,0.15);
+    background: #fff;
+    padding: 8px;
+    border-radius: 12px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--plum);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .goal-preset:hover, .goal-preset.selected {
+    border-color: var(--butter-deep);
+    background: var(--butter);
+    color: var(--plum);
+    transform: translateY(-2px);
+  }
+
+  /* ===== PLANNER ===== */
+  .planner-calendar-section {
+    padding: 18px 16px 20px;
+  }
+
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .cal-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--plum);
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+
+  .cal-nav {
+    background: rgba(74,37,64,0.08);
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--plum);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding-bottom: 4px;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .cal-nav:hover {
+    background: var(--plum);
+    color: var(--cream);
+    transform: scale(1.1);
+  }
+
+  .calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+
+  .calendar-weekdays span {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--plum-mist);
+    padding: 4px 0;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    border: none;
+    background: rgba(255,255,255,0.5);
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--plum);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cal-day:hover:not(.empty) {
+    background: rgba(245,201,107,0.4);
+    transform: scale(1.05);
+  }
+
+  .cal-day.empty {
+    background: transparent;
+    cursor: default;
+    color: transparent;
+  }
+
+  .cal-day.today {
+    background: var(--butter);
+    color: var(--plum);
+    font-weight: 800;
+    box-shadow: 0 0 0 2px var(--butter-deep) inset;
+  }
+
+  .cal-day.selected {
+    background: var(--plum);
+    color: var(--cream);
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(90,46,78,0.3);
+  }
+
+  .cal-day.has-content::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    background: var(--butter-deep);
+    border-radius: 50%;
+  }
+
+  .cal-day.selected.has-content::after {
+    background: var(--butter);
+  }
+
+  .cal-day.future {
+    opacity: 0.55;
+  }
+
+  .planner-editor-section {
+    padding: 18px 18px 16px;
+  }
+
+  .planner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 10px;
+  }
+
+  .planner-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .planner-mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(74,37,64,0.08);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--plum);
+    transition: all 0.2s;
+  }
+
+  .planner-mode-btn:hover {
+    background: rgba(74,37,64,0.15);
+    transform: scale(1.03);
+  }
+
+  .planner-mode-btn.in-check-mode {
+    background: var(--plum);
+    color: var(--cream);
+  }
+
+  .planner-tip {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    color: var(--plum-mist);
+    margin-bottom: 10px;
+  }
+
+  .planner-tip code {
+    font-family: 'Nunito', monospace;
+    font-style: normal;
+    background: rgba(74,37,64,0.1);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--plum);
+  }
+
+  /* Checklist view */
+  .planner-checklist {
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px 4px;
+    border: 2px solid rgba(74,37,64,0.12);
+    min-height: 120px;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+
+  .checklist-item:hover {
+    background: rgba(245,201,107,0.15);
+  }
+
+  .checklist-item.note {
+    cursor: default;
+    color: var(--plum-soft);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+    padding-left: 16px;
+  }
+
+  .checklist-item.note:hover {
+    background: transparent;
+  }
+
+  .checklist-item.empty-line {
+    min-height: 8px;
+    padding: 0;
+  }
+
+  .checklist-item.empty-line:hover {
+    background: transparent;
+  }
+
+  .check-box {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--plum-mist);
+    border-radius: 7px;
+    background: #fff;
+    margin-top: 1px;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .checklist-item:hover .check-box {
+    border-color: var(--butter-deep);
+    transform: scale(1.08);
+  }
+
+  .checklist-item.checked .check-box {
+    background: #7fa873;
+    border-color: #7fa873;
+    transform: scale(1.05);
+  }
+
+  .checklist-item.checked .check-box::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  .check-text {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.98rem;
+    line-height: 1.5;
+    color: var(--plum);
+    flex: 1;
+    transition: color 0.3s, text-decoration-color 0.3s;
+  }
+
+  .checklist-item.checked .check-text {
+    color: #5a8050;
+    text-decoration: line-through;
+    text-decoration-color: rgba(90,128,80,0.5);
+    text-decoration-thickness: 2px;
+  }
+
+  .planner-progress {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.88rem;
+    color: var(--plum-soft);
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 600;
+  }
+
+  .planner-progress.all-done {
+    color: var(--butter-deep);
+    font-weight: 800;
+    font-size: 1rem;
+  }
+
+  .planner-day-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--plum);
+    font-size: 1.2rem;
+    letter-spacing: -0.01em;
+  }
+
+  .planner-save-indicator {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--sage);
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .planner-save-indicator.visible {
+    opacity: 1;
+  }
+
+  .planner-save-indicator.saving {
+    color: var(--plum-mist);
+  }
+
+  .planner-editor {
+    width: 100%;
+    min-height: 260px;
+    padding: 14px 16px;
+    border: 2px solid rgba(74,37,64,0.12);
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--plum);
+    background: #fff;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+
+  .planner-editor:focus {
+    outline: none;
+    border-color: var(--butter-deep);
+  }
+
+  .planner-editor::placeholder {
+    color: var(--plum-mist);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+  }
+
+  #plannerCombinedWrap {
+    display: flex;
+    gap: 12px;
+    flex-direction: column;
+  }
+
+  .planner-combined-col {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    border: 2px solid rgba(74,37,64,0.1);
+  }
+
+  .planner-col-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--plum-soft);
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .planner-col-content {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--plum);
+    white-space: pre-wrap;
+    min-height: 40px;
+  }
+
+  .planner-col-content.empty {
+    color: var(--plum-mist);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+  }
+
+  /* ===== CONFETTI ===== */
+  #confettiCanvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 500;
+    display: none;
+  }
+
+  #confettiCanvas.active {
+    display: block;
+  }
+
+  /* ===== TABS ===== */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    border: none;
+    background: transparent;
+    padding: 10px 20px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--plum-mist);
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+  }
+
+  .tab.active {
+    color: var(--plum);
+  }
+
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    right: 20%;
+    height: 3px;
+    background: var(--butter-deep);
+    border-radius: 2px;
+  }
+
+  /* ===== TASK GRID ===== */
+  .task-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .task-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 18px 12px 14px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 4px 16px var(--shadow-soft), inset 0 0 0 1px rgba(74,37,64,0.06);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: none;
+    user-select: none;
+  }
+
+  .task-card:hover {
+    transform: translateY(-3px) rotate(-1deg);
+    box-shadow: 0 10px 24px var(--shadow), inset 0 0 0 1px rgba(74,37,64,0.1);
+  }
+
+  .task-card:active {
+    transform: translateY(0) scale(0.96);
+  }
+
+  .task-card.log-pulse {
+    animation: logPulse 0.5s ease-out;
+  }
+
+  @keyframes logPulse {
+    0% { transform: scale(1); background: #fff; }
+    30% { transform: scale(1.08); background: #fff4d6; }
+    100% { transform: scale(1); background: #fff; }
+  }
+
+  .task-emoji {
+    font-size: 2.4rem;
+    display: block;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .task-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--plum);
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+
+  .task-points {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--butter-deep);
+    font-size: 0.85rem;
+  }
+
+  .task-logged-today {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--sage);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    min-width: 22px;
+  }
+
+  .task-edit-btn {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: rgba(74,37,64,0.08);
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.05rem;
+    opacity: 0.55;
+    transition: opacity 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .task-card:hover .task-edit-btn {
+    opacity: 1;
+  }
+
+  .task-edit-btn:hover {
+    background: rgba(74,37,64,0.2);
+  }
+
+  /* Add task card */
+  .task-card.add-card {
+    background: transparent;
+    border: 2px dashed var(--plum-mist);
+    box-shadow: none;
+    color: var(--plum-soft);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 130px;
+  }
+
+  .task-card.add-card:hover {
+    border-color: var(--plum);
+    background: rgba(255,255,255,0.5);
+    transform: translateY(-3px) rotate(1deg);
+  }
+
+  .task-card.add-card .task-emoji {
+    font-size: 2rem;
+    opacity: 0.7;
+  }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--plum-soft);
+  }
+
+  .empty-state-emoji {
+    font-size: 3rem;
+    margin-bottom: 12px;
+  }
+
+  .empty-state-text {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+  }
+
+  /* ===== STATS VIEW ===== */
+  .stats-section {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(8px);
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px var(--shadow-soft), inset 0 0 0 1px rgba(74,37,64,0.06);
+  }
+
+  .stats-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--plum);
+    font-size: 1.15rem;
+    margin-bottom: 14px;
+  }
+
+  .chart-wrap {
+    position: relative;
+    height: 220px;
+  }
+
+  .history-list {
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 4px;
+    border-bottom: 1px solid rgba(74,37,64,0.08);
+  }
+
+  .history-item:last-child {
+    border: none;
+  }
+
+  .history-emoji { font-size: 1.4rem; }
+  .history-name { flex: 1; font-weight: 600; color: var(--plum); font-size: 0.95rem; }
+  .history-meta { font-size: 0.78rem; color: var(--plum-mist); }
+  .history-points { font-family: 'Fraunces', serif; font-weight: 700; color: var(--butter-deep); font-style: italic; }
+  .history-profile {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 4px;
+    color: #fff;
+  }
+
+  .history-delete {
+    background: transparent;
+    border: none;
+    color: var(--plum-mist);
+    cursor: pointer;
+    opacity: 0;
+    font-size: 0.9rem;
+    padding: 4px 6px;
+    transition: opacity 0.2s, color 0.2s;
+  }
+
+  .history-item:hover .history-delete {
+    opacity: 1;
+  }
+
+  .history-delete:hover { color: var(--rose); }
+
+  /* ===== MODAL ===== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(42, 21, 32, 0.5);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-backdrop.open {
+    display: flex;
+    animation: fadeIn 0.2s;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal {
+    background: var(--cream);
+    border-radius: 28px;
+    padding: 28px 24px 24px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.85) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .modal-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-style: italic;
+    color: var(--plum);
+    font-size: 1.7rem;
+    margin-bottom: 18px;
+    letter-spacing: -0.02em;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  .field label {
+    display: block;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--plum-soft);
+    margin-bottom: 6px;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid rgba(74,37,64,0.15);
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: var(--plum);
+    background: #fff;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus {
+    outline: none;
+    border-color: var(--butter-deep);
+  }
+
+  .emoji-picker {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 14px;
+    max-height: 160px;
+    overflow-y: auto;
+    border: 2px solid rgba(74,37,64,0.15);
+  }
+
+  .emoji-opt {
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    padding: 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .emoji-opt:hover { background: rgba(245,201,107,0.3); transform: scale(1.15); }
+  .emoji-opt.selected { background: var(--butter); }
+
+  .emoji-opt.custom {
+    position: relative;
+  }
+
+  .emoji-opt.custom::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 5px;
+    height: 5px;
+    background: var(--butter-deep);
+    border-radius: 50%;
+    opacity: 0.7;
+  }
+
+  .emoji-opt.custom .remove-x {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: var(--rose);
+    color: #fff;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .emoji-opt.custom:hover .remove-x {
+    display: flex;
+  }
+
+  .custom-emoji-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .custom-emoji-row input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid rgba(74,37,64,0.15);
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    color: var(--plum);
+    background: #fff;
+    transition: border-color 0.2s;
+  }
+
+  .custom-emoji-row input:focus {
+    outline: none;
+    border-color: var(--butter-deep);
+  }
+
+  .btn-mini {
+    border: none;
+    background: var(--plum);
+    color: var(--cream);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+  }
+
+  .btn-mini:hover {
+    background: var(--plum-soft);
+    transform: translateY(-2px);
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-top: 20px;
+    align-items: center;
+  }
+
+  .btn {
+    border: none;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .btn-primary {
+    background: var(--plum);
+    color: var(--cream);
+    box-shadow: 0 4px 12px rgba(74,37,64,0.3);
+  }
+
+  .btn-primary:hover { background: var(--plum-soft); transform: translateY(-2px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--plum-soft);
+  }
+
+  .btn-ghost:hover { color: var(--plum); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--rose);
+    font-size: 0.85rem;
+  }
+
+  .btn-danger:hover { background: rgba(228,122,122,0.12); }
+
+  .btn-danger-solid {
+    background: var(--rose);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(228,122,122,0.3);
+  }
+
+  .btn-danger-solid:hover {
+    background: #d66060;
+    transform: translateY(-2px);
+  }
+
+  /* User color swatches */
+  .color-swatches {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding: 6px 0;
+  }
+
+  .color-swatch {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .color-swatch:hover {
+    transform: scale(1.1);
+  }
+
+  .color-swatch.selected {
+    border-color: var(--plum);
+    transform: scale(1.15);
+    box-shadow: 0 0 0 2px #fff inset;
+  }
+
+  /* ===== FLYING POINTS ===== */
+  .fly-points {
+    position: fixed;
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-style: italic;
+    color: var(--butter-deep);
+    font-size: 1.8rem;
+    pointer-events: none;
+    z-index: 50;
+    text-shadow: 0 2px 8px rgba(245,168,56,0.4);
+  }
+
+  /* ===== SPARKLES ===== */
+  .sparkle {
+    position: fixed;
+    font-size: 1.2rem;
+    pointer-events: none;
+    z-index: 49;
+  }
+
+  /* ===== MILESTONE TOAST ===== */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120%);
+    background: var(--plum);
+    color: var(--cream);
+    padding: 14px 24px;
+    border-radius: 999px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(74,37,64,0.4);
+    z-index: 200;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(74,37,64,0.2); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(74,37,64,0.4); }
+
+  @media (max-width: 480px) {
+    .task-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .tab { padding: 10px 14px; font-size: 0.95rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Tally Hoes<span class="dot">.</span></h1>
+    <p class="tagline">do the thing. get the points. repeat.</p>
+
+    <div class="profiles" id="profilesBar" role="tablist"></div>
+  </header>
+
+  <section class="points-hero">
+    <div class="points-label">today's tally</div>
+    <div class="points-value" id="pointsToday">0</div>
+    <div class="points-sub" id="pointsSub">0 all time</div>
+  </section>
+
+  <section class="goal-section">
+    <div class="goal-header">
+      <span class="goal-label">today's goal</span>
+      <button class="goal-edit" id="goalEditBtn">
+        <span id="goalCurrentText">0 / 50</span>
+        <span class="goal-pencil">✏️</span>
+      </button>
+    </div>
+    <div class="goal-bar-track">
+      <div class="goal-bar-fill" id="goalBarFill"></div>
+      <div class="goal-bar-shimmer" id="goalBarShimmer"></div>
+    </div>
+    <div class="goal-status" id="goalStatus">0% there</div>
+  </section>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="log">Log</button>
+    <button class="tab" data-tab="stats">Stats</button>
+    <button class="tab" data-tab="history">History</button>
+    <button class="tab" data-tab="planner">Planner</button>
+  </div>
+
+  <section id="tab-log">
+    <div class="task-grid" id="taskGrid"></div>
+  </section>
+
+  <section id="tab-stats" style="display:none;">
+    <div class="stats-section">
+      <div class="stats-title">last 7 days</div>
+      <div class="chart-wrap"><canvas id="chartDaily"></canvas></div>
+    </div>
+    <div class="stats-section">
+      <div class="stats-title">points by task</div>
+      <div class="chart-wrap"><canvas id="chartTasks"></canvas></div>
+    </div>
+    <div class="stats-section" id="versusChartSection">
+      <div class="stats-title">user comparison — all time</div>
+      <div class="chart-wrap"><canvas id="chartVersus"></canvas></div>
+    </div>
+  </section>
+
+  <section id="tab-history" style="display:none;">
+    <div class="stats-section">
+      <div class="stats-title">recent logs</div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </section>
+
+  <section id="tab-planner" style="display:none;">
+    <div class="stats-section planner-calendar-section">
+      <div class="calendar-header">
+        <button class="cal-nav" id="calPrevMonth" aria-label="previous month">‹</button>
+        <div class="cal-title" id="calTitle">April 2026</div>
+        <button class="cal-nav" id="calNextMonth" aria-label="next month">›</button>
+      </div>
+      <div class="calendar-weekdays">
+        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="stats-section planner-editor-section">
+      <div class="planner-header">
+        <div class="planner-day-title" id="plannerDayTitle">Today</div>
+        <div class="planner-header-right">
+          <div class="planner-save-indicator" id="plannerSaveIndicator">saved</div>
+          <button class="planner-mode-btn" id="plannerModeBtn" title="toggle edit / checklist">
+            <span id="plannerModeIcon">✏️</span>
+            <span id="plannerModeLabel">edit</span>
+          </button>
+        </div>
+      </div>
+      <div class="planner-tip" id="plannerTip">tip: each line becomes a checkable task in check mode</div>
+      <div id="plannerEditorWrap">
+        <textarea
+          id="plannerEditor"
+          class="planner-editor"
+          placeholder="what's the plan for today?&#10;&#10;each line becomes a task&#10;you can check off when done&#10;&#10;goals, reminders, vibes, anything..."
+          spellcheck="true"
+        ></textarea>
+      </div>
+      <div id="plannerChecklistWrap" style="display:none;">
+        <div class="planner-checklist" id="plannerChecklist"></div>
+        <div class="planner-progress" id="plannerProgress"></div>
+      </div>
+      <div id="plannerCombinedWrap" style="display:none;"></div>
+    </div>
+  </section>
+</div>
+
+<!-- Add/Edit Task Modal -->
+<div class="modal-backdrop" id="taskModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">new task</div>
+    <div class="field">
+      <label>name</label>
+      <input type="text" id="taskNameInput" placeholder="e.g. shower" maxlength="40" />
+    </div>
+    <div class="field">
+      <label>points</label>
+      <input type="number" id="taskPointsInput" placeholder="10" min="1" max="999" />
+    </div>
+    <div class="field">
+      <label>pick an emoji</label>
+      <div class="emoji-picker" id="emojiPicker"></div>
+      <div class="custom-emoji-row">
+        <input type="text" id="customEmojiInput" placeholder="type or paste any emoji or symbol" maxlength="8" />
+        <button type="button" class="btn-mini" id="addCustomEmojiBtn">＋ add</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="deleteTaskBtn" style="display:none;">delete task</button>
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost" id="cancelBtn">cancel</button>
+      <button class="btn btn-primary" id="saveTaskBtn">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Goal Edit Modal -->
+<div class="modal-backdrop" id="goalModal">
+  <div class="modal">
+    <div class="modal-title" id="goalModalTitle">today's goal</div>
+    <div class="field">
+      <label>points to hit today</label>
+      <input type="number" id="goalInput" min="1" max="9999" />
+    </div>
+    <div class="goal-presets">
+      <button class="goal-preset" data-preset="25">25</button>
+      <button class="goal-preset" data-preset="50">50</button>
+      <button class="goal-preset" data-preset="75">75</button>
+      <button class="goal-preset" data-preset="100">100</button>
+      <button class="goal-preset" data-preset="150">150</button>
+    </div>
+    <div class="modal-actions">
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost" id="goalCancelBtn">cancel</button>
+      <button class="btn btn-primary" id="goalSaveBtn">save</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Settings Modal (rename / color / delete / add) -->
+<div class="modal-backdrop" id="userModal">
+  <div class="modal">
+    <div class="modal-title" id="userModalTitle">user settings</div>
+    <div class="field">
+      <label>name</label>
+      <input type="text" id="userNameInput" placeholder="e.g. Talaya" maxlength="30" />
+    </div>
+    <div class="field">
+      <label>color</label>
+      <div class="color-swatches" id="colorSwatches"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="userDeleteBtn" style="display:none;">remove user</button>
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost" id="userCancelBtn">cancel</button>
+      <button class="btn btn-primary" id="userSaveBtn">save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete User Confirmation Modal -->
+<div class="modal-backdrop" id="deleteUserModal">
+  <div class="modal">
+    <div class="modal-title">remove <span id="deleteUserName">user</span>?</div>
+    <p style="font-family: 'Fraunces', serif; font-style: italic; color: var(--plum-soft); margin-bottom: 18px; line-height: 1.5;">
+      what should happen to their logs and planner entries?
+    </p>
+    <div class="modal-actions" style="flex-direction: column; gap: 10px; align-items: stretch;">
+      <button class="btn btn-primary" id="deleteKeepLogs">keep their logs + planner</button>
+      <button class="btn btn-danger-solid" id="deleteEverything">delete everything</button>
+      <button class="btn btn-ghost" id="deleteUserCancel">never mind</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confetti canvas -->
+<canvas id="confettiCanvas"></canvas>
+
+<script>
+// ==================== STATE ====================
+const STORAGE_KEY = 'tallyHoes_v1';
+const EMOJIS = ['🚿','🪥','🧘','💪','🏃','🥗','💧','📚','✍️','🎨','🧹','🛏️','🧺','💊','🌿','🧴','💅','🪴','🍳','☕','🚶','🧎','🛁','💤','📔','🎵','🎮','🎬','📱','💌','🧠','❤️','🌸','✨','🔥','⭐','🎯','🏆','💎','🌈','☀️','🌙','🦋','🌻','🌊','🍋','🥑','🍵','🫖','🪞','🧷','🗓️','✅','📝','🎁','🎉','🌞','🫧','🧼','🕯️','🌷','🥭','🍎','🫐','🥝'];
+
+// Color palette for users — assigned in order as users are added
+const USER_COLORS = [
+  '#e8a838', // butter gold
+  '#6b3a5e', // plum
+  '#a4b89a', // sage
+  '#e47a7a', // rose
+  '#7a9bc4'  // sky blue
+];
+
+let state = {
+  profile: 'talaya', // active user id (or 'combined')
+  tab: 'log',
+  tasks: [],  // { id, name, points, emoji }
+  logs: [],   // { id, taskId, taskName, taskEmoji, profile, points, timestamp }
+  users: [    // NEW: dynamic user array
+    { id: 'talaya', name: 'User 1', color: '#e8a838' }
+  ],
+  lastMilestone: { talaya: 0 },
+  goals: { talaya: 50, combined: 100 },
+  goalsMetToday: {},
+  customEmojis: [],
+  planner: {}
+};
+
+// Planner UI state (not persisted — UI only). Initialized after todayKey() is defined.
+let plannerSelectedDate = null;
+let plannerCalendarMonth = null;
+let plannerSaveTimeout = null;
+let plannerMode = 'edit';
+
+function load() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      state = { ...state, ...JSON.parse(saved) };
+      migrateState();
+    } else {
+      // seed a few starter tasks so first open isn't empty
+      state.tasks = [
+        { id: uid(), name: 'shower', points: 10, emoji: '🚿' },
+        { id: uid(), name: 'brush teeth', points: 5, emoji: '🪥' },
+        { id: uid(), name: 'drink water', points: 3, emoji: '💧' },
+        { id: uid(), name: 'write', points: 20, emoji: '✍️' },
+        { id: uid(), name: 'walk', points: 15, emoji: '🚶' },
+        { id: uid(), name: 'tidy room', points: 12, emoji: '🧹' }
+      ];
+      save();
+    }
+  } catch(e) { console.warn(e); }
+}
+
+function migrateState() {
+  // If users array is missing or empty, rebuild it from legacy data
+  if (!Array.isArray(state.users) || state.users.length === 0) {
+    state.users = [{ id: 'talaya', name: 'User 1', color: USER_COLORS[0] }];
+
+    // If old 'damien' data exists, add them as User 2
+    const hasDamien =
+      state.logs?.some(l => l.profile === 'damien') ||
+      Object.keys(state.planner || {}).some(k => k.startsWith('damien:')) ||
+      state.goals?.damien !== undefined ||
+      state.lastMilestone?.damien !== undefined;
+    if (hasDamien) {
+      state.users.push({ id: 'damien', name: 'User 2', color: USER_COLORS[1] });
+    }
+  }
+
+  // Ensure each user has a color (for older state that might be missing them)
+  state.users.forEach((u, i) => {
+    if (!u.color) u.color = USER_COLORS[i % USER_COLORS.length];
+  });
+
+  // Ensure goals and lastMilestone have entries for every user
+  if (!state.goals) state.goals = {};
+  if (!state.lastMilestone) state.lastMilestone = {};
+  state.users.forEach(u => {
+    if (state.goals[u.id] === undefined) state.goals[u.id] = 50;
+    if (state.lastMilestone[u.id] === undefined) state.lastMilestone[u.id] = 0;
+  });
+  if (state.goals.combined === undefined) state.goals.combined = 100;
+
+  // If current profile points to a user that no longer exists, fall back to first user
+  const validIds = [...state.users.map(u => u.id), 'combined'];
+  if (!validIds.includes(state.profile)) {
+    state.profile = state.users[0].id;
+  }
+
+  // If only one user, don't allow 'combined' as active profile
+  if (state.users.length < 2 && state.profile === 'combined') {
+    state.profile = state.users[0].id;
+  }
+}
+
+function getUser(id) {
+  return state.users.find(u => u.id === id);
+}
+
+function getUserName(id) {
+  if (id === 'combined') return 'Combined';
+  const u = getUser(id);
+  return u ? u.name : id;
+}
+
+function getUserColor(id) {
+  if (id === 'combined') return 'var(--plum)';
+  const u = getUser(id);
+  return u ? u.color : USER_COLORS[0];
+}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) { console.warn(e); }
+}
+
+function uid() { return Math.random().toString(36).slice(2, 10); }
+
+function todayKey(ts = Date.now()) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ==================== AUDIO ====================
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playTone(freqs, duration = 0.15, type = 'sine', vol = 0.15) {
+  if (!audioCtx) return;
+  freqs = Array.isArray(freqs) ? freqs : [freqs];
+  freqs.forEach((f, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = f;
+    const start = audioCtx.currentTime + i * 0.05;
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(vol, start + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(start);
+    osc.stop(start + duration + 0.05);
+  });
+}
+
+const SFX = {
+  log: () => playTone([523.25, 783.99], 0.18, 'triangle', 0.14),     // C5 + G5
+  milestone: () => playTone([523.25, 659.25, 783.99, 1046.5], 0.25, 'triangle', 0.16), // C E G C major arpeggio
+  add: () => playTone([440, 659.25], 0.12, 'sine', 0.1),             // A4 + E5
+  click: () => playTone(660, 0.05, 'sine', 0.08),
+  delete: () => playTone([220, 165], 0.18, 'triangle', 0.1),
+  check: () => playTone([659.25, 987.77], 0.12, 'triangle', 0.13),   // E5 + B5 — cheerful pop
+  uncheck: () => playTone([440, 329.63], 0.1, 'sine', 0.08),         // A4 + E4 — subtle reverse
+  goalHit: () => {
+    // Triumphant ascending fanfare
+    playTone([523.25, 659.25, 783.99], 0.2, 'triangle', 0.15);
+    setTimeout(() => playTone([659.25, 830.61, 987.77], 0.2, 'triangle', 0.15), 180);
+    setTimeout(() => playTone([783.99, 987.77, 1174.66, 1567.98], 0.45, 'triangle', 0.17), 360);
+  }
+};
+
+// ==================== RENDER ====================
+function totalPoints(profile, dayOnly = false) {
+  const day = todayKey();
+  return state.logs
+    .filter(l => (profile === 'combined' || l.profile === profile))
+    .filter(l => !dayOnly || todayKey(l.timestamp) === day)
+    .reduce((s, l) => s + l.points, 0);
+}
+
+function countLoggedToday(taskId, profile) {
+  const day = todayKey();
+  return state.logs.filter(l =>
+    l.taskId === taskId &&
+    todayKey(l.timestamp) === day &&
+    (profile === 'combined' || l.profile === profile)
+  ).length;
+}
+
+function renderPoints(bump = false) {
+  const today = totalPoints(state.profile, true);
+  const all = totalPoints(state.profile, false);
+  const el = document.getElementById('pointsToday');
+  el.textContent = today;
+  document.getElementById('pointsSub').textContent = `${all} all time`;
+  if (bump) {
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
+  renderGoal();
+}
+
+function renderGoal() {
+  const today = totalPoints(state.profile, true);
+  const goal = state.goals[state.profile] || 50;
+  const pct = Math.min(100, Math.round((today / goal) * 100));
+  const fill = document.getElementById('goalBarFill');
+  const statusEl = document.getElementById('goalStatus');
+  const currentText = document.getElementById('goalCurrentText');
+
+  fill.style.width = pct + '%';
+  currentText.textContent = `${today} / ${goal}`;
+
+  if (today >= goal) {
+    fill.classList.add('complete');
+    statusEl.classList.add('complete');
+    statusEl.textContent = today > goal ? `goal smashed — ${today - goal} over` : 'goal hit 🎉';
+  } else {
+    fill.classList.remove('complete');
+    statusEl.classList.remove('complete');
+    const remaining = goal - today;
+    statusEl.textContent = `${pct}% there — ${remaining} to go`;
+  }
+}
+
+function checkGoalMet(profile) {
+  const today = totalPoints(profile, true);
+  const goal = state.goals[profile] || 50;
+  const key = `${profile}:${todayKey()}`;
+  if (today >= goal && !state.goalsMetToday[key]) {
+    state.goalsMetToday[key] = true;
+    save();
+    return true;
+  }
+  return false;
+}
+
+// ==================== CONFETTI ====================
+function miniConfetti(fromEl) {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.classList.add('active');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const rect = fromEl.getBoundingClientRect();
+  const originX = rect.left + rect.width / 2;
+  const originY = rect.top + rect.height / 2;
+
+  const colors = ['#e8a838', '#f5c96b', '#f5a978', '#e47a7a', '#a4b89a', '#7fa873'];
+  const shapes = ['rect', 'circle', 'triangle', 'star'];
+  const particles = [];
+  const count = 28;
+
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 3 + Math.random() * 5;
+    particles.push({
+      x: originX,
+      y: originY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 2, // slight upward bias
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.3,
+      size: 5 + Math.random() * 7,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      shape: shapes[Math.floor(Math.random() * shapes.length)],
+      life: 1
+    });
+  }
+
+  // Don't overwrite an active full-screen confetti animation
+  // Instead, draw alongside by using a separate requestAnimationFrame loop and NOT clearing the whole canvas
+  // But since the main confetti clears the whole canvas every frame, this is tricky.
+  // Simplest reliable approach: if big confetti is running, skip mini (to avoid conflicts).
+  // Otherwise run our own loop.
+  if (canvas.dataset.bigConfettiRunning === 'true') return;
+
+  const start = performance.now();
+  let animId = null;
+
+  function drawShape(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+
+    if (p.shape === 'rect') {
+      ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+    } else if (p.shape === 'circle') {
+      ctx.beginPath();
+      ctx.arc(0, 0, p.size/2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (p.shape === 'triangle') {
+      ctx.beginPath();
+      ctx.moveTo(0, -p.size/2);
+      ctx.lineTo(p.size/2, p.size/2);
+      ctx.lineTo(-p.size/2, p.size/2);
+      ctx.closePath();
+      ctx.fill();
+    } else if (p.shape === 'star') {
+      const spikes = 5, outer = p.size/2, inner = p.size/4;
+      ctx.beginPath();
+      for (let i = 0; i < spikes * 2; i++) {
+        const r = i % 2 === 0 ? outer : inner;
+        const a = (i / (spikes * 2)) * Math.PI * 2 - Math.PI/2;
+        const x = Math.cos(a) * r;
+        const y = Math.sin(a) * r;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function tick(now) {
+    const elapsed = now - start;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.18; // gravity
+      p.vx *= 0.98;
+      p.rot += p.vr;
+      if (elapsed > 600) p.life = Math.max(0, p.life - 0.04);
+      drawShape(p);
+    });
+
+    if (elapsed < 1400) {
+      animId = requestAnimationFrame(tick);
+    } else {
+      cancelAnimationFrame(animId);
+      canvas.classList.remove('active');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  animId = requestAnimationFrame(tick);
+}
+
+
+function launchConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.classList.add('active');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.dataset.bigConfettiRunning = 'true';
+
+  const colors = ['#e8a838', '#f5c96b', '#f5a978', '#e47a7a', '#a4b89a', '#6b3a5e', '#9b7590'];
+  const shapes = ['rect', 'circle', 'triangle', 'heart', 'star'];
+  const particles = [];
+  const count = 180;
+
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * canvas.height * 0.5,
+      vx: (Math.random() - 0.5) * 6,
+      vy: 2 + Math.random() * 4,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.25,
+      size: 6 + Math.random() * 10,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      shape: shapes[Math.floor(Math.random() * shapes.length)],
+      life: 1
+    });
+  }
+
+  let animId = null;
+  const start = performance.now();
+
+  function drawShape(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+
+    if (p.shape === 'rect') {
+      ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+    } else if (p.shape === 'circle') {
+      ctx.beginPath();
+      ctx.arc(0, 0, p.size/2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (p.shape === 'triangle') {
+      ctx.beginPath();
+      ctx.moveTo(0, -p.size/2);
+      ctx.lineTo(p.size/2, p.size/2);
+      ctx.lineTo(-p.size/2, p.size/2);
+      ctx.closePath();
+      ctx.fill();
+    } else if (p.shape === 'heart') {
+      const s = p.size / 14;
+      ctx.beginPath();
+      ctx.moveTo(0, 3*s);
+      ctx.bezierCurveTo(0, 0, -5*s, -2*s, -5*s, -5*s);
+      ctx.bezierCurveTo(-5*s, -8*s, 0, -8*s, 0, -4*s);
+      ctx.bezierCurveTo(0, -8*s, 5*s, -8*s, 5*s, -5*s);
+      ctx.bezierCurveTo(5*s, -2*s, 0, 0, 0, 3*s);
+      ctx.fill();
+    } else if (p.shape === 'star') {
+      const spikes = 5, outer = p.size/2, inner = p.size/4;
+      ctx.beginPath();
+      for (let i = 0; i < spikes * 2; i++) {
+        const r = i % 2 === 0 ? outer : inner;
+        const a = (i / (spikes * 2)) * Math.PI * 2 - Math.PI/2;
+        const x = Math.cos(a) * r;
+        const y = Math.sin(a) * r;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function tick(now) {
+    const elapsed = now - start;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.12; // gravity
+      p.vx *= 0.995;
+      p.rot += p.vr;
+      if (elapsed > 2500) p.life = Math.max(0, p.life - 0.015);
+      drawShape(p);
+    });
+
+    if (elapsed < 5000) {
+      animId = requestAnimationFrame(tick);
+    } else {
+      cancelAnimationFrame(animId);
+      canvas.classList.remove('active');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.dataset.bigConfettiRunning = 'false';
+    }
+  }
+
+  animId = requestAnimationFrame(tick);
+
+  // Big celebratory chord
+  SFX.goalHit();
+  showToast('today\'s goal crushed 🎉');
+}
+
+// ==================== GOAL MODAL ====================
+function openGoalModal() {
+  SFX.click();
+  const goal = state.goals[state.profile] || 50;
+  document.getElementById('goalInput').value = goal;
+  const displayName = getUserName(state.profile);
+  document.getElementById('goalModalTitle').textContent = `${displayName}'s goal`;
+  document.querySelectorAll('.goal-preset').forEach(btn => {
+    btn.classList.toggle('selected', parseInt(btn.dataset.preset) === goal);
+  });
+  document.getElementById('goalModal').classList.add('open');
+}
+
+function closeGoalModal() {
+  document.getElementById('goalModal').classList.remove('open');
+}
+
+function saveGoal() {
+  const val = parseInt(document.getElementById('goalInput').value, 10);
+  if (!val || val < 1) {
+    showToast('goal must be at least 1 point');
+    return;
+  }
+  state.goals[state.profile] = val;
+  // Clear today's goal-met flag so confetti can fire again if the new goal is now met
+  const key = `${state.profile}:${todayKey()}`;
+  const currentToday = totalPoints(state.profile, true);
+  if (currentToday < val) {
+    delete state.goalsMetToday[key];
+  }
+  save();
+  renderGoal();
+  closeGoalModal();
+  // If the new goal is already met, celebrate
+  if (checkGoalMet(state.profile)) {
+    setTimeout(() => launchConfetti(), 300);
+  }
+}
+
+function renderTasks() {
+  const grid = document.getElementById('taskGrid');
+  grid.innerHTML = '';
+
+  state.tasks.forEach(task => {
+    const card = document.createElement('button');
+    card.className = 'task-card';
+    card.dataset.taskId = task.id;
+    const loggedCount = state.profile === 'combined' ? 0 : countLoggedToday(task.id, state.profile);
+    card.innerHTML = `
+      ${loggedCount > 0 ? `<span class="task-logged-today">×${loggedCount}</span>` : ''}
+      <span class="task-edit-btn" data-edit="${task.id}" title="edit">✏️</span>
+      <span class="task-emoji">${task.emoji}</span>
+      <div class="task-name">${escapeHtml(task.name)}</div>
+      <div class="task-points">+${task.points} pts</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  const addCard = document.createElement('button');
+  addCard.className = 'task-card add-card';
+  addCard.id = 'addTaskCard';
+  addCard.innerHTML = `<span class="task-emoji">➕</span><div class="task-name">new task</div>`;
+  grid.appendChild(addCard);
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ==================== LOG TASK ====================
+function logTask(taskId, sourceEl) {
+  if (state.profile === 'combined') {
+    showToast("switch to user 1 or user 2 to log");
+    return;
+  }
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  state.logs.push({
+    id: uid(),
+    taskId: task.id,
+    taskName: task.name,
+    taskEmoji: task.emoji,
+    profile: state.profile,
+    points: task.points,
+    timestamp: Date.now()
+  });
+  save();
+
+  SFX.log();
+  flyPoints(sourceEl, task.points);
+  sourceEl.classList.remove('log-pulse');
+  void sourceEl.offsetWidth;
+  sourceEl.classList.add('log-pulse');
+
+  renderTasks();
+  setTimeout(() => renderPoints(true), 350);
+
+  // GOAL CHECK — fire confetti if today's goal just got hit for this profile
+  if (checkGoalMet(state.profile)) {
+    setTimeout(() => launchConfetti(), 700);
+  }
+
+  // milestone check (every 100 pts total for this profile, lifetime)
+  const total = totalPoints(state.profile, false);
+  const milestoneHit = Math.floor(total / 100);
+  if (milestoneHit > (state.lastMilestone[state.profile] || 0)) {
+    state.lastMilestone[state.profile] = milestoneHit;
+    save();
+    setTimeout(() => {
+      SFX.milestone();
+      burstSparkles();
+      showToast(`${milestoneHit * 100} points. absolute unit.`);
+    }, 400);
+  }
+}
+
+function flyPoints(fromEl, points) {
+  const target = document.getElementById('pointsToday');
+  const fromRect = fromEl.getBoundingClientRect();
+  const toRect = target.getBoundingClientRect();
+
+  const el = document.createElement('div');
+  el.className = 'fly-points';
+  el.textContent = `+${points}`;
+  el.style.left = `${fromRect.left + fromRect.width/2}px`;
+  el.style.top = `${fromRect.top + 20}px`;
+  el.style.transform = 'translate(-50%, -50%)';
+  document.body.appendChild(el);
+
+  const dx = (toRect.left + toRect.width/2) - (fromRect.left + fromRect.width/2);
+  const dy = (toRect.top + toRect.height/2) - (fromRect.top + 20);
+
+  el.animate([
+    { transform: 'translate(-50%, -50%) scale(0.5)', opacity: 0 },
+    { transform: 'translate(-50%, -50%) scale(1.2)', opacity: 1, offset: 0.2 },
+    { transform: `translate(calc(-50% + ${dx*0.5}px), calc(-50% + ${dy*0.5 - 30}px)) scale(1.1)`, opacity: 1, offset: 0.6 },
+    { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.6)`, opacity: 0 }
+  ], { duration: 900, easing: 'cubic-bezier(0.3, 0, 0.6, 1)' });
+
+  setTimeout(() => el.remove(), 950);
+}
+
+function burstSparkles() {
+  const emojis = ['✨','⭐','💫','🌟','✨'];
+  for (let i = 0; i < 14; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = emojis[i % emojis.length];
+    s.style.left = `${50 + (Math.random()-0.5)*30}%`;
+    s.style.top = `${30 + Math.random()*20}%`;
+    document.body.appendChild(s);
+    const angle = (i / 14) * Math.PI * 2;
+    const dist = 100 + Math.random() * 100;
+    s.animate([
+      { transform: 'translate(0,0) scale(0)', opacity: 0 },
+      { transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(1.4)`, opacity: 1, offset: 0.4 },
+      { transform: `translate(${Math.cos(angle)*dist*1.5}px, ${Math.sin(angle)*dist*1.5 + 60}px) scale(0)`, opacity: 0 }
+    ], { duration: 1400, easing: 'cubic-bezier(0.3, 0, 0.6, 1)' });
+    setTimeout(() => s.remove(), 1450);
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ==================== MODAL ====================
+let editingTaskId = null;
+let selectedEmoji = '✨';
+
+function openTaskModal(taskId = null) {
+  SFX.click();
+  editingTaskId = taskId;
+  confirmingDelete = false;
+  const modal = document.getElementById('taskModal');
+  const nameInput = document.getElementById('taskNameInput');
+  const pointsInput = document.getElementById('taskPointsInput');
+  const deleteBtn = document.getElementById('deleteTaskBtn');
+  const title = document.getElementById('modalTitle');
+  deleteBtn.textContent = 'delete task';
+  deleteBtn.style.background = '';
+
+  if (taskId) {
+    const t = state.tasks.find(x => x.id === taskId);
+    nameInput.value = t.name;
+    pointsInput.value = t.points;
+    selectedEmoji = t.emoji;
+    title.textContent = 'edit task';
+    deleteBtn.style.display = 'inline-block';
+  } else {
+    nameInput.value = '';
+    pointsInput.value = '10';
+    selectedEmoji = '✨';
+    title.textContent = 'new task';
+    deleteBtn.style.display = 'none';
+  }
+
+  renderEmojiPicker();
+  modal.classList.add('open');
+  setTimeout(() => nameInput.focus(), 100);
+}
+
+function closeTaskModal() {
+  document.getElementById('taskModal').classList.remove('open');
+  editingTaskId = null;
+}
+
+function renderEmojiPicker() {
+  const picker = document.getElementById('emojiPicker');
+  picker.innerHTML = '';
+
+  // Custom emojis first — with remove button on hover
+  state.customEmojis.forEach(e => {
+    const btn = document.createElement('button');
+    btn.className = 'emoji-opt custom' + (e === selectedEmoji ? ' selected' : '');
+    btn.innerHTML = `${escapeHtml(e)}<span class="remove-x" data-remove-emoji="${escapeHtml(e)}" title="remove custom emoji">×</span>`;
+    btn.onclick = (ev) => {
+      // If the × was clicked, remove the emoji instead of selecting it
+      if (ev.target.closest('.remove-x')) {
+        ev.stopPropagation();
+        removeCustomEmoji(e);
+        return;
+      }
+      selectedEmoji = e;
+      renderEmojiPicker();
+    };
+    picker.appendChild(btn);
+  });
+
+  // Then built-ins
+  EMOJIS.forEach(e => {
+    const btn = document.createElement('button');
+    btn.className = 'emoji-opt' + (e === selectedEmoji ? ' selected' : '');
+    btn.textContent = e;
+    btn.onclick = () => {
+      selectedEmoji = e;
+      renderEmojiPicker();
+    };
+    picker.appendChild(btn);
+  });
+}
+
+function addCustomEmoji() {
+  const input = document.getElementById('customEmojiInput');
+  const val = input.value.trim();
+  if (!val) {
+    showToast('type an emoji or symbol first');
+    return;
+  }
+  if (val.length > 8) {
+    showToast('keep it short — 8 chars max');
+    return;
+  }
+  if (state.customEmojis.includes(val) || EMOJIS.includes(val)) {
+    showToast('already in the picker');
+    selectedEmoji = val;
+    renderEmojiPicker();
+    input.value = '';
+    return;
+  }
+  state.customEmojis.unshift(val); // add to front so newest shows first
+  save();
+  selectedEmoji = val;
+  input.value = '';
+  SFX.add();
+  renderEmojiPicker();
+}
+
+function removeCustomEmoji(e) {
+  state.customEmojis = state.customEmojis.filter(x => x !== e);
+  if (selectedEmoji === e) selectedEmoji = '✨';
+  save();
+  SFX.delete();
+  renderEmojiPicker();
+}
+
+function saveTask() {
+  const name = document.getElementById('taskNameInput').value.trim();
+  const points = parseInt(document.getElementById('taskPointsInput').value, 10);
+  if (!name || !points || points < 1) {
+    showToast("need a name and points > 0");
+    return;
+  }
+
+  if (editingTaskId) {
+    const t = state.tasks.find(x => x.id === editingTaskId);
+    t.name = name;
+    t.points = points;
+    t.emoji = selectedEmoji;
+    // NOTE: past logs keep their original points (Occam's razor path)
+  } else {
+    state.tasks.push({ id: uid(), name, points, emoji: selectedEmoji });
+    SFX.add();
+  }
+
+  save();
+  renderTasks();
+  closeTaskModal();
+}
+
+let confirmingDelete = false;
+
+function deleteTask() {
+  console.log('[deleteTask] called, editingTaskId =', editingTaskId, 'confirming =', confirmingDelete);
+  if (!editingTaskId) {
+    console.log('[deleteTask] bailing: no editingTaskId');
+    return;
+  }
+  const btn = document.getElementById('deleteTaskBtn');
+  if (!confirmingDelete) {
+    confirmingDelete = true;
+    btn.textContent = 'tap again to confirm';
+    btn.style.background = 'rgba(228,122,122,0.18)';
+    setTimeout(() => {
+      confirmingDelete = false;
+      btn.textContent = 'delete task';
+      btn.style.background = '';
+    }, 3000);
+    return;
+  }
+  console.log('[deleteTask] deleting task', editingTaskId);
+  state.tasks = state.tasks.filter(t => t.id !== editingTaskId);
+  save();
+  SFX.delete();
+  renderTasks();
+  confirmingDelete = false;
+  btn.textContent = 'delete task';
+  btn.style.background = '';
+  closeTaskModal();
+}
+
+// ==================== HISTORY ====================
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  list.innerHTML = '';
+
+  const logs = [...state.logs]
+    .filter(l => state.profile === 'combined' || l.profile === state.profile)
+    .sort((a,b) => b.timestamp - a.timestamp)
+    .slice(0, 100);
+
+  if (logs.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-emoji">🌱</div><div class="empty-state-text">no logs yet — go earn something</div></div>`;
+    return;
+  }
+
+  logs.forEach(log => {
+    const d = new Date(log.timestamp);
+    const timeStr = d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.innerHTML = `
+      <span class="history-emoji">${log.taskEmoji}</span>
+      <div style="flex:1;">
+        <div class="history-name">${escapeHtml(log.taskName)}<span class="history-profile" style="background:${getUserColor(log.profile)}">${escapeHtml(getUserName(log.profile))}</span></div>
+        <div class="history-meta">${timeStr}</div>
+      </div>
+      <span class="history-points">+${log.points}</span>
+      <button class="history-delete" data-del="${log.id}" title="remove log">✕</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function deleteLog(logId) {
+  state.logs = state.logs.filter(l => l.id !== logId);
+  save();
+  SFX.delete();
+  renderPoints();
+  renderTasks();
+  renderHistory();
+}
+
+// ==================== CHARTS ====================
+let chartDaily, chartTasks, chartVersus;
+
+function renderCharts() {
+  renderDailyChart();
+  renderTasksChart();
+  renderVersusChart();
+}
+
+function getLast7Days() {
+  const days = [];
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    days.push(d);
+  }
+  return days;
+}
+
+function renderDailyChart() {
+  const ctx = document.getElementById('chartDaily');
+  if (!ctx) return;
+  const days = getLast7Days();
+  const labels = days.map(d => d.toLocaleDateString('en-US', { weekday: 'short' }));
+
+  function pointsFor(profile, day) {
+    const key = todayKey(day.getTime());
+    return state.logs
+      .filter(l => l.profile === profile && todayKey(l.timestamp) === key)
+      .reduce((s,l) => s + l.points, 0);
+  }
+
+  const datasets = [];
+  if (state.profile === 'combined') {
+    // Stack each user
+    state.users.forEach(user => {
+      datasets.push({
+        label: user.name,
+        data: days.map(d => pointsFor(user.id, d)),
+        backgroundColor: user.color,
+        borderRadius: 10
+      });
+    });
+  } else {
+    const user = getUser(state.profile);
+    if (user) {
+      datasets.push({
+        label: user.name,
+        data: days.map(d => pointsFor(user.id, d)),
+        backgroundColor: user.color,
+        borderRadius: 10
+      });
+    }
+  }
+
+  if (chartDaily) chartDaily.destroy();
+  chartDaily = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: state.profile === 'combined', labels: { font: { family: 'Nunito', weight: '700' }, color: '#4a2540' } }
+      },
+      scales: {
+        x: { stacked: state.profile === 'combined', grid: { display: false }, ticks: { color: '#6b3a5e', font: { family: 'Nunito', weight: '600' } } },
+        y: { stacked: state.profile === 'combined', grid: { color: 'rgba(74,37,64,0.08)' }, ticks: { color: '#6b3a5e', font: { family: 'Nunito' } } }
+      }
+    }
+  });
+}
+
+function renderTasksChart() {
+  const ctx = document.getElementById('chartTasks');
+  if (!ctx) return;
+
+  const relevant = state.logs.filter(l => state.profile === 'combined' || l.profile === state.profile);
+  const byTask = {};
+  relevant.forEach(l => {
+    const key = `${l.taskEmoji} ${l.taskName}`;
+    byTask[key] = (byTask[key] || 0) + l.points;
+  });
+
+  const entries = Object.entries(byTask).sort((a,b) => b[1] - a[1]).slice(0, 8);
+
+  if (chartTasks) chartTasks.destroy();
+  if (entries.length === 0) {
+    ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+    return;
+  }
+
+  const palette = ['#e8a838','#6b3a5e','#a4b89a','#e47a7a','#f5a978','#9b7590','#4a2540','#f5c96b'];
+
+  chartTasks = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: entries.map(e => e[0]),
+      datasets: [{
+        data: entries.map(e => e[1]),
+        backgroundColor: palette,
+        borderColor: '#fdf6e8',
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { font: { family: 'Nunito', weight: '600', size: 11 }, color: '#4a2540', boxWidth: 14 } }
+      }
+    }
+  });
+}
+
+function renderVersusChart() {
+  const ctx = document.getElementById('chartVersus');
+  const section = document.getElementById('versusChartSection');
+  if (!ctx) return;
+
+  if (chartVersus) chartVersus.destroy();
+
+  // If only one user, hide the versus section entirely
+  if (state.users.length < 2) {
+    if (section) section.style.display = 'none';
+    return;
+  }
+  if (section) section.style.display = '';
+
+  const labels = state.users.map(u => u.name);
+  const data = state.users.map(u =>
+    state.logs.filter(l => l.profile === u.id).reduce((s,l) => s + l.points, 0)
+  );
+  const colors = state.users.map(u => u.color);
+
+  chartVersus = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderRadius: 14,
+        barThickness: state.users.length <= 2 ? 60 : 40
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(74,37,64,0.08)' }, ticks: { color: '#6b3a5e', font: { family: 'Nunito' } } },
+        y: { grid: { display: false }, ticks: { color: '#4a2540', font: { family: 'Fraunces', style: 'italic', weight: '600', size: 14 } } }
+      }
+    }
+  });
+}
+
+// ==================== PLANNER ====================
+function plannerKey(profile, dateKey) {
+  return `${profile}:${dateKey}`;
+}
+
+function getPlannerEntry(profile, dateKey) {
+  return state.planner[plannerKey(profile, dateKey)] || '';
+}
+
+function setPlannerEntry(profile, dateKey, text) {
+  const key = plannerKey(profile, dateKey);
+  if (text && text.trim()) {
+    state.planner[key] = text;
+  } else {
+    delete state.planner[key]; // clean up empty entries so the calendar dots don't lie
+  }
+  save();
+}
+
+function parseDateKey(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function formatDateKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function prettyDate(dateKey) {
+  const d = parseDateKey(dateKey);
+  const today = todayKey();
+  const yest = formatDateKey(new Date(Date.now() - 86400000));
+  const tmrw = formatDateKey(new Date(Date.now() + 86400000));
+  if (dateKey === today) return 'Today';
+  if (dateKey === yest) return 'Yesterday';
+  if (dateKey === tmrw) return 'Tomorrow';
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function renderCalendar() {
+  if (!plannerCalendarMonth) {
+    const d = parseDateKey(plannerSelectedDate);
+    plannerCalendarMonth = { year: d.getFullYear(), month: d.getMonth() };
+  }
+  const { year, month } = plannerCalendarMonth;
+  const monthName = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('calTitle').textContent = monthName;
+
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = todayKey();
+
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+
+  // leading empty cells
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-day empty';
+    grid.appendChild(empty);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = formatDateKey(new Date(year, month, day));
+    const btn = document.createElement('button');
+    btn.className = 'cal-day';
+    btn.dataset.date = dateKey;
+    btn.textContent = day;
+
+    if (dateKey === today) btn.classList.add('today');
+    if (dateKey === plannerSelectedDate) btn.classList.add('selected');
+    if (dateKey > today) btn.classList.add('future');
+
+    // Check if any user has content for this day
+    const hasContent = state.users.some(u => getPlannerEntry(u.id, dateKey));
+    if (hasContent) btn.classList.add('has-content');
+
+    grid.appendChild(btn);
+  }
+}
+
+// Parse planner text into line objects.
+// Every non-empty line is a checkable task. Checked state is stored as "[x] " prefix.
+// Dashes, asterisks, and bullet markers are stripped for display.
+function parsePlannerLines(text) {
+  const lines = (text || '').split('\n');
+  return lines.map((raw, i) => {
+    if (raw.trim() === '') return { type: 'empty', raw, index: i };
+
+    // Check for [x] or [X] marker (with optional leading dash/whitespace)
+    const checkedMatch = raw.match(/^(\s*[-*•]?\s*)\[([ xX])\]\s?(.*)$/);
+    if (checkedMatch) {
+      return {
+        type: 'task',
+        checked: checkedMatch[2].toLowerCase() === 'x',
+        raw,
+        taskText: checkedMatch[3].trim() || '(empty)',
+        index: i
+      };
+    }
+
+    // Strip leading dash/bullet/asterisk for display (with or without space after)
+    const stripped = raw.replace(/^(\s*)[-*•]\s*/, '$1').trim();
+
+    return {
+      type: 'task',
+      checked: false,
+      raw,
+      taskText: stripped || raw.trim(),
+      index: i
+    };
+  });
+}
+
+// Toggle a line's checked state. Returns new full text.
+function toggleLineChecked(text, lineIndex) {
+  const lines = text.split('\n');
+  const raw = lines[lineIndex];
+
+  // Already has [x] or [ ] marker — flip it
+  const checkedMatch = raw.match(/^(\s*[-*•]?\s*)\[([ xX])\]\s?(.*)$/);
+  if (checkedMatch) {
+    const leading = checkedMatch[1];
+    const newBox = checkedMatch[2].toLowerCase() === 'x' ? ' ' : 'x';
+    lines[lineIndex] = `${leading}[${newBox}] ${checkedMatch[3]}`;
+  } else {
+    // Plain line — add [x] prefix
+    const leadingWs = raw.match(/^(\s*)/)[1];
+    const content = raw.slice(leadingWs.length);
+    lines[lineIndex] = `${leadingWs}[x] ${content}`;
+  }
+  return lines.join('\n');
+}
+
+function renderPlannerEditor() {
+  const dayTitle = document.getElementById('plannerDayTitle');
+  const editorWrap = document.getElementById('plannerEditorWrap');
+  const checklistWrap = document.getElementById('plannerChecklistWrap');
+  const combinedWrap = document.getElementById('plannerCombinedWrap');
+  const editor = document.getElementById('plannerEditor');
+  const modeBtn = document.getElementById('plannerModeBtn');
+  const modeIcon = document.getElementById('plannerModeIcon');
+  const modeLabel = document.getElementById('plannerModeLabel');
+  const tip = document.getElementById('plannerTip');
+
+  dayTitle.textContent = prettyDate(plannerSelectedDate);
+
+  if (state.profile === 'combined') {
+    // Read-only combined view
+    editorWrap.style.display = 'none';
+    checklistWrap.style.display = 'none';
+    combinedWrap.style.display = 'flex';
+    modeBtn.style.display = 'none';
+    tip.style.display = 'none';
+
+    // Clear and rebuild columns for each user
+    combinedWrap.innerHTML = '';
+    state.users.forEach(user => {
+      const col = document.createElement('div');
+      col.className = 'planner-combined-col';
+
+      const label = document.createElement('div');
+      label.className = 'planner-col-label';
+      label.textContent = user.name;
+      label.style.color = user.color;
+      col.appendChild(label);
+
+      const content = document.createElement('div');
+      content.className = 'planner-col-content';
+      const text = getPlannerEntry(user.id, plannerSelectedDate);
+
+      if (!text) {
+        content.textContent = 'no plans yet';
+        content.classList.add('empty');
+      } else {
+        const lines = parsePlannerLines(text);
+        lines.forEach(line => {
+          const lineEl = document.createElement('div');
+          if (line.type === 'task') {
+            lineEl.className = 'checklist-item' + (line.checked ? ' checked' : '');
+            lineEl.style.cursor = 'default';
+            lineEl.style.padding = '4px 0';
+            lineEl.innerHTML = `<span class="check-box"></span><span class="check-text">${escapeHtml(line.taskText)}</span>`;
+          } else if (line.type === 'empty') {
+            lineEl.style.height = '6px';
+          } else {
+            lineEl.style.color = 'var(--plum)';
+            lineEl.style.fontFamily = "'Nunito', sans-serif";
+            lineEl.style.padding = '2px 0';
+            lineEl.textContent = line.raw;
+          }
+          content.appendChild(lineEl);
+        });
+      }
+      col.appendChild(content);
+      combinedWrap.appendChild(col);
+    });
+  } else {
+    combinedWrap.style.display = 'none';
+    modeBtn.style.display = 'flex';
+
+    if (plannerMode === 'edit') {
+      editorWrap.style.display = 'block';
+      checklistWrap.style.display = 'none';
+      tip.style.display = 'block';
+      editor.value = getPlannerEntry(state.profile, plannerSelectedDate);
+      modeIcon.textContent = '✓';
+      modeLabel.textContent = 'check mode';
+      modeBtn.classList.remove('in-check-mode');
+    } else {
+      editorWrap.style.display = 'none';
+      checklistWrap.style.display = 'block';
+      tip.style.display = 'none';
+      modeIcon.textContent = '✏️';
+      modeLabel.textContent = 'edit';
+      modeBtn.classList.add('in-check-mode');
+      renderChecklist();
+    }
+  }
+
+  hideSaveIndicator();
+}
+
+function renderChecklist() {
+  const container = document.getElementById('plannerChecklist');
+  const progress = document.getElementById('plannerProgress');
+  const text = getPlannerEntry(state.profile, plannerSelectedDate);
+  const lines = parsePlannerLines(text);
+  container.innerHTML = '';
+
+  const tasks = lines.filter(l => l.type === 'task');
+
+  if (lines.length === 0 || (lines.length === 1 && lines[0].type === 'empty')) {
+    container.innerHTML = `<div style="padding:24px;text-align:center;color:var(--plum-mist);font-family:'Fraunces',serif;font-style:italic;">nothing planned yet — switch to edit mode to add some</div>`;
+    progress.textContent = '';
+    return;
+  }
+
+  lines.forEach(line => {
+    const item = document.createElement('div');
+    if (line.type === 'task') {
+      item.className = 'checklist-item' + (line.checked ? ' checked' : '');
+      item.dataset.lineIndex = line.index;
+      item.innerHTML = `<span class="check-box"></span><span class="check-text">${escapeHtml(line.taskText)}</span>`;
+    } else if (line.type === 'note') {
+      item.className = 'checklist-item note';
+      item.textContent = line.raw;
+    } else {
+      item.className = 'checklist-item empty-line';
+    }
+    container.appendChild(item);
+  });
+
+  // Progress text
+  if (tasks.length === 0) {
+    progress.textContent = '';
+    progress.classList.remove('all-done');
+  } else {
+    const done = tasks.filter(t => t.checked).length;
+    if (done === tasks.length) {
+      progress.textContent = `all ${tasks.length} done 🎉`;
+      progress.classList.add('all-done');
+    } else {
+      progress.textContent = `${done} of ${tasks.length} done`;
+      progress.classList.remove('all-done');
+    }
+  }
+}
+
+function handleChecklistClick(itemEl) {
+  const lineIndex = parseInt(itemEl.dataset.lineIndex, 10);
+  if (isNaN(lineIndex)) return;
+
+  const currentText = getPlannerEntry(state.profile, plannerSelectedDate);
+  const wasChecked = itemEl.classList.contains('checked');
+
+  // Count tasks and completion BEFORE the toggle
+  const linesBefore = parsePlannerLines(currentText);
+  const tasksBefore = linesBefore.filter(l => l.type === 'task');
+  const doneBefore = tasksBefore.filter(t => t.checked).length;
+
+  const newText = toggleLineChecked(currentText, lineIndex);
+  setPlannerEntry(state.profile, plannerSelectedDate, newText);
+  renderChecklist();
+  renderCalendar(); // update content dots
+
+  if (wasChecked) {
+    // Unchecking — subtle sound, no confetti
+    SFX.uncheck();
+  } else {
+    // Checking — pop sound + mini confetti from the item
+    SFX.check();
+    const box = itemEl.querySelector('.check-box');
+    miniConfetti(box || itemEl);
+
+    // Check if ALL tasks are now done (and there's at least one)
+    const linesAfter = parsePlannerLines(newText);
+    const tasksAfter = linesAfter.filter(l => l.type === 'task');
+    const doneAfter = tasksAfter.filter(t => t.checked).length;
+    if (tasksAfter.length > 0 && doneAfter === tasksAfter.length && doneBefore < tasksBefore.length) {
+      // Just completed the last one
+      setTimeout(() => {
+        launchConfetti();
+        showToast(`all done — ${tasksAfter.length} task${tasksAfter.length === 1 ? '' : 's'} crushed`);
+      }, 300);
+    }
+  }
+}
+
+function togglePlannerMode() {
+  if (state.profile === 'combined') return;
+
+  if (plannerMode === 'edit') {
+    const editor = document.getElementById('plannerEditor');
+    if (plannerSaveTimeout) {
+      clearTimeout(plannerSaveTimeout);
+      plannerSaveTimeout = null;
+    }
+    setPlannerEntry(state.profile, plannerSelectedDate, editor.value);
+    plannerMode = 'check';
+  } else {
+    plannerMode = 'edit';
+  }
+  SFX.click();
+  renderPlannerEditor();
+}
+
+function showSaveIndicator(state) {
+  const el = document.getElementById('plannerSaveIndicator');
+  el.classList.add('visible');
+  if (state === 'saving') {
+    el.textContent = 'saving…';
+    el.classList.add('saving');
+  } else {
+    el.textContent = 'saved';
+    el.classList.remove('saving');
+  }
+}
+
+function hideSaveIndicator() {
+  const el = document.getElementById('plannerSaveIndicator');
+  el.classList.remove('visible');
+}
+
+function onPlannerInput() {
+  if (state.profile === 'combined') return;
+  showSaveIndicator('saving');
+  clearTimeout(plannerSaveTimeout);
+  plannerSaveTimeout = setTimeout(() => {
+    const text = document.getElementById('plannerEditor').value;
+    setPlannerEntry(state.profile, plannerSelectedDate, text);
+    renderCalendar(); // refresh dots
+    showSaveIndicator('saved');
+    setTimeout(hideSaveIndicator, 1500);
+  }, 500);
+}
+
+function selectPlannerDate(dateKey) {
+  // flush any pending save for the previously-selected day before switching
+  if (plannerSaveTimeout) {
+    clearTimeout(plannerSaveTimeout);
+    if (state.profile !== 'combined') {
+      const text = document.getElementById('plannerEditor').value;
+      setPlannerEntry(state.profile, plannerSelectedDate, text);
+    }
+    plannerSaveTimeout = null;
+  }
+  plannerSelectedDate = dateKey;
+  // If selected day is in a different month, update month view
+  const d = parseDateKey(dateKey);
+  plannerCalendarMonth = { year: d.getFullYear(), month: d.getMonth() };
+  renderCalendar();
+  renderPlannerEditor();
+  SFX.click();
+}
+
+function shiftCalendarMonth(delta) {
+  if (!plannerCalendarMonth) return;
+  let { year, month } = plannerCalendarMonth;
+  month += delta;
+  if (month < 0) { month = 11; year--; }
+  if (month > 11) { month = 0; year++; }
+  plannerCalendarMonth = { year, month };
+  renderCalendar();
+  SFX.click();
+}
+
+function renderPlanner() {
+  if (!plannerSelectedDate) plannerSelectedDate = todayKey();
+  renderCalendar();
+  renderPlannerEditor();
+}
+
+// ==================== TABS ====================
+function switchTab(tab) {
+  state.tab = tab;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.getElementById('tab-log').style.display = tab === 'log' ? 'block' : 'none';
+  document.getElementById('tab-stats').style.display = tab === 'stats' ? 'block' : 'none';
+  document.getElementById('tab-history').style.display = tab === 'history' ? 'block' : 'none';
+  document.getElementById('tab-planner').style.display = tab === 'planner' ? 'block' : 'none';
+
+  if (tab === 'stats') renderCharts();
+  if (tab === 'history') renderHistory();
+  if (tab === 'planner') renderPlanner();
+}
+
+function renderProfiles() {
+  const bar = document.getElementById('profilesBar');
+  bar.innerHTML = '';
+
+  // Render each user button
+  state.users.forEach(user => {
+    const btn = document.createElement('button');
+    btn.className = 'profile-btn' + (state.profile === user.id ? ' active' : '');
+    btn.dataset.profile = user.id;
+    btn.textContent = user.name;
+    bar.appendChild(btn);
+  });
+
+  // Render "Combined" button if 2+ users
+  if (state.users.length >= 2) {
+    const combinedBtn = document.createElement('button');
+    combinedBtn.className = 'profile-btn' + (state.profile === 'combined' ? ' active' : '');
+    combinedBtn.dataset.profile = 'combined';
+    combinedBtn.textContent = 'Combined';
+    bar.appendChild(combinedBtn);
+  }
+
+  // Add "+" button (disabled if at max 5 users)
+  const addBtn = document.createElement('button');
+  addBtn.className = 'profile-btn add-user-btn';
+  if (state.users.length >= 5) addBtn.classList.add('disabled');
+  addBtn.id = 'addUserBtn';
+  addBtn.title = state.users.length >= 5 ? 'max 5 users' : 'add a user';
+  addBtn.textContent = '＋';
+  bar.appendChild(addBtn);
+}
+
+function switchProfile(profile) {
+  // If user tapped the already-active user (not combined) → open rename/settings modal
+  if (profile === state.profile && profile !== 'combined') {
+    openUserSettingsModal(profile);
+    return;
+  }
+
+  // flush any pending planner save before switching profile
+  if (plannerSaveTimeout && state.profile !== 'combined') {
+    clearTimeout(plannerSaveTimeout);
+    const editor = document.getElementById('plannerEditor');
+    if (editor) {
+      setPlannerEntry(state.profile, plannerSelectedDate, editor.value);
+    }
+    plannerSaveTimeout = null;
+  }
+  state.profile = profile;
+  save();
+  SFX.click();
+  renderProfiles();
+  renderPoints();
+  renderTasks();
+  if (state.tab === 'stats') renderCharts();
+  if (state.tab === 'history') renderHistory();
+  if (state.tab === 'planner') renderPlannerEditor();
+}
+
+// ==================== USER MANAGEMENT ====================
+let editingUserId = null;
+let selectedUserColor = null;
+
+function openUserSettingsModal(userId) {
+  editingUserId = userId;
+  const user = getUser(userId);
+  if (!user) return;
+  SFX.click();
+  document.getElementById('userModalTitle').textContent = 'edit user';
+  document.getElementById('userNameInput').value = user.name;
+  selectedUserColor = user.color;
+  renderColorSwatches();
+  // Only show delete if more than 1 user
+  document.getElementById('userDeleteBtn').style.display =
+    state.users.length > 1 ? 'inline-block' : 'none';
+  document.getElementById('userModal').classList.add('open');
+  setTimeout(() => document.getElementById('userNameInput').focus(), 100);
+}
+
+function openAddUserModal() {
+  if (state.users.length >= 5) {
+    showToast('max 5 users');
+    return;
+  }
+  editingUserId = null;
+  SFX.click();
+  document.getElementById('userModalTitle').textContent = 'add user';
+  document.getElementById('userNameInput').value = '';
+  // Pick first unused color
+  const usedColors = state.users.map(u => u.color);
+  selectedUserColor = USER_COLORS.find(c => !usedColors.includes(c)) || USER_COLORS[0];
+  renderColorSwatches();
+  document.getElementById('userDeleteBtn').style.display = 'none';
+  document.getElementById('userModal').classList.add('open');
+  setTimeout(() => document.getElementById('userNameInput').focus(), 100);
+}
+
+function closeUserModal() {
+  document.getElementById('userModal').classList.remove('open');
+  editingUserId = null;
+}
+
+function renderColorSwatches() {
+  const container = document.getElementById('colorSwatches');
+  container.innerHTML = '';
+  const usedByOthers = state.users
+    .filter(u => u.id !== editingUserId)
+    .map(u => u.color);
+  USER_COLORS.forEach(color => {
+    const swatch = document.createElement('button');
+    swatch.className = 'color-swatch' + (color === selectedUserColor ? ' selected' : '');
+    swatch.style.background = color;
+    swatch.dataset.color = color;
+    if (usedByOthers.includes(color)) {
+      swatch.style.opacity = '0.3';
+      swatch.title = 'already taken';
+    }
+    swatch.onclick = () => {
+      if (usedByOthers.includes(color)) {
+        showToast('another user has this color');
+        return;
+      }
+      selectedUserColor = color;
+      renderColorSwatches();
+    };
+    container.appendChild(swatch);
+  });
+}
+
+function saveUser() {
+  const name = document.getElementById('userNameInput').value.trim();
+  if (!name) {
+    showToast('name required');
+    return;
+  }
+
+  if (editingUserId) {
+    // Edit existing user
+    const user = getUser(editingUserId);
+    user.name = name;
+    user.color = selectedUserColor;
+  } else {
+    // Add new user
+    const newId = 'user_' + uid();
+    state.users.push({
+      id: newId,
+      name,
+      color: selectedUserColor
+    });
+    state.goals[newId] = 50;
+    state.lastMilestone[newId] = 0;
+    SFX.add();
+  }
+
+  save();
+  closeUserModal();
+  renderProfiles();
+  renderPoints();
+  renderTasks();
+  if (state.tab === 'stats') renderCharts();
+  if (state.tab === 'history') renderHistory();
+  if (state.tab === 'planner') renderPlannerEditor();
+}
+
+function openDeleteUserModal() {
+  if (state.users.length <= 1) return;
+  const user = getUser(editingUserId);
+  if (!user) return;
+  document.getElementById('deleteUserName').textContent = user.name;
+  document.getElementById('deleteUserModal').classList.add('open');
+}
+
+function closeDeleteUserModal() {
+  document.getElementById('deleteUserModal').classList.remove('open');
+}
+
+function deleteUser(alsoDeleteData) {
+  const userId = editingUserId;
+  if (!userId || state.users.length <= 1) return;
+
+  // Remove user from users array
+  state.users = state.users.filter(u => u.id !== userId);
+
+  // Clean up user-specific state
+  delete state.goals[userId];
+  delete state.lastMilestone[userId];
+
+  // Clean up goalsMetToday entries for this user
+  Object.keys(state.goalsMetToday || {}).forEach(key => {
+    if (key.startsWith(userId + ':')) delete state.goalsMetToday[key];
+  });
+
+  if (alsoDeleteData) {
+    // Delete logs and planner entries tied to this user
+    state.logs = state.logs.filter(l => l.profile !== userId);
+    Object.keys(state.planner || {}).forEach(key => {
+      if (key.startsWith(userId + ':')) delete state.planner[key];
+    });
+  }
+  // Otherwise, logs and planner entries stay in storage as "orphaned" data
+
+  // If the active profile was this user, switch to the first remaining user
+  if (state.profile === userId) {
+    state.profile = state.users[0].id;
+  }
+  // If only one user left, switch away from 'combined'
+  if (state.users.length < 2 && state.profile === 'combined') {
+    state.profile = state.users[0].id;
+  }
+
+  save();
+  SFX.delete();
+  closeDeleteUserModal();
+  closeUserModal();
+  renderProfiles();
+  renderPoints();
+  renderTasks();
+  if (state.tab === 'stats') renderCharts();
+  if (state.tab === 'history') renderHistory();
+  if (state.tab === 'planner') renderPlannerEditor();
+}
+
+// ==================== EVENTS ====================
+document.addEventListener('click', (e) => {
+  initAudio();
+
+  // add user button (must check before generic profile button)
+  if (e.target.closest('#addUserBtn')) {
+    const btn = e.target.closest('#addUserBtn');
+    if (btn.classList.contains('disabled')) {
+      showToast('max 5 users');
+    } else {
+      openAddUserModal();
+    }
+    return;
+  }
+
+  // profile switch (or rename if already active)
+  const profBtn = e.target.closest('.profile-btn');
+  if (profBtn && profBtn.dataset.profile) { switchProfile(profBtn.dataset.profile); return; }
+
+  // tab switch
+  const tabBtn = e.target.closest('.tab');
+  if (tabBtn) { switchTab(tabBtn.dataset.tab); return; }
+
+  // add task
+  if (e.target.closest('#addTaskCard')) { openTaskModal(); return; }
+
+  // edit task (must check BEFORE task card log)
+  const editBtn = e.target.closest('.task-edit-btn');
+  if (editBtn) { e.stopPropagation(); openTaskModal(editBtn.dataset.edit); return; }
+
+  // log task
+  const card = e.target.closest('.task-card:not(.add-card)');
+  if (card && card.dataset.taskId) { logTask(card.dataset.taskId, card); return; }
+
+  // delete log
+  const delLog = e.target.closest('[data-del]');
+  if (delLog) { deleteLog(delLog.dataset.del); return; }
+
+  // modal buttons
+  if (e.target.closest('#saveTaskBtn')) { saveTask(); return; }
+  if (e.target.closest('#cancelBtn')) { closeTaskModal(); return; }
+  if (e.target.closest('#deleteTaskBtn')) { deleteTask(); return; }
+  if (e.target.closest('#addCustomEmojiBtn')) { addCustomEmoji(); return; }
+  if (e.target.id === 'taskModal') closeTaskModal();
+
+  // goal modal
+  if (e.target.closest('#goalEditBtn')) { openGoalModal(); return; }
+  if (e.target.closest('#goalSaveBtn')) { saveGoal(); return; }
+  if (e.target.closest('#goalCancelBtn')) { closeGoalModal(); return; }
+  if (e.target.id === 'goalModal') closeGoalModal();
+  const preset = e.target.closest('.goal-preset');
+  if (preset) {
+    document.getElementById('goalInput').value = preset.dataset.preset;
+    document.querySelectorAll('.goal-preset').forEach(b => b.classList.toggle('selected', b === preset));
+    return;
+  }
+
+  // user settings modal
+  if (e.target.closest('#userSaveBtn')) { saveUser(); return; }
+  if (e.target.closest('#userCancelBtn')) { closeUserModal(); return; }
+  if (e.target.closest('#userDeleteBtn')) { openDeleteUserModal(); return; }
+  if (e.target.id === 'userModal') closeUserModal();
+
+  // delete user confirmation modal
+  if (e.target.closest('#deleteKeepLogs')) { deleteUser(false); return; }
+  if (e.target.closest('#deleteEverything')) { deleteUser(true); return; }
+  if (e.target.closest('#deleteUserCancel')) { closeDeleteUserModal(); return; }
+  if (e.target.id === 'deleteUserModal') closeDeleteUserModal();
+
+  // planner — calendar navigation
+  if (e.target.closest('#calPrevMonth')) { shiftCalendarMonth(-1); return; }
+  if (e.target.closest('#calNextMonth')) { shiftCalendarMonth(1); return; }
+
+  // planner — day selection
+  const calDay = e.target.closest('.cal-day:not(.empty)');
+  if (calDay && calDay.dataset.date) {
+    selectPlannerDate(calDay.dataset.date);
+    return;
+  }
+
+  // planner — mode toggle (edit <-> check)
+  if (e.target.closest('#plannerModeBtn')) { togglePlannerMode(); return; }
+
+  // planner — checklist item tap
+  const checkItem = e.target.closest('.checklist-item[data-line-index]');
+  if (checkItem) { handleChecklistClick(checkItem); return; }
+});
+
+// Planner textarea input — debounced autosave
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'plannerEditor') {
+    onPlannerInput();
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeTaskModal();
+    closeGoalModal();
+    closeUserModal();
+    closeDeleteUserModal();
+  }
+
+  if (e.key === 'Enter') {
+    // Custom emoji input gets its own Enter handling — add the emoji, don't save the task
+    if (document.activeElement && document.activeElement.id === 'customEmojiInput') {
+      e.preventDefault();
+      addCustomEmoji();
+      return;
+    }
+    if (document.getElementById('taskModal').classList.contains('open') && document.activeElement.tagName === 'INPUT') saveTask();
+    if (document.getElementById('goalModal').classList.contains('open') && document.activeElement.tagName === 'INPUT') saveGoal();
+  }
+});
+
+// Flush any pending planner save before closing the tab
+window.addEventListener('beforeunload', () => {
+  if (plannerSaveTimeout && state.profile !== 'combined') {
+    clearTimeout(plannerSaveTimeout);
+    const editor = document.getElementById('plannerEditor');
+    if (editor && plannerSelectedDate) {
+      setPlannerEntry(state.profile, plannerSelectedDate, editor.value);
+    }
+  }
+});
+
+// ==================== INIT ====================
+load();
+plannerSelectedDate = todayKey();
+renderProfiles();
+renderTasks();
+renderPoints();
+
+// Register service worker for offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((err) => {
+      console.warn('Service worker registration failed:', err);
+    });
+  });
+}
+</script>
+</body>
+</html>
