@@ -1,4 +1,4 @@
-# Tally Hoes
+# Oops, All Done
 
 A productivity + self-care tracker with points, streaks, graphs, and a planner. Installable as a standalone app on phones and computers.
 
