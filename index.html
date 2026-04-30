@@ -1352,6 +1352,23 @@
     z-index: 49;
   }
 
+  /* ===== WELCOME MODAL ===== */
+  .welcome-modal {
+    text-align: center;
+    padding: 32px 28px 24px;
+  }
+
+  .welcome-emoji {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    animation: welcomeBounce 1.5s ease-in-out infinite;
+  }
+
+  @keyframes welcomeBounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(8deg); }
+  }
+
   /* ===== EXPORT/IMPORT BAR ===== */
   .data-bar {
     position: fixed;
@@ -1648,6 +1665,23 @@
   </div>
 </div>
 
+<!-- Welcome Modal (first-time onboarding) -->
+<div class="modal-backdrop" id="welcomeModal">
+  <div class="modal welcome-modal">
+    <div class="welcome-emoji">✨</div>
+    <div class="modal-title" style="text-align:center;">welcome to Oops, All Done!</div>
+    <p style="font-family:'Fraunces',serif;font-style:italic;color:var(--plum-soft);margin-bottom:18px;line-height:1.5;text-align:center;">
+      let's get you set up. what should we call you?
+    </p>
+    <div class="field">
+      <input type="text" id="welcomeNameInput" placeholder="your name or nickname" maxlength="30" autocomplete="off" />
+    </div>
+    <div class="modal-actions" style="justify-content:center;">
+      <button class="btn btn-primary" id="welcomeStartBtn">let's go</button>
+    </div>
+  </div>
+</div>
+
 <!-- Confetti canvas -->
 <canvas id="confettiCanvas"></canvas>
 
@@ -1693,6 +1727,7 @@ function load() {
     if (saved) {
       state = { ...state, ...JSON.parse(saved) };
       migrateState();
+      return false; // not a fresh install
     } else {
       // seed a few starter tasks so first open isn't empty
       state.tasks = [
@@ -1710,8 +1745,36 @@ function load() {
         { id: uid(), name: 'Go to work or school', points: 50, emoji: '🎒' }
       ];
       save();
+      return true; // fresh install — show welcome
     }
-  } catch(e) { console.warn(e); }
+  } catch(e) {
+    console.warn(e);
+    return false;
+  }
+}
+
+// ==================== WELCOME / ONBOARDING ====================
+function showWelcome() {
+  const modal = document.getElementById('welcomeModal');
+  const input = document.getElementById('welcomeNameInput');
+  modal.classList.add('open');
+  setTimeout(() => input.focus(), 200);
+}
+
+function finishWelcome() {
+  const input = document.getElementById('welcomeNameInput');
+  const name = input.value.trim();
+  if (name) {
+    // Update User 1 with the chosen name
+    if (state.users[0]) {
+      state.users[0].name = name;
+      save();
+    }
+  }
+  document.getElementById('welcomeModal').classList.remove('open');
+  renderProfiles();
+  SFX.add();
+  showToast(`hi ${name || 'there'} ✨ tap a task to start earning points`);
 }
 
 function migrateState() {
@@ -3475,6 +3538,9 @@ function deleteUser(alsoDeleteData) {
 document.addEventListener('click', (e) => {
   initAudio();
 
+  // welcome modal
+  if (e.target.closest('#welcomeStartBtn')) { finishWelcome(); return; }
+
   // export / import
   if (e.target.closest('#exportBtn')) { exportData(); return; }
   if (e.target.closest('#importBtn')) {
@@ -3605,6 +3671,12 @@ document.addEventListener('keydown', (e) => {
   }
 
   if (e.key === 'Enter') {
+    // Welcome input — Enter starts the app
+    if (document.activeElement && document.activeElement.id === 'welcomeNameInput') {
+      e.preventDefault();
+      finishWelcome();
+      return;
+    }
     // Custom emoji input gets its own Enter handling — add the emoji, don't save the task
     if (document.activeElement && document.activeElement.id === 'customEmojiInput') {
       e.preventDefault();
@@ -3715,11 +3787,16 @@ function confirmImport() {
 }
 
 // ==================== INIT ====================
-load();
+const isFreshInstall = load();
 plannerSelectedDate = todayKey();
 renderProfiles();
 renderTasks();
 renderPoints();
+
+if (isFreshInstall) {
+  // Wait a beat so the UI renders first, then ask for name
+  setTimeout(() => showWelcome(), 300);
+}
 
 // Register service worker for offline support
 if ('serviceWorker' in navigator) {
