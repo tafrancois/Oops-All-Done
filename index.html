@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Tally Hoes</title>
+<title>Oops, All Done</title>
 
 <!-- PWA manifest and theme -->
 <link rel="manifest" href="manifest.json" />
@@ -13,7 +13,7 @@
 <!-- iOS-specific (iOS doesn't read manifest.json) -->
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="Tally Hoes" />
+<meta name="apple-mobile-web-app-title" content="Oops, All Done" />
 <link rel="apple-touch-icon" href="icon-180.png" />
 
 <!-- Favicon -->
@@ -814,6 +814,47 @@
   }
 
   /* ===== TASK GRID ===== */
+  .sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 0 4px;
+    flex-wrap: wrap;
+  }
+
+  .sort-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--plum-soft);
+    margin-right: 4px;
+  }
+
+  .sort-btn {
+    border: none;
+    background: rgba(255,255,255,0.55);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--plum-soft);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: inset 0 0 0 1px rgba(74,37,64,0.08);
+  }
+
+  .sort-btn:hover {
+    background: rgba(255,255,255,0.85);
+    color: var(--plum);
+  }
+
+  .sort-btn.active {
+    background: var(--plum);
+    color: var(--cream);
+    box-shadow: 0 2px 8px rgba(74,37,64,0.25);
+  }
   .task-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -1311,6 +1352,46 @@
     z-index: 49;
   }
 
+  /* ===== EXPORT/IMPORT BAR ===== */
+  .data-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 60;
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+    padding: 8px 12px;
+    border-radius: 999px;
+    box-shadow: 0 4px 20px rgba(74,37,64,0.18), inset 0 0 0 1px rgba(74,37,64,0.08);
+  }
+
+  .data-btn {
+    border: none;
+    background: transparent;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--plum-soft);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .data-btn:hover {
+    background: rgba(74,37,64,0.08);
+    color: var(--plum);
+  }
+
+  /* Push page content up so it doesn't hide behind the bar */
+  body {
+    padding-bottom: 80px;
+  }
+
   /* ===== MILESTONE TOAST ===== */
   .toast {
     position: fixed;
@@ -1348,8 +1429,8 @@
 <body>
 <div class="container">
   <header>
-    <h1>Tally Hoes<span class="dot">.</span></h1>
-    <p class="tagline">do the thing. get the points. repeat.</p>
+    <h1>Oops, All Done<span class="dot">.</span></h1>
+    <p class="tagline">accidentally productive</p>
 
     <div class="profiles" id="profilesBar" role="tablist"></div>
   </header>
@@ -1376,13 +1457,19 @@
   </section>
 
   <div class="tabs">
-    <button class="tab active" data-tab="log">Log</button>
+    <button class="tab active" data-tab="log">Tasks</button>
     <button class="tab" data-tab="stats">Stats</button>
     <button class="tab" data-tab="history">History</button>
     <button class="tab" data-tab="planner">Planner</button>
   </div>
 
   <section id="tab-log">
+    <div class="sort-bar">
+      <span class="sort-label">sort:</span>
+      <button class="sort-btn active" data-sort="alpha">A–Z</button>
+      <button class="sort-btn" data-sort="frequency">most used</button>
+      <button class="sort-btn" data-sort="recent">recent</button>
+    </div>
     <div class="task-grid" id="taskGrid"></div>
   </section>
 
@@ -1540,6 +1627,27 @@
   </div>
 </div>
 
+<!-- Export/Import Bar -->
+<div class="data-bar">
+  <button class="data-btn" id="exportBtn">⬇ export data</button>
+  <button class="data-btn" id="importBtn">⬆ import data</button>
+  <input type="file" id="importFileInput" accept=".json" style="display:none;" />
+</div>
+
+<!-- Import Confirmation Modal -->
+<div class="modal-backdrop" id="importModal">
+  <div class="modal">
+    <div class="modal-title">import data?</div>
+    <p style="font-family:'Fraunces',serif;font-style:italic;color:var(--plum-soft);margin-bottom:18px;line-height:1.6;">
+      This will <strong>replace everything</strong> in the app with the data from your backup file — tasks, logs, users, goals, planner entries, all of it.<br><br>This cannot be undone.
+    </p>
+    <div class="modal-actions" style="flex-direction:column;gap:10px;align-items:stretch;">
+      <button class="btn btn-primary" id="importConfirmBtn">yes, replace my data</button>
+      <button class="btn btn-ghost" id="importCancelBtn">cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- Confetti canvas -->
 <canvas id="confettiCanvas"></canvas>
 
@@ -1569,7 +1677,8 @@ let state = {
   goals: { talaya: 50, combined: 100 },
   goalsMetToday: {},
   customEmojis: [],
-  planner: {}
+  planner: {},
+  taskSortMode: 'alpha' // 'alpha' | 'frequency' | 'recent'
 };
 
 // Planner UI state (not persisted — UI only). Initialized after todayKey() is defined.
@@ -1587,12 +1696,18 @@ function load() {
     } else {
       // seed a few starter tasks so first open isn't empty
       state.tasks = [
-        { id: uid(), name: 'shower', points: 10, emoji: '🚿' },
-        { id: uid(), name: 'brush teeth', points: 5, emoji: '🪥' },
-        { id: uid(), name: 'drink water', points: 3, emoji: '💧' },
-        { id: uid(), name: 'write', points: 20, emoji: '✍️' },
-        { id: uid(), name: 'walk', points: 15, emoji: '🚶' },
-        { id: uid(), name: 'tidy room', points: 12, emoji: '🧹' }
+        { id: uid(), name: 'Brush teeth', points: 10, emoji: '🪥' },
+        { id: uid(), name: 'Plan the day', points: 10, emoji: '🗓️' },
+        { id: uid(), name: 'Get dressed', points: 10, emoji: '👕' },
+        { id: uid(), name: 'Drink 16 oz of water', points: 10, emoji: '💧' },
+        { id: uid(), name: 'Eat fruit or vegetables', points: 10, emoji: '🥗' },
+        { id: uid(), name: 'Make bed', points: 15, emoji: '🛏️' },
+        { id: uid(), name: 'Tidy one area', points: 15, emoji: '🧹' },
+        { id: uid(), name: 'Move your body for 10 minutes', points: 15, emoji: '🚶' },
+        { id: uid(), name: 'Shower or wash up', points: 20, emoji: '🚿' },
+        { id: uid(), name: 'Cook or prepare a meal', points: 30, emoji: '🍳' },
+        { id: uid(), name: 'Move your body for 30 minutes', points: 30, emoji: '🏃' },
+        { id: uid(), name: 'Go to work or school', points: 50, emoji: '🎒' }
       ];
       save();
     }
@@ -1691,6 +1806,170 @@ function playTone(freqs, duration = 0.15, type = 'sine', vol = 0.15) {
     osc.stop(start + duration + 0.05);
   });
 }
+
+// ==================== QUOTES ====================
+// Tiered library of motivational quotes shown when crossing daily-point milestones.
+// {user name} gets replaced with the active user's display name.
+const QUOTES = {
+  // Under 50 points: encouraging, small-win energy
+  tier1: [
+    "A little goes a long way.",
+    "Done is undefeated.",
+    "Tiny steps, big gains.",
+    "Starting is the hardest part.",
+    "Progress beats perfection.",
+    "Start small. Stay steady.",
+    "One small step counts a ton!",
+    "Consistency compounds.",
+    "Small wins matter.",
+    "Almost is momentum.",
+    "Forward is forward.",
+    "Effort adds up.",
+    "You're a beast.",
+    "You did it!"
+  ],
+  // 50–149 points: affirming, hype, grounded
+  tier2: [
+    "You're building good habits.",
+    "You're putting in the work!",
+    "Who's productive? {user name}'s productive!",
+    "You're building something real.",
+    "That's consistency right there.",
+    "You showed up again — nice.",
+    "This is how progress looks.",
+    "You're getting stronger at this.",
+    "That effort is paying off.",
+    "You're on a roll.",
+    "Look at you go.",
+    "That's a solid win.",
+    "You're stacking victories.",
+    "You're doing the work.",
+    "This is momentum.",
+    "You're getting it done.",
+    "That's real discipline.",
+    "You're staying consistent.",
+    "You're making it happen.",
+    "That's how it's done.",
+    "You're building a streak.",
+    "You're locked in.",
+    "You're making progress every day.",
+    "You're showing up for yourself.",
+    "That's dedication.",
+    "You're turning effort into results.",
+    "You're getting into a rhythm.",
+    "That's commitment.",
+    "You're leveling up.",
+    "You're doing better than yesterday.",
+    "You're staying on track.",
+    "That's growth in action."
+  ],
+  // 150–299 points: high energy, peak performance
+  tier3: [
+    "Executive function champion!",
+    "Pure excellence!",
+    "Task slayer!",
+    "Another task? You can't be stopped!",
+    "Absolutely incredible!",
+    "Unstoppable energy!",
+    "You're on fire!",
+    "Productivity legend!",
+    "Nothing can slow you down!",
+    "Certified powerhouse!",
+    "You're crushing it!",
+    "Relentless progress!",
+    "Peak performance!",
+    "You're in your zone!",
+    "Flawless execution!",
+    "You're built for this!",
+    "Maximum momentum!",
+    "Elite consistency!",
+    "You're dominating today!",
+    "Next-level focus!",
+    "You're a machine!",
+    "Unmatched drive!",
+    "You're absolutely cooking!",
+    "High-performance mode: ON.",
+    "You're making this look easy!",
+    "Top-tier effort!",
+    "You're unstoppable right now!",
+    "This is excellence!",
+    "You're setting the pace!",
+    "No brakes, just progress!",
+    "You're clearing everything!",
+    "All gas, no hesitation!",
+    "You're in full control!",
+    "Dominating the checklist!",
+    "That's how champions move!"
+  ],
+  // 300+ points: unhinged, chaotic, hilarious
+  tier4: [
+    "Okay but are you even human though? 👀",
+    "World's Most Productive Person 🏆",
+    "🥇 Olympic Champion of Executive Function",
+    "Do you write books on productivity?! Because you're an expert! 🤯",
+    "HELLO??? Who gave you this much power???",
+    "You're illegally productive at this point 🚨",
+    "Blink twice if you've replaced sleep with pure ambition 👀",
+    "Productivity goblin spotted in the wild 🧌✨",
+    "You didn't just eat the frog — you opened a restaurant 🍽️🐸",
+    "This is getting suspiciously impressive…",
+    "Be honest. Are you speedrunning your life right now?",
+    "Somewhere, a to-do list is crying tears of joy 😭",
+    "You're out here breaking the productivity economy 💰",
+    "NASA just called — they want your launch trajectory 🚀",
+    "Are you farming XP or living life?? 🎮",
+    "You're stacking wins tall enough to be a skyscraper 😳",
+    "At this rate, you're gonna unlock a secret ending",
+    "The tasks never stood a chance. Not even a little.",
+    "You're chewing through tasks like a gremlin with snacks 😈",
+    "This feels like cheating. Is this cheating???",
+    "You've officially entered menace-to-checklists mode.",
+    "I'm calling it: you're the final boss now.",
+    "Productivity said 'relax' and you said 'no.'",
+    "You're outpacing your own expectations 😭",
+    "Okay but like… what CAN'T you do??",
+    "This is a highlight reel at this point 🎬",
+    "You're generating momentum like a physics problem",
+    "Even your future self is impressed right now",
+    "You didn't come to play. You came to DOMINATE.",
+    "The grind fears YOU.",
+    "This is giving main character montage energy 🎶",
+    "You're one task away from ascending",
+    "The to-do list is now your to-DONE list 😤",
+    "At this point, you deserve a victory cutscene 🏆"
+  ]
+};
+
+// Track recently-shown quotes per tier so we don't repeat them back-to-back
+const recentlyShownQuotes = { tier1: [], tier2: [], tier3: [], tier4: [] };
+
+function pickTier(dailyPoints) {
+  if (dailyPoints < 50) return 'tier1';
+  if (dailyPoints < 150) return 'tier2';
+  if (dailyPoints < 300) return 'tier3';
+  return 'tier4';
+}
+
+function showQuote(dailyPoints) {
+  const tier = pickTier(dailyPoints);
+  const pool = QUOTES[tier];
+  // Prefer quotes not recently shown in this tier
+  const recent = recentlyShownQuotes[tier];
+  const fresh = pool.filter(q => !recent.includes(q));
+  const candidates = fresh.length > 0 ? fresh : pool;
+  let quote = candidates[Math.floor(Math.random() * candidates.length)];
+
+  // Track shown — keep last half of the pool to avoid immediate repeats
+  recent.push(quote);
+  if (recent.length > Math.floor(pool.length / 2)) recent.shift();
+
+  // Substitute {user name} with active user name
+  const userName = getUserName(state.profile);
+  quote = quote.replace(/\{user name\}/g, userName);
+
+  showToast(quote);
+}
+
 
 const SFX = {
   log: () => playTone([523.25, 783.99], 0.18, 'triangle', 0.14),     // C5 + G5
@@ -2032,7 +2311,39 @@ function renderTasks() {
   const grid = document.getElementById('taskGrid');
   grid.innerHTML = '';
 
-  state.tasks.forEach(task => {
+  // Compute sort metadata for each task
+  const taskMeta = state.tasks.map(task => {
+    const taskLogs = state.logs.filter(l => l.taskId === task.id);
+    return {
+      task,
+      frequency: taskLogs.length,
+      lastUsed: taskLogs.length > 0 ? Math.max(...taskLogs.map(l => l.timestamp)) : 0
+    };
+  });
+
+  // Sort
+  const mode = state.taskSortMode || 'alpha';
+  if (mode === 'alpha') {
+    taskMeta.sort((a, b) => a.task.name.toLowerCase().localeCompare(b.task.name.toLowerCase()));
+  } else if (mode === 'frequency') {
+    // Most used first; ties broken alphabetically
+    taskMeta.sort((a, b) => b.frequency - a.frequency || a.task.name.toLowerCase().localeCompare(b.task.name.toLowerCase()));
+  } else if (mode === 'recent') {
+    // Most recently used first; never-used tasks at the bottom alphabetically
+    taskMeta.sort((a, b) => {
+      if (a.lastUsed === 0 && b.lastUsed === 0) {
+        return a.task.name.toLowerCase().localeCompare(b.task.name.toLowerCase());
+      }
+      return b.lastUsed - a.lastUsed;
+    });
+  }
+
+  // Update active sort button visual
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.sort === mode);
+  });
+
+  taskMeta.forEach(({ task }) => {
     const card = document.createElement('button');
     card.className = 'task-card';
     card.dataset.taskId = task.id;
@@ -2052,6 +2363,13 @@ function renderTasks() {
   addCard.id = 'addTaskCard';
   addCard.innerHTML = `<span class="task-emoji">➕</span><div class="task-name">new task</div>`;
   grid.appendChild(addCard);
+}
+
+function setSortMode(mode) {
+  state.taskSortMode = mode;
+  save();
+  SFX.click();
+  renderTasks();
 }
 
 function escapeHtml(s) {
@@ -2092,16 +2410,16 @@ function logTask(taskId, sourceEl) {
     setTimeout(() => launchConfetti(), 700);
   }
 
-  // milestone check (every 100 pts total for this profile, lifetime)
-  const total = totalPoints(state.profile, false);
-  const milestoneHit = Math.floor(total / 100);
-  if (milestoneHit > (state.lastMilestone[state.profile] || 0)) {
-    state.lastMilestone[state.profile] = milestoneHit;
-    save();
+  // DAILY QUOTE — fire a tier-appropriate quote every 25 daily points crossed
+  const dailyTotal = totalPoints(state.profile, true);
+  const dailyBefore = dailyTotal - task.points;
+  const beforeMilestone = Math.floor(dailyBefore / 25);
+  const afterMilestone = Math.floor(dailyTotal / 25);
+  if (afterMilestone > beforeMilestone && dailyTotal > 0) {
     setTimeout(() => {
       SFX.milestone();
       burstSparkles();
-      showToast(`${milestoneHit * 100} points. absolute unit.`);
+      showQuote(dailyTotal);
     }, 400);
   }
 }
@@ -3157,6 +3475,28 @@ function deleteUser(alsoDeleteData) {
 document.addEventListener('click', (e) => {
   initAudio();
 
+  // export / import
+  if (e.target.closest('#exportBtn')) { exportData(); return; }
+  if (e.target.closest('#importBtn')) {
+    document.getElementById('importFileInput').click();
+    return;
+  }
+  if (e.target.closest('#importConfirmBtn')) { confirmImport(); return; }
+  if (e.target.closest('#importCancelBtn')) {
+    pendingImportData = null;
+    document.getElementById('importModal').classList.remove('open');
+    return;
+  }
+  if (e.target.id === 'importModal') {
+    pendingImportData = null;
+    document.getElementById('importModal').classList.remove('open');
+    return;
+  }
+
+  // sort buttons
+  const sortBtn = e.target.closest('.sort-btn');
+  if (sortBtn && sortBtn.dataset.sort) { setSortMode(sortBtn.dataset.sort); return; }
+
   // add user button (must check before generic profile button)
   if (e.target.closest('#addUserBtn')) {
     const btn = e.target.closest('#addUserBtn');
@@ -3242,6 +3582,12 @@ document.addEventListener('click', (e) => {
 });
 
 // Planner textarea input — debounced autosave
+document.getElementById('importFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) handleImportFile(file);
+  e.target.value = ''; // reset so same file can be re-selected
+});
+
 document.addEventListener('input', (e) => {
   if (e.target && e.target.id === 'plannerEditor') {
     onPlannerInput();
@@ -3254,6 +3600,8 @@ document.addEventListener('keydown', (e) => {
     closeGoalModal();
     closeUserModal();
     closeDeleteUserModal();
+    pendingImportData = null;
+    document.getElementById('importModal').classList.remove('open');
   }
 
   if (e.key === 'Enter') {
@@ -3278,6 +3626,93 @@ window.addEventListener('beforeunload', () => {
     }
   }
 });
+
+// ==================== EXPORT / IMPORT ====================
+function exportData() {
+  const exportObj = {
+    exportedAt: new Date().toISOString(),
+    appVersion: 'oops-all-done-v3',
+    state: {
+      tasks: state.tasks,
+      logs: state.logs,
+      users: state.users,
+      goals: state.goals,
+      goalsMetToday: state.goalsMetToday,
+      lastMilestone: state.lastMilestone,
+      customEmojis: state.customEmojis,
+      planner: state.planner,
+      taskSortMode: state.taskSortMode
+    }
+  };
+
+  const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0, 10); // e.g. 2026-04-30
+  a.href = url;
+  a.download = `oops-all-done-backup-${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('data exported ✓');
+  SFX.add();
+}
+
+let pendingImportData = null;
+
+function handleImportFile(file) {
+  if (!file || !file.name.endsWith('.json')) {
+    showToast('please select a .json backup file');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      // Validate it looks like our data
+      if (!parsed.state || !Array.isArray(parsed.state.tasks)) {
+        showToast('file doesn\'t look like a valid backup');
+        return;
+      }
+      pendingImportData = parsed.state;
+      document.getElementById('importModal').classList.add('open');
+    } catch (err) {
+      showToast('couldn\'t read that file — is it corrupted?');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function confirmImport() {
+  if (!pendingImportData) return;
+  // Merge the imported state over the current state defaults
+  const imported = pendingImportData;
+  state.tasks = imported.tasks || [];
+  state.logs = imported.logs || [];
+  state.users = imported.users || state.users;
+  state.goals = imported.goals || state.goals;
+  state.goalsMetToday = imported.goalsMetToday || {};
+  state.lastMilestone = imported.lastMilestone || {};
+  state.customEmojis = imported.customEmojis || [];
+  state.planner = imported.planner || {};
+  state.taskSortMode = imported.taskSortMode || 'alpha';
+  // Make sure profile is valid after import
+  const validIds = [...state.users.map(u => u.id), 'combined'];
+  if (!validIds.includes(state.profile)) state.profile = state.users[0]?.id || 'talaya';
+  save();
+  pendingImportData = null;
+  document.getElementById('importModal').classList.remove('open');
+  // Re-render everything
+  renderProfiles();
+  renderTasks();
+  renderPoints();
+  if (state.tab === 'stats') renderCharts();
+  if (state.tab === 'history') renderHistory();
+  if (state.tab === 'planner') renderPlanner();
+  showToast('data imported ✓ welcome back');
+  SFX.milestone();
+}
 
 // ==================== INIT ====================
 load();

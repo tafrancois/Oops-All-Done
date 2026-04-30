@@ -1,7 +1,7 @@
 {
-  "name": "Tally Hoes",
-  "short_name": "Tally Hoes",
-  "description": "Do the thing. Get the points. Repeat.",
+  "name": "Oops, All Done",
+  "short_name": "Oops All Done",
+  "description": "Accidentally productive.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,6 +1,6 @@
 // Tally Hoes service worker — offline caching
 // Bump this version string whenever you change files, so the browser fetches the new version
-const CACHE = 'tally-hoes-v2';
+const CACHE = 'oops-all-done-v4';
 
 const ASSETS = [
   './',

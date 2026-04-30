@@ -46,14 +46,14 @@ The app icon appears on the home screen. Opens fullscreen with no browser chrome
 
 1. Open the site in Chrome or Edge
 2. Click the install icon in the address bar (monitor with down arrow), or
-3. Three-dot menu > **Install Tally Hoes**
+3. Three-dot menu > **Install Oops, All Done**
 
 ## Updating the App
 
 When you change `index.html`, bump the version number in `sw.js`:
 
 ```js
-const CACHE = 'tally-hoes-v1';  // change to v2, v3, etc.
+const CACHE = 'oops-all-done-v1';  // change to v2, v3, etc.
 ```
 
 This forces installed PWAs to fetch the new version on next open.
