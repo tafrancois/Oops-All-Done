@@ -1966,7 +1966,7 @@
       <div id="plannerEditorWrap">
         <div class="list-toggle" role="tablist" aria-label="which list">
           <button type="button" class="list-toggle-btn active" data-list="must">✅ must-do</button>
-          <button type="button" class="list-toggle-btn" data-list="maybe">🤷 maybe</button>
+          <button type="button" class="list-toggle-btn" data-list="maybe">🌱 maybe</button>
         </div>
         <textarea
           id="plannerEditor"
@@ -1985,7 +1985,7 @@
         <div class="planner-progress" id="plannerProgress"></div>
         <div id="plannerMaybeWrap" style="display:none;">
           <div class="maybe-header">
-            <div class="list-section-label">🤷 maybe <span class="maybe-count" id="maybeCount"></span></div>
+            <div class="list-section-label">🌱 maybe <span class="maybe-count" id="maybeCount"></span></div>
             <button type="button" class="maybe-move-all" id="moveAllMaybeBtn">📅 move unfinished</button>
           </div>
           <div class="planner-checklist maybe-list" id="plannerMaybeList"></div>
@@ -3864,7 +3864,7 @@ function renderPlannerEditor() {
       if (maybeText) {
         const lbl = document.createElement('div');
         lbl.className = 'planner-col-sub';
-        lbl.textContent = '🤷 maybe';
+        lbl.textContent = '🌱 maybe';
         content.appendChild(lbl);
         parsePlannerLines(maybeText).forEach(line => {
           if (line.type !== 'task') return;

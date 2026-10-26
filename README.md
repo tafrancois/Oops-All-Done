@@ -61,7 +61,7 @@ The app icon appears on the home screen. Opens fullscreen with no browser chrome
 When you change `index.html`, bump the version number in `sw.js`:
 
 ```js
-const CACHE = 'task-planner-v6';  // change to v7, v8, etc.
+const CACHE = 'task-planner-v7';  // change to v7, v8, etc.
 ```
 
 This forces installed PWAs to fetch the new version on next open.
