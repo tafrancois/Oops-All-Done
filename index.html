@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Oops, All Done</title>
+<title>Task Planner</title>
 
 <!-- PWA manifest and theme -->
 <link rel="manifest" href="manifest.json" />
@@ -13,7 +13,7 @@
 <!-- iOS-specific (iOS doesn't read manifest.json) -->
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="Oops, All Done" />
+<meta name="apple-mobile-web-app-title" content="Task Planner" />
 <link rel="apple-touch-icon" href="icon-180.png" />
 
 <!-- Favicon -->
@@ -763,6 +763,424 @@
     font-family: 'Fraunces', serif;
   }
 
+  /* ===== SUB-TASKS ===== */
+  .planner-editor { tab-size: 3; -moz-tab-size: 3; }
+  .planner-header { flex-wrap: wrap; }
+
+  .checklist-item.sub {
+    padding-left: calc(12px + var(--lvl, 1) * 26px);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    position: relative;
+  }
+
+  .checklist-item.sub::before {
+    content: '';
+    position: absolute;
+    left: calc(22px + (var(--lvl, 1) - 1) * 26px);
+    top: 0;
+    bottom: 50%;
+    width: 12px;
+    border-left: 2px solid rgba(171,133,160,0.35);
+    border-bottom: 2px solid rgba(171,133,160,0.35);
+    border-bottom-left-radius: 6px;
+  }
+
+  .checklist-item.sub .check-box {
+    width: 19px;
+    height: 19px;
+    border-radius: 6px;
+    margin-top: 2px;
+  }
+
+  .checklist-item.sub .check-text { font-size: 0.93rem; }
+
+  .checklist-item.sub.checked .check-box::after { font-size: 0.8rem; }
+
+  .indent-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .indent-btn {
+    border: none;
+    background: rgba(74,37,64,0.08);
+    color: var(--plum);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+  }
+
+  .indent-btn:hover { background: rgba(74,37,64,0.15); }
+  .indent-btn:active { transform: scale(0.94); }
+
+  /* ===== MUST-DO / MAYBE ===== */
+  .list-toggle {
+    display: flex;
+    background: rgba(74,37,64,0.08);
+    border-radius: 999px;
+    padding: 4px;
+    margin-bottom: 10px;
+    gap: 4px;
+  }
+
+  .list-toggle-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 10px;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--plum-soft);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .list-toggle-btn.active {
+    background: var(--plum);
+    color: var(--cream);
+    box-shadow: 0 3px 10px rgba(74,37,64,0.25);
+  }
+
+  .list-toggle-btn.active[data-list="maybe"] {
+    background: var(--plum-mist);
+  }
+
+  .list-section-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--plum);
+    font-size: 0.98rem;
+    margin: 2px 4px 8px;
+  }
+
+  #plannerMaybeWrap { margin-top: 18px; }
+
+  .maybe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .maybe-count {
+    font-weight: 600;
+    color: var(--plum-mist);
+    font-size: 0.85rem;
+  }
+
+  .maybe-move-all {
+    border: none;
+    background: rgba(74,37,64,0.08);
+    color: var(--plum);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 5px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+
+  .maybe-list {
+    background: #fbf7fa;
+    border-style: dashed;
+  }
+
+  .maybe-list .check-box { border-style: dashed; }
+  .maybe-list .checked .check-box { border-style: solid; }
+
+  .move-btn {
+    flex-shrink: 0;
+    border: none;
+    background: rgba(74,37,64,0.07);
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--plum-soft);
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    align-self: center;
+  }
+
+  .move-btn:hover { background: var(--butter); color: var(--plum); }
+
+  .move-quick {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .move-quick .day-chip { font-size: 0.82rem; }
+
+  .cal-day.past { opacity: 0.3; cursor: default; }
+  .cal-day.past:hover { transform: none; background: rgba(255,255,255,0.5); }
+
+  .planner-col-sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--plum-mist);
+    margin: 8px 0 2px;
+  }
+
+  /* ===== TIMES ===== */
+  .checklist-item { flex-wrap: wrap; }
+  .checklist-item .check-text { flex: 1 1 120px; min-width: 0; }
+  .row-extras {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .time-pill {
+    flex-shrink: 0;
+    align-self: center;
+    display: inline-flex;
+    gap: 4px;
+    border: none;
+    background: none;
+    padding: 0;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+  }
+
+  .time-pill.static { cursor: default; }
+
+  .time-pill span {
+    font-size: 0.74rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .tp-time { background: var(--plum); color: var(--cream); }
+  .tp-dur { background: rgba(245,201,107,0.55); color: var(--plum); }
+  .tp-add { background: rgba(74,37,64,0.06); color: var(--plum-mist); }
+  .checklist-item.checked .time-pill span { opacity: 0.45; }
+
+  .dur-chips {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+
+  #plannerModeBtn, #routinesBtn, #timesBtn { white-space: nowrap; }
+
+  /* ===== STREAK ===== */
+  .streak-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 8px auto 4px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.55);
+    border: 2px solid rgba(232,168,56,0.45);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--plum);
+  }
+
+  .streak-pill .streak-sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--plum-soft);
+    font-size: 0.8rem;
+  }
+
+  .streak-pill.bump { animation: streakBump 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes streakBump { 0% { transform: scale(1); } 40% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+  /* ===== NOTES ===== */
+  .planner-notes {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 2px dashed rgba(74,37,64,0.12);
+  }
+
+  .planner-notes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .planner-notes-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--plum);
+    font-size: 1.05rem;
+  }
+
+  .planner-notes-editor {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px 14px;
+    border: 2px solid rgba(74,37,64,0.1);
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--plum);
+    background: #fffbf1;
+    background-image: repeating-linear-gradient(transparent, transparent 25.5px, rgba(171,133,160,0.18) 25.5px, rgba(171,133,160,0.18) 26.5px);
+    background-position: 0 11px;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+
+  .planner-notes-editor:focus {
+    outline: none;
+    border-color: var(--butter-deep);
+  }
+
+  .planner-notes-editor::placeholder {
+    color: var(--plum-mist);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+  }
+
+  .planner-col-notes {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(74,37,64,0.15);
+    font-size: 0.88rem;
+    color: var(--plum-soft);
+    white-space: pre-wrap;
+  }
+
+  /* ===== ROUTINES ===== */
+  .routines-modal {
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+  }
+
+  .routines-sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--plum-soft);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: -8px 0 14px;
+  }
+
+  .routines-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .routines-empty {
+    padding: 22px 12px;
+    text-align: center;
+    color: var(--plum-mist);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    background: #fff;
+    border-radius: 14px;
+    border: 2px dashed rgba(74,37,64,0.12);
+  }
+
+  .routine-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px 12px 12px 14px;
+    border: 2px solid rgba(74,37,64,0.1);
+  }
+
+  .routine-info { flex: 1; min-width: 0; }
+
+  .routine-name {
+    font-weight: 800;
+    color: var(--plum);
+    font-size: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .routine-meta {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--plum-mist);
+    margin-top: 2px;
+  }
+
+  .routine-meta.auto { color: #5a8050; }
+
+  .routine-card-btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .routine-card-btns .btn-mini { padding: 8px 12px; font-size: 0.82rem; }
+
+  .routine-card-btns .btn-mini.ghost {
+    background: rgba(74,37,64,0.08);
+    color: var(--plum);
+  }
+
+  .routine-editor { min-height: 150px; }
+
+  .day-chips {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+  }
+
+  .day-chip {
+    border: 2px solid rgba(74,37,64,0.15);
+    background: #fff;
+    color: var(--plum-soft);
+    border-radius: 12px;
+    padding: 9px 0;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .day-chip.on {
+    background: var(--butter);
+    border-color: var(--butter-deep);
+    color: var(--plum);
+    transform: translateY(-1px);
+  }
+
+  .day-all-btn {
+    margin-top: 8px;
+    border: none;
+    background: none;
+    color: var(--plum-soft);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   /* ===== CONFETTI ===== */
   #confettiCanvas {
     position: fixed;
@@ -1446,8 +1864,9 @@
 <body>
 <div class="container">
   <header>
-    <h1>Oops, All Done<span class="dot">.</span></h1>
+    <h1>Task Planner<span class="dot">.</span></h1>
     <p class="tagline">accidentally productive</p>
+    <div class="streak-pill" id="streakPill" title="days in a row you've opened the app"></div>
 
     <div class="profiles" id="profilesBar" role="tablist"></div>
   </header>
@@ -1474,13 +1893,13 @@
   </section>
 
   <div class="tabs">
-    <button class="tab active" data-tab="log">Tasks</button>
+    <button class="tab active" data-tab="planner">Planner</button>
+    <button class="tab" data-tab="log">Tasks</button>
     <button class="tab" data-tab="stats">Stats</button>
     <button class="tab" data-tab="history">History</button>
-    <button class="tab" data-tab="planner">Planner</button>
   </div>
 
-  <section id="tab-log">
+  <section id="tab-log" style="display:none;">
     <div class="sort-bar">
       <span class="sort-label">sort:</span>
       <button class="sort-btn active" data-sort="alpha">A–Z</button>
@@ -1512,7 +1931,7 @@
     </div>
   </section>
 
-  <section id="tab-planner" style="display:none;">
+  <section id="tab-planner">
     <div class="stats-section planner-calendar-section">
       <div class="calendar-header">
         <button class="cal-nav" id="calPrevMonth" aria-label="previous month">‹</button>
@@ -1530,26 +1949,62 @@
         <div class="planner-day-title" id="plannerDayTitle">Today</div>
         <div class="planner-header-right">
           <div class="planner-save-indicator" id="plannerSaveIndicator">saved</div>
+          <button class="planner-mode-btn" id="timesBtn" title="show / hide times + durations" aria-label="toggle times">
+            <span>⏰</span>
+          </button>
+          <button class="planner-mode-btn" id="routinesBtn" title="saved routines">
+            <span>🔁</span>
+            <span>routines</span>
+          </button>
           <button class="planner-mode-btn" id="plannerModeBtn" title="toggle edit / checklist">
             <span id="plannerModeIcon">✏️</span>
             <span id="plannerModeLabel">edit</span>
           </button>
         </div>
       </div>
-      <div class="planner-tip" id="plannerTip">tip: each line becomes a checkable task in check mode</div>
+      <div class="planner-tip" id="plannerTip">each line is a task · press <code>Tab</code> (or ⇥) to make it a sub-task</div>
       <div id="plannerEditorWrap">
+        <div class="list-toggle" role="tablist" aria-label="which list">
+          <button type="button" class="list-toggle-btn active" data-list="must">✅ must-do</button>
+          <button type="button" class="list-toggle-btn" data-list="maybe">🤷 maybe</button>
+        </div>
         <textarea
           id="plannerEditor"
           class="planner-editor"
-          placeholder="what's the plan for today?&#10;&#10;each line becomes a task&#10;you can check off when done&#10;&#10;goals, reminders, vibes, anything..."
+          placeholder="what's the plan for today?&#10;&#10;each line becomes a task&#10;	indent a line to make a sub-task&#10;&#10;goals, reminders, vibes, anything..."
+          spellcheck="true"
+        ></textarea>
+        <div class="indent-bar">
+          <button type="button" class="indent-btn" data-indent="out" data-target="plannerEditor" aria-label="outdent line">⇤ outdent</button>
+          <button type="button" class="indent-btn" data-indent="in" data-target="plannerEditor" aria-label="indent line">⇥ indent</button>
+        </div>
+      </div>
+      <div id="plannerChecklistWrap" style="display:none;">
+        <div class="list-section-label">✅ must-do</div>
+        <div class="planner-checklist" id="plannerChecklist"></div>
+        <div class="planner-progress" id="plannerProgress"></div>
+        <div id="plannerMaybeWrap" style="display:none;">
+          <div class="maybe-header">
+            <div class="list-section-label">🤷 maybe <span class="maybe-count" id="maybeCount"></span></div>
+            <button type="button" class="maybe-move-all" id="moveAllMaybeBtn">📅 move unfinished</button>
+          </div>
+          <div class="planner-checklist maybe-list" id="plannerMaybeList"></div>
+        </div>
+      </div>
+      <div id="plannerCombinedWrap" style="display:none;"></div>
+
+      <div class="planner-notes" id="plannerNotesWrap">
+        <div class="planner-notes-header">
+          <span class="planner-notes-title">📝 notes</span>
+          <span class="planner-save-indicator" id="notesSaveIndicator">saved</span>
+        </div>
+        <textarea
+          id="plannerNotes"
+          class="planner-notes-editor"
+          placeholder="jot anything down for this day…"
           spellcheck="true"
         ></textarea>
       </div>
-      <div id="plannerChecklistWrap" style="display:none;">
-        <div class="planner-checklist" id="plannerChecklist"></div>
-        <div class="planner-progress" id="plannerProgress"></div>
-      </div>
-      <div id="plannerCombinedWrap" style="display:none;"></div>
     </div>
   </section>
 </div>
@@ -1665,11 +2120,102 @@
   </div>
 </div>
 
+<!-- Move Maybe Task Modal (pick a day) -->
+<div class="modal-backdrop" id="moveModal">
+  <div class="modal">
+    <div class="modal-title" style="margin-bottom:6px;">move to…</div>
+    <p class="routines-sub" id="moveWhat" style="margin:0 0 14px;"></p>
+    <div class="move-quick">
+      <button type="button" class="day-chip" data-move-quick="0" id="moveTodayBtn">today</button>
+      <button type="button" class="day-chip" data-move-quick="1">tomorrow</button>
+      <button type="button" class="day-chip" data-move-quick="7">next week</button>
+    </div>
+    <div class="calendar-header" style="margin-top:14px;">
+      <button class="cal-nav" id="movePrevMonth" aria-label="previous month">‹</button>
+      <div class="cal-title" id="moveCalTitle"></div>
+      <button class="cal-nav" id="moveNextMonth" aria-label="next month">›</button>
+    </div>
+    <div class="calendar-weekdays">
+      <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+    </div>
+    <div class="calendar-grid" id="moveCalendarGrid"></div>
+    <div class="modal-actions">
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost" id="moveCancelBtn">cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Time / Duration Modal -->
+<div class="modal-backdrop" id="timingModal">
+  <div class="modal">
+    <div class="modal-title" style="margin-bottom:6px;">when + how long ⏰</div>
+    <p class="routines-sub" id="timingWhat" style="margin:0 0 14px;"></p>
+    <div class="field">
+      <label>time (optional)</label>
+      <input type="time" id="timingTimeInput" />
+    </div>
+    <div class="field">
+      <label>duration (optional)</label>
+      <div class="dur-chips" id="timingDurChips"></div>
+      <input type="number" id="timingDurCustom" min="1" max="1440" placeholder="or type minutes" style="margin-top:8px;" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="timingClearBtn">clear</button>
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost" id="timingCancelBtn">cancel</button>
+      <button class="btn btn-primary" id="timingSaveBtn">save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Routines Modal (list + edit views) -->
+<div class="modal-backdrop" id="routinesModal">
+  <div class="modal routines-modal">
+    <div id="routinesListView">
+      <div class="modal-title">routines 🔁</div>
+      <p class="routines-sub">saved task lists. pick days and they drop into your planner on their own — or tap <strong>＋ add</strong> to drop one in right now.</p>
+      <div class="routines-list" id="routinesList"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="routinesCloseBtn">done</button>
+        <button class="btn btn-primary" id="newRoutineBtn">＋ new routine</button>
+      </div>
+    </div>
+
+    <div id="routineEditView" style="display:none;">
+      <div class="modal-title" id="routineEditTitle">new routine</div>
+      <div class="field">
+        <label>name</label>
+        <input type="text" id="routineNameInput" placeholder="e.g. morning reset" maxlength="40" />
+      </div>
+      <div class="field">
+        <label>tasks (one per line · indent for sub-tasks)</label>
+        <textarea id="routineTextInput" class="planner-editor routine-editor" placeholder="brush teeth&#10;skincare&#10;	cleanser&#10;	moisturizer&#10;make bed" spellcheck="true"></textarea>
+        <div class="indent-bar">
+          <button type="button" class="indent-btn" data-indent="out" data-target="routineTextInput" aria-label="outdent line">⇤ outdent</button>
+          <button type="button" class="indent-btn" data-indent="in" data-target="routineTextInput" aria-label="indent line">⇥ indent</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>auto-add on these days (leave blank for manual only)</label>
+        <div class="day-chips" id="routineDayChips"></div>
+        <button type="button" class="day-all-btn" id="routineEveryDayBtn">every day</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="routineDeleteBtn" style="display:none;">delete</button>
+        <div style="flex:1;"></div>
+        <button class="btn btn-ghost" id="routineCancelBtn">cancel</button>
+        <button class="btn btn-primary" id="routineSaveBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Welcome Modal (first-time onboarding) -->
 <div class="modal-backdrop" id="welcomeModal">
   <div class="modal welcome-modal">
     <div class="welcome-emoji">✨</div>
-    <div class="modal-title" style="text-align:center;">welcome to Oops, All Done!</div>
+    <div class="modal-title" style="text-align:center;">welcome to Task Planner!</div>
     <p style="font-family:'Fraunces',serif;font-style:italic;color:var(--plum-soft);margin-bottom:18px;line-height:1.5;text-align:center;">
       let's get you set up. what should we call you?
     </p>
@@ -1701,7 +2247,7 @@ const USER_COLORS = [
 
 let state = {
   profile: 'talaya', // active user id (or 'combined')
-  tab: 'log',
+  tab: 'planner',
   tasks: [],  // { id, name, points, emoji }
   logs: [],   // { id, taskId, taskName, taskEmoji, profile, points, timestamp }
   users: [    // NEW: dynamic user array
@@ -1712,6 +2258,12 @@ let state = {
   goalsMetToday: {},
   customEmojis: [],
   planner: {},
+  notes: {},        // 'profile:YYYY-MM-DD' -> freeform notes text
+  routines: [],     // { id, owner, name, text, days: [0-6] }
+  routineLog: {},   // 'profile:YYYY-MM-DD' -> [routineId] already auto-added that day
+  maybe: {},        // 'profile:YYYY-MM-DD' -> "maybe" list text (same format as planner)
+  showTimes: false, // show time + duration pills next to tasks
+  daysUsed: [],     // every YYYY-MM-DD the app was opened (for the streak)
   taskSortMode: 'alpha' // 'alpha' | 'frequency' | 'recent'
 };
 
@@ -1720,6 +2272,10 @@ let plannerSelectedDate = null;
 let plannerCalendarMonth = null;
 let plannerSaveTimeout = null;
 let plannerMode = 'edit';
+let notesSaveTimeout = null;
+let plannerList = 'must';      // which list the editor is showing: 'must' | 'maybe'
+let moveTarget = null;         // { from: dateKey, lineIndex | 'all' }
+let moveCalendarMonth = null;
 
 function load() {
   try {
@@ -1774,7 +2330,7 @@ function finishWelcome() {
   document.getElementById('welcomeModal').classList.remove('open');
   renderProfiles();
   SFX.add();
-  showToast(`hi ${name || 'there'} ✨ tap a task to start earning points`);
+  showToast(`hi ${name || 'there'} ✨ let\'s plan the day`);
 }
 
 function migrateState() {
@@ -1792,6 +2348,13 @@ function migrateState() {
       state.users.push({ id: 'damien', name: 'User 2', color: USER_COLORS[1] });
     }
   }
+
+  // Planner extras added in Task Planner
+  if (!state.notes || typeof state.notes !== 'object') state.notes = {};
+  if (!Array.isArray(state.routines)) state.routines = [];
+  if (!state.routineLog || typeof state.routineLog !== 'object') state.routineLog = {};
+  if (!state.maybe || typeof state.maybe !== 'object') state.maybe = {};
+  if (!Array.isArray(state.daysUsed)) state.daysUsed = [];
 
   // Ensure each user has a color (for older state that might be missing them)
   state.users.forEach((u, i) => {
@@ -2924,6 +3487,43 @@ function setPlannerEntry(profile, dateKey, text) {
   save();
 }
 
+function getMaybeEntry(profile, dateKey) {
+  return (state.maybe || {})[plannerKey(profile, dateKey)] || '';
+}
+
+function setMaybeEntry(profile, dateKey, text) {
+  const key = plannerKey(profile, dateKey);
+  if (text && text.trim()) {
+    state.maybe[key] = text;
+  } else {
+    delete state.maybe[key];
+  }
+  save();
+}
+
+function getListEntry(list, profile, dateKey) {
+  return list === 'maybe' ? getMaybeEntry(profile, dateKey) : getPlannerEntry(profile, dateKey);
+}
+
+function setListEntry(list, profile, dateKey, text) {
+  if (list === 'maybe') setMaybeEntry(profile, dateKey, text);
+  else setPlannerEntry(profile, dateKey, text);
+}
+
+function getNotes(profile, dateKey) {
+  return (state.notes || {})[plannerKey(profile, dateKey)] || '';
+}
+
+function setNotes(profile, dateKey, text) {
+  const key = plannerKey(profile, dateKey);
+  if (text && text.trim()) {
+    state.notes[key] = text;
+  } else {
+    delete state.notes[key];
+  }
+  save();
+}
+
 function parseDateKey(key) {
   const [y, m, d] = key.split('-').map(Number);
   return new Date(y, m - 1, d);
@@ -2978,65 +3578,219 @@ function renderCalendar() {
     if (dateKey === plannerSelectedDate) btn.classList.add('selected');
     if (dateKey > today) btn.classList.add('future');
 
-    // Check if any user has content for this day
-    const hasContent = state.users.some(u => getPlannerEntry(u.id, dateKey));
+    // Check if any user has plans or notes for this day
+    const hasContent = state.users.some(u =>
+      getPlannerEntry(u.id, dateKey) || getMaybeEntry(u.id, dateKey) || getNotes(u.id, dateKey));
     if (hasContent) btn.classList.add('has-content');
 
     grid.appendChild(btn);
   }
 }
 
-// Parse planner text into line objects.
-// Every non-empty line is a checkable task. Checked state is stored as "[x] " prefix.
+// ---------- line parsing (tasks + sub-tasks) ----------
+// Every non-empty line is a checkable task. Checked state is stored as a "[x] " marker.
+// Leading tabs (or every 2 spaces) make a line a sub-task one level deeper.
 // Dashes, asterisks, and bullet markers are stripped for display.
+const CHECK_LINE_RE = /^(\s*)([-*•]\s*)?\[([ xX])\]\s?(.*)$/;
+const BULLET_LINE_RE = /^(\s*)([-*•]\s*)?(.*)$/;
+
+// ---------- times + durations ("@2pm", "~45m") ----------
+const TIME_TOKEN_RE = /(^|\s)@\s?(\d{1,2})(?::(\d{2}))?\s?(am|pm|a|p)?(?=\s|$)/i;
+const DUR_TOKEN_RE = /(^|\s)~\s?(\d+(?:\.\d+)?)\s?(m|min|mins|h|hr|hrs)(?=\s|$)/i;
+
+// returns minutes after midnight, or null
+function tokenToMinutes(h, mm, ap) {
+  h = parseInt(h, 10);
+  mm = parseInt(mm || '0', 10);
+  if (isNaN(h) || h > 23 || mm > 59) return null;
+  ap = (ap || '').toLowerCase();
+  if (ap.startsWith('p') && h < 12) h += 12;
+  else if (ap.startsWith('a') && h === 12) h = 0;
+  else if (!ap && h >= 1 && h <= 6) h += 12; // "@3" probably means 3pm
+  return h * 60 + mm;
+}
+
+function formatClock(mins) {
+  const h24 = Math.floor(mins / 60), mm = mins % 60;
+  const ap = h24 >= 12 ? 'pm' : 'am';
+  const h = h24 % 12 === 0 ? 12 : h24 % 12;
+  return mm ? `${h}:${String(mm).padStart(2, '0')}${ap}` : `${h}${ap}`;
+}
+
+function formatDuration(mins) {
+  if (mins < 60) return `${mins}m`;
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return m ? `${h}h ${m}m` : `${h}h`;
+}
+
+function durationToken(mins) {
+  if (mins % 60 === 0) return `~${mins / 60}h`;
+  if (mins > 60 && mins % 30 === 0) return `~${mins / 60}h`;
+  return `~${mins}m`;
+}
+
+// Pull "@time" and "~duration" out of a task's text.
+function extractTiming(text) {
+  let rest = text;
+  let time = null, dur = null;
+  const tm = rest.match(TIME_TOKEN_RE);
+  if (tm) {
+    const mins = tokenToMinutes(tm[2], tm[3], tm[4]);
+    if (mins !== null) {
+      time = mins;
+      rest = rest.replace(tm[0], tm[1]);
+    }
+  }
+  const dm = rest.match(DUR_TOKEN_RE);
+  if (dm) {
+    const n = parseFloat(dm[2]);
+    const mins = Math.round(/^h/i.test(dm[3]) ? n * 60 : n);
+    if (mins > 0) {
+      dur = mins;
+      rest = rest.replace(dm[0], dm[1]);
+    }
+  }
+  return { text: rest.replace(/\s{2,}/g, ' ').trim(), time, dur };
+}
+
+// Rewrite a raw line with a new time (minutes or null) and duration (minutes or null).
+function setLineTiming(raw, time, dur) {
+  let line = raw;
+  let m;
+  while ((m = line.match(TIME_TOKEN_RE)) && tokenToMinutes(m[2], m[3], m[4]) !== null) line = line.replace(m[0], m[1]);
+  while ((m = line.match(DUR_TOKEN_RE))) line = line.replace(m[0], m[1]);
+  line = line.replace(/[ ]+$/, '').replace(/([^\s])[ ]{2,}/g, '$1 ');
+  if (time !== null && time !== undefined) line += ` @${formatClock(time)}`;
+  if (dur) line += ` ${durationToken(dur)}`;
+  return line;
+}
+
+function indentLevel(raw) {
+  const ws = raw.match(/^[ \t]*/)[0];
+  let tabs = 0, spaces = 0;
+  for (const ch of ws) { if (ch === '\t') tabs++; else spaces++; }
+  return Math.min(6, tabs + Math.floor(spaces / 2));
+}
+
 function parsePlannerLines(text) {
   const lines = (text || '').split('\n');
   return lines.map((raw, i) => {
     if (raw.trim() === '') return { type: 'empty', raw, index: i };
+    const level = indentLevel(raw);
 
-    // Check for [x] or [X] marker (with optional leading dash/whitespace)
-    const checkedMatch = raw.match(/^(\s*[-*•]?\s*)\[([ xX])\]\s?(.*)$/);
-    if (checkedMatch) {
+    const m = raw.match(CHECK_LINE_RE);
+    if (m) {
+      const t = extractTiming(m[4].replace(/^[-*•]\s*/, '').trim());
       return {
         type: 'task',
-        checked: checkedMatch[2].toLowerCase() === 'x',
+        checked: m[3].toLowerCase() === 'x',
         raw,
-        taskText: checkedMatch[3].trim() || '(empty)',
+        level,
+        taskText: t.text || '(empty)',
+        time: t.time,
+        dur: t.dur,
         index: i
       };
     }
 
-    // Strip leading dash/bullet/asterisk for display (with or without space after)
-    const stripped = raw.replace(/^(\s*)[-*•]\s*/, '$1').trim();
-
-    return {
-      type: 'task',
-      checked: false,
-      raw,
-      taskText: stripped || raw.trim(),
-      index: i
-    };
+    const stripped = raw.trim().replace(/^[-*•]\s*/, '');
+    const t = extractTiming(stripped || raw.trim());
+    return { type: 'task', checked: false, raw, level, taskText: t.text || '(empty)', time: t.time, dur: t.dur, index: i };
   });
 }
 
-// Toggle a line's checked state. Returns new full text.
-function toggleLineChecked(text, lineIndex) {
-  const lines = text.split('\n');
-  const raw = lines[lineIndex];
-
-  // Already has [x] or [ ] marker — flip it
-  const checkedMatch = raw.match(/^(\s*[-*•]?\s*)\[([ xX])\]\s?(.*)$/);
-  if (checkedMatch) {
-    const leading = checkedMatch[1];
-    const newBox = checkedMatch[2].toLowerCase() === 'x' ? ' ' : 'x';
-    lines[lineIndex] = `${leading}[${newBox}] ${checkedMatch[3]}`;
-  } else {
-    // Plain line — add [x] prefix
-    const leadingWs = raw.match(/^(\s*)/)[1];
-    const content = raw.slice(leadingWs.length);
-    lines[lineIndex] = `${leadingWs}[x] ${content}`;
+// Set one raw line's checked state, keeping its indentation and bullet.
+function setLineChecked(raw, checked) {
+  const m = raw.match(CHECK_LINE_RE);
+  if (m) {
+    return checked
+      ? `${m[1]}${m[2] || ''}[x] ${m[4]}`
+      : `${m[1]}${m[2] || ''}${m[4]}`;
   }
+  if (!checked) return raw;
+  const b = raw.match(BULLET_LINE_RE);
+  return `${b[1]}${b[2] || ''}[x] ${b[3]}`;
+}
+
+// Indexes of every task nested under the task at idx.
+function descendantIndexes(parsed, idx) {
+  const out = [];
+  const lvl = parsed[idx].level;
+  for (let j = idx + 1; j < parsed.length; j++) {
+    const p = parsed[j];
+    if (p.type !== 'task') continue;
+    if (p.level <= lvl) break;
+    out.push(j);
+  }
+  return out;
+}
+
+// Check/uncheck a task. Its sub-tasks follow it, and a parent auto-checks
+// when all of its sub-tasks are done (and un-checks if one gets un-done).
+function setTaskTreeChecked(text, lineIndex, checked) {
+  const lines = text.split('\n');
+  const parsed = parsePlannerLines(text);
+  const target = parsed[lineIndex];
+  if (!target || target.type !== 'task') return text;
+
+  const checks = parsed.map(p => (p.type === 'task' ? p.checked : null));
+  checks[lineIndex] = checked;
+  descendantIndexes(parsed, lineIndex).forEach(j => { checks[j] = checked; });
+
+  let childLevel = target.level;
+  for (let j = lineIndex - 1; j >= 0 && childLevel > 0; j--) {
+    const p = parsed[j];
+    if (p.type !== 'task' || p.level >= childLevel) continue;
+    const desc = descendantIndexes(parsed, j);
+    checks[j] = desc.length > 0 && desc.every(k => checks[k]);
+    childLevel = p.level;
+  }
+
+  parsed.forEach((p, j) => {
+    if (p.type === 'task' && checks[j] !== p.checked) lines[j] = setLineChecked(lines[j], checks[j]);
+  });
   return lines.join('\n');
+}
+
+// Kept for compatibility — flips one line (with cascade).
+function toggleLineChecked(text, lineIndex) {
+  const p = parsePlannerLines(text)[lineIndex];
+  if (!p || p.type !== 'task') return text;
+  return setTaskTreeChecked(text, lineIndex, !p.checked);
+}
+
+function timingPillsHtml(line, interactive, list) {
+  if (!state.showTimes || line.type !== 'task') return '';
+  const bits = [];
+  if (line.time !== null && line.time !== undefined) bits.push(`<span class="tp-time">${formatClock(line.time)}</span>`);
+  if (line.dur) bits.push(`<span class="tp-dur">${formatDuration(line.dur)}</span>`);
+  if (!bits.length && !interactive) return '';
+  const inner = bits.length ? bits.join('') : '<span class="tp-add">＋⏰</span>';
+  return interactive
+    ? `<button type="button" class="time-pill${bits.length ? '' : ' empty'}" data-time-index="${line.index}" data-list="${list}" aria-label="set time">${inner}</button>`
+    : `<span class="time-pill static">${inner}</span>`;
+}
+
+function buildChecklistItem(line, interactive, list = 'must') {
+  const el = document.createElement('div');
+  if (line.type === 'task') {
+    el.className = 'checklist-item' + (line.checked ? ' checked' : '') + (line.level > 0 ? ' sub' : '');
+    if (line.level > 0) el.style.setProperty('--lvl', line.level);
+    if (interactive) {
+      el.dataset.lineIndex = line.index;
+      el.dataset.list = list;
+    } else {
+      el.style.cursor = 'default';
+    }
+    const moveBtn = (interactive && list === 'maybe' && line.level === 0)
+      ? `<button type="button" class="move-btn" data-move-index="${line.index}" aria-label="move to another day">📅 move</button>`
+      : '';
+    const extras = timingPillsHtml(line, interactive, list) + moveBtn;
+    el.innerHTML = `<span class="check-box"></span><span class="check-text">${escapeHtml(line.taskText)}</span>${extras ? `<span class="row-extras">${extras}</span>` : ''}`;
+  } else {
+    el.className = 'checklist-item empty-line';
+  }
+  return el;
 }
 
 function renderPlannerEditor() {
@@ -3049,8 +3803,22 @@ function renderPlannerEditor() {
   const modeIcon = document.getElementById('plannerModeIcon');
   const modeLabel = document.getElementById('plannerModeLabel');
   const tip = document.getElementById('plannerTip');
+  const notesWrap = document.getElementById('plannerNotesWrap');
+  const notesEl = document.getElementById('plannerNotes');
+  const routinesBtn = document.getElementById('routinesBtn');
+  const timesBtn = document.getElementById('timesBtn');
+  timesBtn.classList.toggle('in-check-mode', !!state.showTimes);
 
   dayTitle.textContent = prettyDate(plannerSelectedDate);
+
+  // Drop in any routines scheduled for this day (today or later only)
+  const profilesToFill = state.profile === 'combined' ? state.users.map(u => u.id) : [state.profile];
+  const added = [];
+  profilesToFill.forEach(pid => added.push(...applyAutoRoutines(pid, plannerSelectedDate)));
+  if (added.length) {
+    renderCalendar();
+    showToast(`🔁 added ${added.length === 1 ? `"${added[0].name}"` : `${added.length} routines`}`);
+  }
 
   if (state.profile === 'combined') {
     // Read-only combined view
@@ -3058,9 +3826,11 @@ function renderPlannerEditor() {
     checklistWrap.style.display = 'none';
     combinedWrap.style.display = 'flex';
     modeBtn.style.display = 'none';
+    routinesBtn.style.display = 'none';
+    timesBtn.style.display = 'none';
     tip.style.display = 'none';
+    notesWrap.style.display = 'none';
 
-    // Clear and rebuild columns for each user
     combinedWrap.innerHTML = '';
     state.users.forEach(user => {
       const col = document.createElement('div');
@@ -3080,37 +3850,71 @@ function renderPlannerEditor() {
         content.textContent = 'no plans yet';
         content.classList.add('empty');
       } else {
-        const lines = parsePlannerLines(text);
-        lines.forEach(line => {
-          const lineEl = document.createElement('div');
-          if (line.type === 'task') {
-            lineEl.className = 'checklist-item' + (line.checked ? ' checked' : '');
-            lineEl.style.cursor = 'default';
-            lineEl.style.padding = '4px 0';
-            lineEl.innerHTML = `<span class="check-box"></span><span class="check-text">${escapeHtml(line.taskText)}</span>`;
-          } else if (line.type === 'empty') {
-            lineEl.style.height = '6px';
-          } else {
-            lineEl.style.color = 'var(--plum)';
-            lineEl.style.fontFamily = "'Nunito', sans-serif";
-            lineEl.style.padding = '2px 0';
-            lineEl.textContent = line.raw;
-          }
+        content.style.whiteSpace = 'normal';
+        parsePlannerLines(text).forEach(line => {
+          const lineEl = buildChecklistItem(line, false);
+          if (line.type === 'task') lineEl.style.paddingTop = lineEl.style.paddingBottom = '4px';
+          else lineEl.style.minHeight = '6px';
           content.appendChild(lineEl);
         });
       }
       col.appendChild(content);
+
+      const maybeText = getMaybeEntry(user.id, plannerSelectedDate);
+      if (maybeText) {
+        const lbl = document.createElement('div');
+        lbl.className = 'planner-col-sub';
+        lbl.textContent = '🤷 maybe';
+        content.appendChild(lbl);
+        parsePlannerLines(maybeText).forEach(line => {
+          if (line.type !== 'task') return;
+          const lineEl = buildChecklistItem(line, false, 'maybe');
+          lineEl.style.paddingTop = lineEl.style.paddingBottom = '4px';
+          content.appendChild(lineEl);
+        });
+        if (content.classList.contains('empty')) {
+          content.classList.remove('empty');
+          content.textContent = '';
+          content.appendChild(lbl);
+          parsePlannerLines(maybeText).forEach(line => {
+            if (line.type === 'task') content.appendChild(buildChecklistItem(line, false, 'maybe'));
+          });
+        }
+      }
+
+      const notes = getNotes(user.id, plannerSelectedDate);
+      if (notes) {
+        const n = document.createElement('div');
+        n.className = 'planner-col-notes';
+        n.textContent = '📝 ' + notes;
+        col.appendChild(n);
+      }
       combinedWrap.appendChild(col);
     });
   } else {
     combinedWrap.style.display = 'none';
     modeBtn.style.display = 'flex';
+    routinesBtn.style.display = 'flex';
+    timesBtn.style.display = 'flex';
+    notesWrap.style.display = 'block';
+    if (document.activeElement !== notesEl || !notesSaveTimeout) {
+      notesEl.value = getNotes(state.profile, plannerSelectedDate);
+    }
 
     if (plannerMode === 'edit') {
       editorWrap.style.display = 'block';
       checklistWrap.style.display = 'none';
       tip.style.display = 'block';
-      editor.value = getPlannerEntry(state.profile, plannerSelectedDate);
+      tip.innerHTML = plannerList === 'maybe'
+        ? `maybe = nice if it happens · unfinished ones can be moved to another day`
+        : `each line is a task · press <code>Tab</code> (or ⇥) for a sub-task`;
+      if (state.showTimes) tip.innerHTML += ` · add <code>@2pm</code> or <code>~30m</code> for times`;
+      document.querySelectorAll('.list-toggle-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.list === plannerList));
+      editor.placeholder = plannerList === 'maybe'
+        ? "things that'd be nice to get to…\n\nfix the car\n\tbuy the part\n\twatch the tutorial\n\nif they don't happen, move them to another day"
+        : "what's the plan for today?\n\neach line becomes a task\n\tindent a line to make a sub-task\n\ngoals, reminders, vibes, anything...";
+      editor.value = getListEntry(plannerList, state.profile, plannerSelectedDate);
       modeIcon.textContent = '✓';
       modeLabel.textContent = 'check mode';
       modeBtn.classList.remove('in-check-mode');
@@ -3131,38 +3935,22 @@ function renderPlannerEditor() {
 function renderChecklist() {
   const container = document.getElementById('plannerChecklist');
   const progress = document.getElementById('plannerProgress');
-  const text = getPlannerEntry(state.profile, plannerSelectedDate);
-  const lines = parsePlannerLines(text);
-  container.innerHTML = '';
+  const maybeWrap = document.getElementById('plannerMaybeWrap');
+  const maybeList = document.getElementById('plannerMaybeList');
+  const maybeCount = document.getElementById('maybeCount');
 
+  const lines = parsePlannerLines(getPlannerEntry(state.profile, plannerSelectedDate));
+  const maybeLines = parsePlannerLines(getMaybeEntry(state.profile, plannerSelectedDate));
   const tasks = lines.filter(l => l.type === 'task');
+  const maybeTasks = maybeLines.filter(l => l.type === 'task');
 
-  if (lines.length === 0 || (lines.length === 1 && lines[0].type === 'empty')) {
-    container.innerHTML = `<div style="padding:24px;text-align:center;color:var(--plum-mist);font-family:'Fraunces',serif;font-style:italic;">nothing planned yet — switch to edit mode to add some</div>`;
-    progress.textContent = '';
-    return;
-  }
-
-  lines.forEach(line => {
-    const item = document.createElement('div');
-    if (line.type === 'task') {
-      item.className = 'checklist-item' + (line.checked ? ' checked' : '');
-      item.dataset.lineIndex = line.index;
-      item.innerHTML = `<span class="check-box"></span><span class="check-text">${escapeHtml(line.taskText)}</span>`;
-    } else if (line.type === 'note') {
-      item.className = 'checklist-item note';
-      item.textContent = line.raw;
-    } else {
-      item.className = 'checklist-item empty-line';
-    }
-    container.appendChild(item);
-  });
-
-  // Progress text
+  container.innerHTML = '';
   if (tasks.length === 0) {
+    container.innerHTML = `<div style="padding:20px;text-align:center;color:var(--plum-mist);font-family:'Fraunces',serif;font-style:italic;">${maybeTasks.length ? 'no must-dos — just maybes today 🌙' : 'nothing planned yet — switch to edit mode to add some'}</div>`;
     progress.textContent = '';
     progress.classList.remove('all-done');
   } else {
+    lines.forEach(line => container.appendChild(buildChecklistItem(line, true, 'must')));
     const done = tasks.filter(t => t.checked).length;
     if (done === tasks.length) {
       progress.textContent = `all ${tasks.length} done 🎉`;
@@ -3172,58 +3960,80 @@ function renderChecklist() {
       progress.classList.remove('all-done');
     }
   }
+
+  maybeList.innerHTML = '';
+  if (!maybeTasks.length) {
+    maybeWrap.style.display = 'none';
+  } else {
+    maybeWrap.style.display = 'block';
+    maybeLines.forEach(line => maybeList.appendChild(buildChecklistItem(line, true, 'maybe')));
+    const mDone = maybeTasks.filter(t => t.checked).length;
+    maybeCount.textContent = `· ${mDone} of ${maybeTasks.length}`;
+    const unfinishedTop = maybeLines.some(l => l.type === 'task' && l.level === 0 && !l.checked);
+    document.getElementById('moveAllMaybeBtn').style.display = unfinishedTop ? 'inline-block' : 'none';
+  }
 }
 
 function handleChecklistClick(itemEl) {
   const lineIndex = parseInt(itemEl.dataset.lineIndex, 10);
   if (isNaN(lineIndex)) return;
+  const list = itemEl.dataset.list === 'maybe' ? 'maybe' : 'must';
 
-  const currentText = getPlannerEntry(state.profile, plannerSelectedDate);
+  const currentText = getListEntry(list, state.profile, plannerSelectedDate);
   const wasChecked = itemEl.classList.contains('checked');
 
-  // Count tasks and completion BEFORE the toggle
-  const linesBefore = parsePlannerLines(currentText);
-  const tasksBefore = linesBefore.filter(l => l.type === 'task');
+  const tasksBefore = parsePlannerLines(currentText).filter(l => l.type === 'task');
   const doneBefore = tasksBefore.filter(t => t.checked).length;
 
-  const newText = toggleLineChecked(currentText, lineIndex);
-  setPlannerEntry(state.profile, plannerSelectedDate, newText);
+  const newText = setTaskTreeChecked(currentText, lineIndex, !wasChecked);
+  setListEntry(list, state.profile, plannerSelectedDate, newText);
   renderChecklist();
   renderCalendar(); // update content dots
 
   if (wasChecked) {
-    // Unchecking — subtle sound, no confetti
     SFX.uncheck();
   } else {
-    // Checking — pop sound + mini confetti from the item
     SFX.check();
     const box = itemEl.querySelector('.check-box');
     miniConfetti(box || itemEl);
 
-    // Check if ALL tasks are now done (and there's at least one)
-    const linesAfter = parsePlannerLines(newText);
-    const tasksAfter = linesAfter.filter(l => l.type === 'task');
+    const tasksAfter = parsePlannerLines(newText).filter(l => l.type === 'task');
     const doneAfter = tasksAfter.filter(t => t.checked).length;
     if (tasksAfter.length > 0 && doneAfter === tasksAfter.length && doneBefore < tasksBefore.length) {
-      // Just completed the last one
       setTimeout(() => {
         launchConfetti();
-        showToast(`all done — ${tasksAfter.length} task${tasksAfter.length === 1 ? '' : 's'} crushed`);
+        showToast(list === 'maybe'
+          ? `every maybe done?? overachiever 👑`
+          : `all done — ${tasksAfter.length} must-do${tasksAfter.length === 1 ? '' : 's'} crushed`);
       }, 300);
+    }
+  }
+}
+
+// Save anything still waiting on the typing debounce (planner list + notes).
+function flushPlannerSaves() {
+  const canWrite = state.profile !== 'combined' && plannerSelectedDate;
+  if (plannerSaveTimeout) {
+    clearTimeout(plannerSaveTimeout);
+    plannerSaveTimeout = null;
+    if (canWrite && plannerMode === 'edit') {
+      setListEntry(plannerList, state.profile, plannerSelectedDate, document.getElementById('plannerEditor').value);
+    }
+  }
+  if (notesSaveTimeout) {
+    clearTimeout(notesSaveTimeout);
+    notesSaveTimeout = null;
+    if (canWrite) {
+      setNotes(state.profile, plannerSelectedDate, document.getElementById('plannerNotes').value);
     }
   }
 }
 
 function togglePlannerMode() {
   if (state.profile === 'combined') return;
-
+  flushPlannerSaves();
   if (plannerMode === 'edit') {
-    const editor = document.getElementById('plannerEditor');
-    if (plannerSaveTimeout) {
-      clearTimeout(plannerSaveTimeout);
-      plannerSaveTimeout = null;
-    }
-    setPlannerEntry(state.profile, plannerSelectedDate, editor.value);
+    setListEntry(plannerList, state.profile, plannerSelectedDate, document.getElementById('plannerEditor').value);
     plannerMode = 'check';
   } else {
     plannerMode = 'edit';
@@ -3232,8 +4042,8 @@ function togglePlannerMode() {
   renderPlannerEditor();
 }
 
-function showSaveIndicator(state) {
-  const el = document.getElementById('plannerSaveIndicator');
+function showSaveIndicator(state, id = 'plannerSaveIndicator') {
+  const el = document.getElementById(id);
   el.classList.add('visible');
   if (state === 'saving') {
     el.textContent = 'saving…';
@@ -3244,9 +4054,9 @@ function showSaveIndicator(state) {
   }
 }
 
-function hideSaveIndicator() {
-  const el = document.getElementById('plannerSaveIndicator');
-  el.classList.remove('visible');
+function hideSaveIndicator(id) {
+  const ids = id ? [id] : ['plannerSaveIndicator', 'notesSaveIndicator'];
+  ids.forEach(i => document.getElementById(i).classList.remove('visible'));
 }
 
 function onPlannerInput() {
@@ -3254,26 +4064,90 @@ function onPlannerInput() {
   showSaveIndicator('saving');
   clearTimeout(plannerSaveTimeout);
   plannerSaveTimeout = setTimeout(() => {
+    plannerSaveTimeout = null;
     const text = document.getElementById('plannerEditor').value;
-    setPlannerEntry(state.profile, plannerSelectedDate, text);
+    setListEntry(plannerList, state.profile, plannerSelectedDate, text);
     renderCalendar(); // refresh dots
     showSaveIndicator('saved');
-    setTimeout(hideSaveIndicator, 1500);
+    setTimeout(() => hideSaveIndicator('plannerSaveIndicator'), 1500);
   }, 500);
 }
 
-function selectPlannerDate(dateKey) {
-  // flush any pending save for the previously-selected day before switching
-  if (plannerSaveTimeout) {
-    clearTimeout(plannerSaveTimeout);
-    if (state.profile !== 'combined') {
-      const text = document.getElementById('plannerEditor').value;
-      setPlannerEntry(state.profile, plannerSelectedDate, text);
+function onNotesInput() {
+  if (state.profile === 'combined') return;
+  showSaveIndicator('saving', 'notesSaveIndicator');
+  clearTimeout(notesSaveTimeout);
+  notesSaveTimeout = setTimeout(() => {
+    notesSaveTimeout = null;
+    setNotes(state.profile, plannerSelectedDate, document.getElementById('plannerNotes').value);
+    renderCalendar();
+    showSaveIndicator('saved', 'notesSaveIndicator');
+    setTimeout(() => hideSaveIndicator('notesSaveIndicator'), 1500);
+  }, 500);
+}
+
+// ---------- indenting (Tab key + ⇤ ⇥ buttons) ----------
+function indentSelection(ta, dir) {
+  const v = ta.value;
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const lineStart = v.lastIndexOf('\n', start - 1) + 1;
+  const endProbe = (end > start && v[end - 1] === '\n') ? end - 1 : end;
+  let blockEnd = v.indexOf('\n', endProbe);
+  if (blockEnd === -1) blockEnd = v.length;
+
+  let firstDelta = 0, totalDelta = 0;
+  const out = v.slice(lineStart, blockEnd).split('\n').map((line, i) => {
+    let nl;
+    if (dir === 'in') nl = '\t' + line;
+    else if (line.startsWith('\t')) nl = line.slice(1);
+    else nl = line.replace(/^ {1,2}/, '');
+    const d = nl.length - line.length;
+    if (i === 0) firstDelta = d;
+    totalDelta += d;
+    return nl;
+  });
+
+  ta.value = v.slice(0, lineStart) + out.join('\n') + v.slice(blockEnd);
+  const newStart = Math.max(lineStart, start + firstDelta);
+  const newEnd = start === end ? newStart : Math.max(newStart, end + totalDelta);
+  ta.setSelectionRange(newStart, newEnd);
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// Enter on an indented / bulleted line keeps the same indent + bullet.
+// Enter on an empty indented line steps it back out a level.
+function handleListEnter(ta, e) {
+  const start = ta.selectionStart;
+  if (start !== ta.selectionEnd) return;
+  const v = ta.value;
+  const lineStart = v.lastIndexOf('\n', start - 1) + 1;
+  let lineEnd = v.indexOf('\n', start);
+  if (lineEnd === -1) lineEnd = v.length;
+  const line = v.slice(lineStart, lineEnd);
+  const m = line.match(/^([ \t]*)([-*•]\s+)?/);
+  const ws = m[1];
+  const bullet = m[2] || '';
+  if (!ws && !bullet) return; // plain line → normal Enter
+
+  e.preventDefault();
+  const content = line.slice(ws.length + bullet.length);
+  if (content.trim() === '' && start === lineEnd) {
+    if (ws) {
+      indentSelection(ta, 'out');
+    } else {
+      ta.setRangeText('', lineStart, lineEnd, 'end'); // empty bullet ends the list
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
     }
-    plannerSaveTimeout = null;
+    return;
   }
+  ta.setRangeText('\n' + ws + bullet.replace(/\[[ xX]\]\s*/, ''), start, start, 'end');
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function selectPlannerDate(dateKey) {
+  flushPlannerSaves(); // save the previously-selected day before switching
   plannerSelectedDate = dateKey;
-  // If selected day is in a different month, update month view
   const d = parseDateKey(dateKey);
   plannerCalendarMonth = { year: d.getFullYear(), month: d.getMonth() };
   renderCalendar();
@@ -3296,6 +4170,449 @@ function renderPlanner() {
   if (!plannerSelectedDate) plannerSelectedDate = todayKey();
   renderCalendar();
   renderPlannerEditor();
+}
+
+function switchPlannerList(list) {
+  if (list === plannerList) return;
+  flushPlannerSaves();
+  plannerList = list === 'maybe' ? 'maybe' : 'must';
+  SFX.click();
+  renderPlannerEditor();
+}
+
+function toggleShowTimes() {
+  flushPlannerSaves();
+  state.showTimes = !state.showTimes;
+  save();
+  SFX.click();
+  showToast(state.showTimes ? '⏰ times on' : 'times hidden');
+  renderPlannerEditor();
+}
+
+// ---------- time / duration picker ----------
+let timingTarget = null; // { list, lineIndex }
+let timingDur = null;
+const DUR_PRESETS = [15, 30, 45, 60, 90, 120, 180];
+
+function openTimingModal(list, lineIndex) {
+  const line = parsePlannerLines(getListEntry(list, state.profile, plannerSelectedDate))[lineIndex];
+  if (!line || line.type !== 'task') return;
+  timingTarget = { list, lineIndex };
+  timingDur = line.dur || null;
+  document.getElementById('timingWhat').textContent = line.taskText;
+  const t = line.time;
+  document.getElementById('timingTimeInput').value =
+    (t !== null && t !== undefined) ? `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}` : '';
+  document.getElementById('timingDurCustom').value = timingDur && !DUR_PRESETS.includes(timingDur) ? timingDur : '';
+  renderDurChips();
+  SFX.click();
+  document.getElementById('timingModal').classList.add('open');
+}
+
+function renderDurChips() {
+  const wrap = document.getElementById('timingDurChips');
+  wrap.innerHTML = '';
+  DUR_PRESETS.forEach(m => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'day-chip' + (timingDur === m ? ' on' : '');
+    b.dataset.dur = m;
+    b.textContent = formatDuration(m);
+    wrap.appendChild(b);
+  });
+}
+
+function closeTimingModal() {
+  document.getElementById('timingModal').classList.remove('open');
+  timingTarget = null;
+}
+
+function saveTiming(clear = false) {
+  if (!timingTarget) return;
+  const { list, lineIndex } = timingTarget;
+  const text = getListEntry(list, state.profile, plannerSelectedDate);
+  const lines = text.split('\n');
+  if (lineIndex >= lines.length) { closeTimingModal(); return; }
+  let time = null, dur = null;
+  if (!clear) {
+    const v = document.getElementById('timingTimeInput').value; // "14:30"
+    if (v) {
+      const [h, mm] = v.split(':').map(Number);
+      time = h * 60 + mm;
+    }
+    const custom = parseInt(document.getElementById('timingDurCustom').value, 10);
+    dur = custom > 0 ? custom : timingDur;
+  }
+  lines[lineIndex] = setLineTiming(lines[lineIndex], time, dur);
+  setListEntry(list, state.profile, plannerSelectedDate, lines.join('\n'));
+  closeTimingModal();
+  SFX.add();
+  renderChecklist();
+}
+
+// ---------- move maybe tasks to another day ----------
+// Block = the task line plus everything nested under it.
+function blockRange(parsed, idx) {
+  const desc = descendantIndexes(parsed, idx);
+  return [idx, desc.length ? desc[desc.length - 1] : idx];
+}
+
+function openMoveModal(lineIndex) {
+  if (state.profile === 'combined') return;
+  const parsed = parsePlannerLines(getMaybeEntry(state.profile, plannerSelectedDate));
+  let what;
+  if (lineIndex === 'all') {
+    const n = parsed.filter(l => l.type === 'task' && l.level === 0 && !l.checked).length;
+    if (!n) { showToast('no unfinished maybes to move'); return; }
+    what = `${n} unfinished maybe${n === 1 ? '' : 's'} (with their sub-tasks)`;
+  } else {
+    const line = parsed[lineIndex];
+    if (!line || line.type !== 'task') return;
+    const subs = descendantIndexes(parsed, lineIndex).length;
+    what = `"${line.taskText}"${subs ? ` + ${subs} sub-task${subs === 1 ? '' : 's'}` : ''}`;
+  }
+  moveTarget = { from: plannerSelectedDate, lineIndex };
+  document.getElementById('moveWhat').textContent = what;
+  const d = parseDateKey(plannerSelectedDate < todayKey() ? todayKey() : plannerSelectedDate);
+  moveCalendarMonth = { year: d.getFullYear(), month: d.getMonth() };
+  renderMoveCalendar();
+  document.getElementById('moveTodayBtn').style.display = plannerSelectedDate === todayKey() ? 'none' : '';
+  document.querySelector('.move-quick').style.gridTemplateColumns =
+    plannerSelectedDate === todayKey() ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)';
+  SFX.click();
+  document.getElementById('moveModal').classList.add('open');
+}
+
+function closeMoveModal() {
+  document.getElementById('moveModal').classList.remove('open');
+  moveTarget = null;
+}
+
+function renderMoveCalendar() {
+  const { year, month } = moveCalendarMonth;
+  document.getElementById('moveCalTitle').textContent =
+    new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const grid = document.getElementById('moveCalendarGrid');
+  grid.innerHTML = '';
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = todayKey();
+  for (let i = 0; i < firstDay; i++) {
+    const e = document.createElement('div');
+    e.className = 'cal-day empty';
+    grid.appendChild(e);
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = formatDateKey(new Date(year, month, day));
+    const b = document.createElement('button');
+    b.className = 'cal-day move-day';
+    b.textContent = day;
+    if (dateKey === today) b.classList.add('today');
+    if (moveTarget && dateKey === moveTarget.from) b.classList.add('selected');
+    if (dateKey < today) b.classList.add('past');
+    else b.dataset.moveDate = dateKey;
+    if (getPlannerEntry(state.profile, dateKey) || getMaybeEntry(state.profile, dateKey)) b.classList.add('has-content');
+    grid.appendChild(b);
+  }
+}
+
+function shiftMoveMonth(delta) {
+  let { year, month } = moveCalendarMonth;
+  month += delta;
+  if (month < 0) { month = 11; year--; }
+  if (month > 11) { month = 0; year++; }
+  moveCalendarMonth = { year, month };
+  renderMoveCalendar();
+}
+
+function moveMaybeTo(toDate) {
+  if (!moveTarget || state.profile === 'combined') return;
+  const { from, lineIndex } = moveTarget;
+  if (toDate === from) { showToast("that's the same day 😅"); return; }
+
+  flushPlannerSaves();
+  const lines = getMaybeEntry(state.profile, from).split('\n');
+  const parsed = parsePlannerLines(lines.join('\n'));
+  const ranges = [];
+  if (lineIndex === 'all') {
+    parsed.forEach(l => { if (l.type === 'task' && l.level === 0 && !l.checked) ranges.push(blockRange(parsed, l.index)); });
+  } else {
+    ranges.push(blockRange(parsed, lineIndex));
+  }
+  if (!ranges.length) { closeMoveModal(); return; }
+
+  const moving = [];
+  const remove = new Set();
+  ranges.forEach(([a, b]) => {
+    for (let i = a; i <= b; i++) {
+      remove.add(i);
+      if (lines[i].trim()) moving.push(lines[i]);
+    }
+  });
+  const remaining = lines.filter((_, i) => !remove.has(i)).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  setMaybeEntry(state.profile, from, remaining);
+
+  const existing = getMaybeEntry(state.profile, toDate);
+  const merged = existing.trim() ? existing.replace(/\s+$/, '') + '\n' + moving.join('\n') : moving.join('\n');
+  setMaybeEntry(state.profile, toDate, merged);
+
+  closeMoveModal();
+  renderCalendar();
+  renderPlannerEditor();
+  SFX.add();
+  const n = ranges.length;
+  showToast(`📅 moved ${n === 1 ? 'it' : n + ' maybes'} to ${prettyDate(toDate).toLowerCase()}`);
+}
+
+// ==================== ROUTINES ====================
+const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+let editingRoutineId = null;
+let routineDays = [];
+
+function myRoutines() {
+  return (state.routines || []).filter(r => r.owner === state.profile);
+}
+
+function routineTaskCount(r) {
+  return (r.text || '').split('\n').filter(l => l.trim()).length;
+}
+
+function routineDaysLabel(days) {
+  if (!days || !days.length) return 'manual only';
+  const s = [...days].sort((a, b) => a - b).join(',');
+  if (days.length === 7) return 'auto · every day';
+  if (s === '1,2,3,4,5') return 'auto · weekdays';
+  if (s === '0,6') return 'auto · weekends';
+  return 'auto · ' + [...days].sort((a, b) => a - b).map(d => DAY_SHORT[d]).join(', ');
+}
+
+// Routine lines go in fresh (unchecked), blank lines dropped.
+function cleanRoutineLines(text) {
+  return (text || '').split('\n').filter(l => l.trim()).map(l => setLineChecked(l, false)).join('\n');
+}
+
+function appendRoutineText(existing, routine) {
+  const add = cleanRoutineLines(routine.text);
+  if (!add) return existing;
+  if (!existing.trim()) return add;
+  return existing.replace(/\s+$/, '') + '\n' + add;
+}
+
+// Auto-add routines scheduled for this weekday — once per day, today or later only.
+function applyAutoRoutines(profile, dateKey) {
+  if (!profile || profile === 'combined' || !dateKey) return [];
+  if (dateKey < todayKey()) return [];
+  const dow = parseDateKey(dateKey).getDay();
+  const key = plannerKey(profile, dateKey);
+  const already = state.routineLog[key] || [];
+  const due = (state.routines || []).filter(r =>
+    r.owner === profile && Array.isArray(r.days) && r.days.includes(dow) && !already.includes(r.id)
+  );
+  if (!due.length) return [];
+
+  let text = getPlannerEntry(profile, dateKey);
+  due.forEach(r => { text = appendRoutineText(text, r); });
+  state.routineLog[key] = [...already, ...due.map(r => r.id)];
+  setPlannerEntry(profile, dateKey, text); // also saves
+  return due;
+}
+
+// Forget auto-add bookkeeping for days that are already over.
+function pruneRoutineLog() {
+  const today = todayKey();
+  Object.keys(state.routineLog || {}).forEach(k => {
+    const date = k.slice(k.lastIndexOf(':') + 1);
+    if (date < today) delete state.routineLog[k];
+  });
+}
+
+function openRoutinesModal() {
+  if (state.profile === 'combined') {
+    showToast('pick a user to use routines');
+    return;
+  }
+  flushPlannerSaves();
+  SFX.click();
+  showRoutineListView();
+  document.getElementById('routinesModal').classList.add('open');
+}
+
+function closeRoutinesModal() {
+  document.getElementById('routinesModal').classList.remove('open');
+  editingRoutineId = null;
+}
+
+function showRoutineListView() {
+  editingRoutineId = null;
+  renderRoutinesList();
+  document.getElementById('routinesListView').style.display = 'block';
+  document.getElementById('routineEditView').style.display = 'none';
+}
+
+function renderRoutinesList() {
+  const list = document.getElementById('routinesList');
+  const routines = myRoutines();
+  list.innerHTML = '';
+  if (!routines.length) {
+    list.innerHTML = `<div class="routines-empty">no routines yet — make one and it can show up on its own ✨</div>`;
+    return;
+  }
+  const dayLabel = prettyDate(plannerSelectedDate).toLowerCase();
+  routines.forEach(r => {
+    const n = routineTaskCount(r);
+    const card = document.createElement('div');
+    card.className = 'routine-card';
+    card.innerHTML = `
+      <div class="routine-info">
+        <div class="routine-name">${escapeHtml(r.name)}</div>
+        <div class="routine-meta${r.days && r.days.length ? ' auto' : ''}">${n} task${n === 1 ? '' : 's'} · ${routineDaysLabel(r.days)}</div>
+      </div>
+      <div class="routine-card-btns">
+        <button class="btn-mini" data-routine-add="${r.id}" title="add to ${escapeHtml(dayLabel)}">＋ add</button>
+        <button class="btn-mini ghost" data-routine-edit="${r.id}">edit</button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function openRoutineEditor(id = null) {
+  editingRoutineId = id;
+  const r = id ? state.routines.find(x => x.id === id) : null;
+  document.getElementById('routineEditTitle').textContent = r ? 'edit routine' : 'new routine';
+  document.getElementById('routineNameInput').value = r ? r.name : '';
+  document.getElementById('routineTextInput').value = r ? r.text : '';
+  routineDays = r && Array.isArray(r.days) ? [...r.days] : [];
+  document.getElementById('routineDeleteBtn').style.display = r ? 'inline-block' : 'none';
+  renderDayChips();
+  document.getElementById('routinesListView').style.display = 'none';
+  document.getElementById('routineEditView').style.display = 'block';
+  SFX.click();
+  if (!r) setTimeout(() => document.getElementById('routineNameInput').focus(), 100);
+}
+
+function renderDayChips() {
+  const wrap = document.getElementById('routineDayChips');
+  wrap.innerHTML = '';
+  DAY_LETTERS.forEach((letter, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'day-chip' + (routineDays.includes(i) ? ' on' : '');
+    b.dataset.day = i;
+    b.textContent = letter;
+    b.setAttribute('aria-label', DAY_SHORT[i]);
+    b.setAttribute('aria-pressed', routineDays.includes(i));
+    wrap.appendChild(b);
+  });
+  document.getElementById('routineEveryDayBtn').textContent =
+    routineDays.length === 7 ? 'clear days' : 'every day';
+}
+
+function toggleRoutineDay(i) {
+  routineDays = routineDays.includes(i) ? routineDays.filter(d => d !== i) : [...routineDays, i];
+  SFX.click();
+  renderDayChips();
+}
+
+function saveRoutine() {
+  const name = document.getElementById('routineNameInput').value.trim();
+  const text = document.getElementById('routineTextInput').value.replace(/\s+$/, '');
+  if (!name) { showToast('give your routine a name'); return; }
+  if (!text.trim()) { showToast('add at least one task'); return; }
+  const days = [...routineDays].sort((a, b) => a - b);
+
+  if (editingRoutineId) {
+    const r = state.routines.find(x => x.id === editingRoutineId);
+    if (r) Object.assign(r, { name, text, days });
+  } else {
+    state.routines.push({ id: 'r_' + uid(), owner: state.profile, name, text, days });
+  }
+  save();
+  SFX.add();
+  showRoutineListView();
+  renderPlannerEditor(); // a routine due on the selected day drops in right away
+  renderCalendar();
+}
+
+function deleteRoutine() {
+  const r = state.routines.find(x => x.id === editingRoutineId);
+  if (!r) return;
+  if (!confirm(`delete the "${r.name}" routine? (tasks it already added stay put)`)) return;
+  state.routines = state.routines.filter(x => x.id !== r.id);
+  save();
+  SFX.delete();
+  showRoutineListView();
+}
+
+function addRoutineToDay(id) {
+  if (state.profile === 'combined') return;
+  const r = state.routines.find(x => x.id === id);
+  if (!r) return;
+  flushPlannerSaves();
+  const text = appendRoutineText(getPlannerEntry(state.profile, plannerSelectedDate), r);
+  setPlannerEntry(state.profile, plannerSelectedDate, text);
+  closeRoutinesModal();
+  renderCalendar();
+  renderPlannerEditor();
+  SFX.add();
+  showToast(`🔁 added "${r.name}" to ${prettyDate(plannerSelectedDate).toLowerCase()}`);
+}
+
+// ==================== STREAK ====================
+function shiftDateKey(dateKey, days) {
+  const d = parseDateKey(dateKey);
+  return formatDateKey(new Date(d.getFullYear(), d.getMonth(), d.getDate() + days));
+}
+
+// First time on this version: give credit for days already used (task logs + past planner days).
+function backfillDaysUsed() {
+  if (state.daysUsed.length) return;
+  const today = todayKey();
+  const days = new Set();
+  (state.logs || []).forEach(l => { if (l.timestamp) days.add(todayKey(l.timestamp)); });
+  Object.keys(state.planner || {}).forEach(k => {
+    const d = k.slice(k.lastIndexOf(':') + 1);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d) && d <= today) days.add(d);
+  });
+  state.daysUsed = [...days].sort();
+}
+
+function recordDayUsed() {
+  const t = todayKey();
+  if (state.daysUsed.includes(t)) return false;
+  state.daysUsed.push(t);
+  state.daysUsed.sort();
+  if (state.daysUsed.length > 1000) state.daysUsed = state.daysUsed.slice(-1000);
+  save();
+  return true;
+}
+
+function streakStats() {
+  const set = new Set(state.daysUsed);
+  let current = 0;
+  let d = todayKey();
+  while (set.has(d)) { current++; d = shiftDateKey(d, -1); }
+  let best = 0, run = 0, prev = null;
+  [...set].sort().forEach(day => {
+    run = (prev && shiftDateKey(prev, 1) === day) ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = day;
+  });
+  return { current, best, total: set.size };
+}
+
+function renderStreak(bump = false) {
+  const pill = document.getElementById('streakPill');
+  const { current, best, total } = streakStats();
+  const flame = current >= 30 ? '🌋' : current >= 7 ? '🔥🔥' : '🔥';
+  const main = current <= 1 ? `${flame} day 1 — let's go` : `${flame} ${current}-day streak`;
+  const sub = best > current ? `best ${best} · ${total} days` : `${total} day${total === 1 ? '' : 's'} total`;
+  pill.innerHTML = `${main} <span class="streak-sub">· ${sub}</span>`;
+  if (bump) {
+    pill.classList.remove('bump');
+    void pill.offsetWidth;
+    pill.classList.add('bump');
+  }
 }
 
 // ==================== TABS ====================
@@ -3351,15 +4668,8 @@ function switchProfile(profile) {
     return;
   }
 
-  // flush any pending planner save before switching profile
-  if (plannerSaveTimeout && state.profile !== 'combined') {
-    clearTimeout(plannerSaveTimeout);
-    const editor = document.getElementById('plannerEditor');
-    if (editor) {
-      setPlannerEntry(state.profile, plannerSelectedDate, editor.value);
-    }
-    plannerSaveTimeout = null;
-  }
+  // flush any pending planner/notes save before switching profile
+  flushPlannerSaves();
   state.profile = profile;
   save();
   SFX.click();
@@ -3507,9 +4817,12 @@ function deleteUser(alsoDeleteData) {
   if (alsoDeleteData) {
     // Delete logs and planner entries tied to this user
     state.logs = state.logs.filter(l => l.profile !== userId);
-    Object.keys(state.planner || {}).forEach(key => {
-      if (key.startsWith(userId + ':')) delete state.planner[key];
+    ['planner', 'maybe', 'notes', 'routineLog'].forEach(bucket => {
+      Object.keys(state[bucket] || {}).forEach(key => {
+        if (key.startsWith(userId + ':')) delete state[bucket][key];
+      });
     });
+    state.routines = (state.routines || []).filter(r => r.owner !== userId);
   }
   // Otherwise, logs and planner entries stay in storage as "orphaned" data
 
@@ -3540,6 +4853,74 @@ document.addEventListener('click', (e) => {
 
   // welcome modal
   if (e.target.closest('#welcomeStartBtn')) { finishWelcome(); return; }
+
+  // ---- indent / outdent buttons (planner + routine editors) ----
+  const indentBtn = e.target.closest('.indent-btn');
+  if (indentBtn) {
+    const ta = document.getElementById(indentBtn.dataset.target);
+    if (ta) {
+      indentSelection(ta, indentBtn.dataset.indent);
+      ta.focus({ preventScroll: true });
+    }
+    return;
+  }
+
+  // ---- planner: must-do / maybe toggle, times toggle ----
+  const listBtn = e.target.closest('.list-toggle-btn');
+  if (listBtn) { switchPlannerList(listBtn.dataset.list); return; }
+  if (e.target.closest('#timesBtn')) { toggleShowTimes(); return; }
+
+  // ---- time pill / move button inside a checklist row (before the row's check toggle) ----
+  const timePill = e.target.closest('.time-pill[data-time-index]');
+  if (timePill) { openTimingModal(timePill.dataset.list, parseInt(timePill.dataset.timeIndex, 10)); return; }
+  const moveBtn = e.target.closest('.move-btn[data-move-index]');
+  if (moveBtn) { openMoveModal(parseInt(moveBtn.dataset.moveIndex, 10)); return; }
+  if (e.target.closest('#moveAllMaybeBtn')) { openMoveModal('all'); return; }
+
+  // ---- move modal ----
+  if (e.target.closest('#movePrevMonth')) { shiftMoveMonth(-1); return; }
+  if (e.target.closest('#moveNextMonth')) { shiftMoveMonth(1); return; }
+  const moveDay = e.target.closest('.move-day');
+  if (moveDay) { if (moveDay.dataset.moveDate) moveMaybeTo(moveDay.dataset.moveDate); return; }
+  const moveQuick = e.target.closest('[data-move-quick]');
+  if (moveQuick && moveTarget) {
+    moveMaybeTo(shiftDateKey(todayKey(), parseInt(moveQuick.dataset.moveQuick, 10)));
+    return;
+  }
+  if (e.target.closest('#moveCancelBtn') || e.target.id === 'moveModal') { closeMoveModal(); return; }
+
+  // ---- time / duration modal ----
+  const durChip = e.target.closest('#timingDurChips [data-dur]');
+  if (durChip) {
+    const m = parseInt(durChip.dataset.dur, 10);
+    timingDur = timingDur === m ? null : m;
+    document.getElementById('timingDurCustom').value = '';
+    renderDurChips();
+    return;
+  }
+  if (e.target.closest('#timingSaveBtn')) { saveTiming(false); return; }
+  if (e.target.closest('#timingClearBtn')) { saveTiming(true); return; }
+  if (e.target.closest('#timingCancelBtn') || e.target.id === 'timingModal') { closeTimingModal(); return; }
+
+  // ---- routines ----
+  if (e.target.closest('#routinesBtn')) { openRoutinesModal(); return; }
+  if (e.target.closest('#routinesCloseBtn') || e.target.id === 'routinesModal') { closeRoutinesModal(); return; }
+  if (e.target.closest('#newRoutineBtn')) { openRoutineEditor(); return; }
+  const rAdd = e.target.closest('[data-routine-add]');
+  if (rAdd) { addRoutineToDay(rAdd.dataset.routineAdd); return; }
+  const rEdit = e.target.closest('[data-routine-edit]');
+  if (rEdit) { openRoutineEditor(rEdit.dataset.routineEdit); return; }
+  const dayChip = e.target.closest('#routineDayChips .day-chip');
+  if (dayChip) { toggleRoutineDay(parseInt(dayChip.dataset.day, 10)); return; }
+  if (e.target.closest('#routineEveryDayBtn')) {
+    routineDays = routineDays.length === 7 ? [] : [0, 1, 2, 3, 4, 5, 6];
+    SFX.click();
+    renderDayChips();
+    return;
+  }
+  if (e.target.closest('#routineSaveBtn')) { saveRoutine(); return; }
+  if (e.target.closest('#routineCancelBtn')) { SFX.click(); showRoutineListView(); return; }
+  if (e.target.closest('#routineDeleteBtn')) { deleteRoutine(); return; }
 
   // export / import
   if (e.target.closest('#exportBtn')) { exportData(); return; }
@@ -3658,10 +5039,42 @@ document.addEventListener('input', (e) => {
   if (e.target && e.target.id === 'plannerEditor') {
     onPlannerInput();
   }
+  if (e.target && e.target.id === 'plannerNotes') {
+    onNotesInput();
+  }
+  if (e.target && e.target.id === 'timingDurCustom' && e.target.value) {
+    timingDur = null;
+    renderDurChips();
+  }
+});
+
+// Keep focus in the editor when tapping ⇤ ⇥ on desktop
+document.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.indent-btn')) e.preventDefault();
+});
+
+// Enter on an indented/bulleted line keeps the indent (works with phone keyboards too)
+document.addEventListener('beforeinput', (e) => {
+  const ta = e.target;
+  if (!ta || (ta.id !== 'plannerEditor' && ta.id !== 'routineTextInput')) return;
+  if (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph') {
+    if (e.isComposing) return;
+    handleListEnter(ta, e);
+  }
 });
 
 document.addEventListener('keydown', (e) => {
+  // Tab / Shift+Tab indents lines in the planner + routine editors
+  if (e.key === 'Tab' && e.target && (e.target.id === 'plannerEditor' || e.target.id === 'routineTextInput')) {
+    e.preventDefault();
+    indentSelection(e.target, e.shiftKey ? 'out' : 'in');
+    return;
+  }
+
   if (e.key === 'Escape') {
+    closeMoveModal();
+    closeTimingModal();
+    closeRoutinesModal();
     closeTaskModal();
     closeGoalModal();
     closeUserModal();
@@ -3688,22 +5101,37 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Flush any pending planner save before closing the tab
-window.addEventListener('beforeunload', () => {
-  if (plannerSaveTimeout && state.profile !== 'combined') {
-    clearTimeout(plannerSaveTimeout);
-    const editor = document.getElementById('plannerEditor');
-    if (editor && plannerSelectedDate) {
-      setPlannerEntry(state.profile, plannerSelectedDate, editor.value);
-    }
+// Flush any pending planner/notes save before closing or backgrounding the app
+window.addEventListener('beforeunload', () => flushPlannerSaves());
+
+let lastSeenToday = null;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    flushPlannerSaves();
+    return;
   }
+  // Came back to the app — if it's a new day, count it and jump the planner to today
+  const t = todayKey();
+  if (lastSeenToday && t !== lastSeenToday) {
+    const wasOnToday = plannerSelectedDate === lastSeenToday;
+    recordDayUsed();
+    renderStreak(true);
+    renderPoints();
+    pruneRoutineLog();
+    if (wasOnToday) {
+      plannerSelectedDate = t;
+      plannerCalendarMonth = null;
+    }
+    if (state.tab === 'planner') renderPlanner();
+  }
+  lastSeenToday = t;
 });
 
 // ==================== EXPORT / IMPORT ====================
 function exportData() {
   const exportObj = {
     exportedAt: new Date().toISOString(),
-    appVersion: 'oops-all-done-v3',
+    appVersion: 'task-planner-v4',
     state: {
       tasks: state.tasks,
       logs: state.logs,
@@ -3713,6 +5141,12 @@ function exportData() {
       lastMilestone: state.lastMilestone,
       customEmojis: state.customEmojis,
       planner: state.planner,
+      maybe: state.maybe,
+      notes: state.notes,
+      routines: state.routines,
+      routineLog: state.routineLog,
+      showTimes: state.showTimes,
+      daysUsed: state.daysUsed,
       taskSortMode: state.taskSortMode
     }
   };
@@ -3722,7 +5156,7 @@ function exportData() {
   const a = document.createElement('a');
   const dateStr = new Date().toISOString().slice(0, 10); // e.g. 2026-04-30
   a.href = url;
-  a.download = `oops-all-done-backup-${dateStr}.json`;
+  a.download = `task-planner-backup-${dateStr}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -3768,6 +5202,15 @@ function confirmImport() {
   state.lastMilestone = imported.lastMilestone || {};
   state.customEmojis = imported.customEmojis || [];
   state.planner = imported.planner || {};
+  state.maybe = imported.maybe || {};
+  state.notes = imported.notes || {};
+  state.routines = Array.isArray(imported.routines) ? imported.routines : [];
+  state.routineLog = imported.routineLog || {};
+  state.showTimes = !!imported.showTimes;
+  state.daysUsed = Array.isArray(imported.daysUsed) ? imported.daysUsed : [];
+  backfillDaysUsed();
+  recordDayUsed();
+  renderStreak();
   state.taskSortMode = imported.taskSortMode || 'alpha';
   // Make sure profile is valid after import
   const validIds = [...state.users.map(u => u.id), 'combined'];
@@ -3789,9 +5232,16 @@ function confirmImport() {
 // ==================== INIT ====================
 const isFreshInstall = load();
 plannerSelectedDate = todayKey();
+lastSeenToday = todayKey();
+backfillDaysUsed();
+recordDayUsed();
+pruneRoutineLog();
+save();
 renderProfiles();
 renderTasks();
 renderPoints();
+renderStreak();
+switchTab('planner'); // Planner is the landing page
 
 if (isFreshInstall) {
   // Wait a beat so the UI renders first, then ask for name

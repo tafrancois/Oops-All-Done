@@ -1,7 +1,7 @@
 {
-  "name": "Oops, All Done",
-  "short_name": "Oops All Done",
-  "description": "Accidentally productive.",
+  "name": "Task Planner",
+  "short_name": "Task Planner",
+  "description": "Plan the day, check it off.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

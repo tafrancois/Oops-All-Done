@@ -1,6 +1,8 @@
-# Oops, All Done
+# Task Planner
 
-A productivity + self-care tracker with points, streaks, graphs, and a planner. Installable as a standalone app on phones and computers.
+(formerly *Oops, All Done*)
+
+A daily planner + self-care tracker with sub-tasks, maybe-lists, routines, points, streaks, and graphs. Installable as a standalone app on phones and computers.
 
 ## Features
 
@@ -9,7 +11,13 @@ A productivity + self-care tracker with points, streaks, graphs, and a planner. 
 - Daily points goal with progress bar and confetti celebration
 - Stats: 7-day chart, task breakdown donut, user-vs-user comparison
 - History tab with delete option
-- Planner with calendar, per-day freeform notes, and checkable tasks
+- **Planner is the home screen** — calendar + checkable list for each day
+- **Sub-tasks** — press Tab (or the ⇥ indent button on phones) to nest a task; checking all sub-tasks checks the parent
+- **Must-do / maybe lists** — maybes don't count against "all done", and unfinished ones can be moved to any day with 📅 move
+- **⏰ Times + durations** — toggle on to show pills like `3pm` · `45m`; type `@3pm` / `~45m` or tap the pill to set them
+- **Routines** — saved task lists that auto-add on chosen weekdays, or drop in with one tap
+- **Notes** — a per-day notes box under the list
+- **Daily streak** — counts consecutive days you open the app
 - Installable PWA — works offline once installed
 
 ## Deploy to GitHub Pages
@@ -46,14 +54,14 @@ The app icon appears on the home screen. Opens fullscreen with no browser chrome
 
 1. Open the site in Chrome or Edge
 2. Click the install icon in the address bar (monitor with down arrow), or
-3. Three-dot menu > **Install Oops, All Done**
+3. Three-dot menu > **Install Task Planner**
 
 ## Updating the App
 
 When you change `index.html`, bump the version number in `sw.js`:
 
 ```js
-const CACHE = 'oops-all-done-v1';  // change to v2, v3, etc.
+const CACHE = 'task-planner-v6';  // change to v7, v8, etc.
 ```
 
 This forces installed PWAs to fetch the new version on next open.
@@ -61,3 +69,5 @@ This forces installed PWAs to fetch the new version on next open.
 ## Data
 
 All data is stored in the browser's localStorage. It's per-device — data on phone and data on laptop are separate. If you want sync later, you'd need a backend.
+
+Storage key is still `tallyHoes_v1`, so updating from Oops, All Done keeps all existing data.
