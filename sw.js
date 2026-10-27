@@ -1,6 +1,6 @@
 // Task Planner service worker — offline caching
 // Bump this version string whenever you change files, so the browser fetches the new version
-const CACHE = 'task-planner-v9';
+const CACHE = 'task-planner-v10';
 
 const ASSETS = [
   './',
@@ -34,8 +34,13 @@ self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
+  // Same-origin files skip the browser's HTTP cache (GitHub Pages says "reuse for 10 min"),
+  // so a new version shows up the next time the app opens instead of up to 10 minutes later.
+  const sameOrigin = event.request.url.startsWith(self.location.origin);
+  const req = sameOrigin ? new Request(event.request, { cache: 'no-cache' }) : event.request;
+
   event.respondWith(
-    fetch(event.request)
+    fetch(req)
       .then((response) => {
         // Cache successful responses for app assets
         if (response.ok && event.request.url.startsWith(self.location.origin)) {

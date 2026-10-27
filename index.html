@@ -5418,8 +5418,26 @@ if (isFreshInstall) {
 // Register service worker for offline support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch((err) => {
-      console.warn('Service worker registration failed:', err);
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+      .then((reg) => {
+        reg.update();
+        // check for a new version whenever the app comes back to the foreground
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') reg.update();
+        });
+      })
+      .catch((err) => {
+        console.warn('Service worker registration failed:', err);
+      });
+
+    // When a new version takes over, reload once so it shows up right away
+    let reloadedForUpdate = false;
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || reloadedForUpdate) return;
+      reloadedForUpdate = true;
+      flushPlannerSaves();
+      window.location.reload();
     });
   });
 }
