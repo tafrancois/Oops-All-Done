@@ -16,7 +16,7 @@ A daily planner + self-care tracker with sub-tasks, maybe-lists, routines, point
 - **Must-do / maybe lists** — maybes don't count against "all done", and unfinished ones can be moved to any day with 📅 move
 - **⏰ Times + durations** — toggle on to show pills like `3pm` · `45m`; type `@3pm` / `~45m` or tap the pill to set them
 - **Routines** — saved task lists that auto-add on chosen weekdays, or drop in with one tap
-- **✨ Bonus** — log extra things you got done that weren't on the list
+- **✦ Bonus** — type `>> BONUS <<` in your list (or tap ✦ bonus) and everything under it becomes bonus wins, sub-tasks and all
 - **Notes** — a per-day notes box under the list
 - **Daily streak** — counts consecutive days you open the app
 - Installable PWA — works offline once installed
@@ -62,7 +62,7 @@ The app icon appears on the home screen. Opens fullscreen with no browser chrome
 When you change `index.html`, bump the version number in `sw.js`:
 
 ```js
-const CACHE = 'task-planner-v8';  // change to v7, v8, etc.
+const CACHE = 'task-planner-v9';  // change to v7, v8, etc.
 ```
 
 This forces installed PWAs to fetch the new version on next open.

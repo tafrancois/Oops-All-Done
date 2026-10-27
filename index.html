@@ -1008,86 +1008,76 @@
   .streak-pill.bump { animation: streakBump 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
   @keyframes streakBump { 0% { transform: scale(1); } 40% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
-  /* ===== EXTRA ===== */
-  .planner-extra {
-    margin-top: 18px;
-    padding-top: 16px;
-    border-top: 2px dashed rgba(74,37,64,0.12);
-  }
-
-  .extra-header {
+  /* ===== SECTION HEADERS (>> BONUS <<) ===== */
+  .list-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 12px 6px;
+    cursor: default;
+    user-select: none;
   }
 
-  .extra-sub {
+  .list-header::before,
+  .list-header::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, rgba(122,69,112,0.45));
+  }
+
+  .list-header::after {
+    background: linear-gradient(90deg, rgba(122,69,112,0.45), transparent);
+  }
+
+  .list-header-text {
     font-family: 'Fraunces', serif;
     font-style: italic;
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.14em;
+    text-transform: lowercase;
+    color: var(--plum-soft);
+    white-space: nowrap;
+    max-width: 75%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .list-header.bonus .list-header-text {
+    color: var(--plum);
+    background: linear-gradient(90deg, #7a4570, #b0679a, #7a4570);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .list-header.bonus .list-header-text::before,
+  .list-header.bonus .list-header-text::after {
+    content: '✦';
+    -webkit-text-fill-color: var(--butter-deep);
+    font-style: normal;
     font-size: 0.8rem;
-    color: var(--plum-mist);
-    margin: 2px 4px 8px;
+    margin: 0 8px;
+    vertical-align: 2px;
   }
 
-  .extra-list {
-    background: #fffaf0;
-    border-color: rgba(232,168,56,0.35);
-    min-height: 0;
-    padding: 6px 4px;
-  }
+  .list-header:hover { background: transparent; }
 
-  .extra-list:empty { display: none; }
-
-  .extra-list .checklist-item.checked .check-box {
+  .checklist-item.bonus.checked .check-box {
     background: var(--butter-deep);
     border-color: var(--butter-deep);
   }
 
-  .extra-list .checklist-item.checked .check-text {
+  .checklist-item.bonus.checked .check-text {
     color: var(--plum);
     text-decoration: none;
   }
 
-  .extra-del {
-    flex-shrink: 0;
-    align-self: center;
-    border: none;
-    background: none;
-    color: var(--plum-mist);
-    font-size: 1.05rem;
-    line-height: 1;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-
-  .extra-del:hover { background: rgba(228,122,122,0.15); color: var(--rose); }
-
-  .extra-add {
-    display: flex;
-    gap: 6px;
-    margin-top: 8px;
-  }
-
-  .extra-add input {
-    flex: 1;
-    min-width: 0;
-    padding: 10px 14px;
-    border: 2px solid rgba(74,37,64,0.12);
-    border-radius: 12px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.95rem;
-    color: var(--plum);
-    background: #fff;
-  }
-
-  .extra-add input:focus { outline: none; border-color: var(--butter-deep); }
-
-  .extra-add input::placeholder {
-    color: var(--plum-mist);
-    font-style: italic;
-    font-family: 'Fraunces', serif;
+  .bonus-header-btn {
+    background: rgba(232,168,56,0.22) !important;
+    margin-right: auto;
   }
 
   /* ===== NOTES ===== */
@@ -2057,6 +2047,7 @@
           spellcheck="true"
         ></textarea>
         <div class="indent-bar">
+          <button type="button" class="indent-btn bonus-header-btn" id="bonusHeaderBtn" aria-label="add bonus section">✦ bonus</button>
           <button type="button" class="indent-btn" data-indent="out" data-target="plannerEditor" aria-label="outdent line">⇤ outdent</button>
           <button type="button" class="indent-btn" data-indent="in" data-target="plannerEditor" aria-label="indent line">⇥ indent</button>
         </div>
@@ -2074,18 +2065,6 @@
         </div>
       </div>
       <div id="plannerCombinedWrap" style="display:none;"></div>
-
-      <div class="planner-extra" id="plannerExtraWrap">
-        <div class="extra-header">
-          <span class="list-section-label" style="margin:0;">✨ bonus <span class="maybe-count" id="extraCount"></span></span>
-        </div>
-        <div class="extra-sub">bonus stuff you got done that wasn't on the list</div>
-        <div class="planner-checklist extra-list" id="plannerExtraList"></div>
-        <form class="extra-add" id="extraAddForm" autocomplete="off">
-          <input type="text" id="extraInput" placeholder="i also did…" maxlength="120" enterkeyhint="done" />
-          <button type="submit" class="btn-mini" id="extraAddBtn">＋ add</button>
-        </form>
-      </div>
 
       <div class="planner-notes" id="plannerNotesWrap">
         <div class="planner-notes-header">
@@ -2356,7 +2335,6 @@ let state = {
   routines: [],     // { id, owner, name, text, days: [0-6] }
   routineLog: {},   // 'profile:YYYY-MM-DD' -> [routineId] already auto-added that day
   maybe: {},        // 'profile:YYYY-MM-DD' -> "maybe" list text (same format as planner)
-  extra: {},        // 'profile:YYYY-MM-DD' -> extra (unplanned, already-done) tasks
   showTimes: false, // show time + duration pills next to tasks
   daysUsed: [],     // every YYYY-MM-DD the app was opened (for the streak)
   taskSortMode: 'alpha' // 'alpha' | 'frequency' | 'recent'
@@ -2449,7 +2427,7 @@ function migrateState() {
   if (!Array.isArray(state.routines)) state.routines = [];
   if (!state.routineLog || typeof state.routineLog !== 'object') state.routineLog = {};
   if (!state.maybe || typeof state.maybe !== 'object') state.maybe = {};
-  if (!state.extra || typeof state.extra !== 'object') state.extra = {};
+  mergeLegacyExtra();
   if (!Array.isArray(state.daysUsed)) state.daysUsed = [];
 
   // Ensure each user has a color (for older state that might be missing them)
@@ -3597,29 +3575,13 @@ function setMaybeEntry(profile, dateKey, text) {
   save();
 }
 
-function getExtraEntry(profile, dateKey) {
-  return (state.extra || {})[plannerKey(profile, dateKey)] || '';
-}
-
-function setExtraEntry(profile, dateKey, text) {
-  const key = plannerKey(profile, dateKey);
-  if (text && text.trim()) {
-    state.extra[key] = text;
-  } else {
-    delete state.extra[key];
-  }
-  save();
-}
-
 function getListEntry(list, profile, dateKey) {
   if (list === 'maybe') return getMaybeEntry(profile, dateKey);
-  if (list === 'extra') return getExtraEntry(profile, dateKey);
   return getPlannerEntry(profile, dateKey);
 }
 
 function setListEntry(list, profile, dateKey, text) {
   if (list === 'maybe') setMaybeEntry(profile, dateKey, text);
-  else if (list === 'extra') setExtraEntry(profile, dateKey, text);
   else setPlannerEntry(profile, dateKey, text);
 }
 
@@ -3693,8 +3655,7 @@ function renderCalendar() {
 
     // Check if any user has plans or notes for this day
     const hasContent = state.users.some(u =>
-      getPlannerEntry(u.id, dateKey) || getMaybeEntry(u.id, dateKey) ||
-      getExtraEntry(u.id, dateKey) || getNotes(u.id, dateKey));
+      getPlannerEntry(u.id, dateKey) || getMaybeEntry(u.id, dateKey) || getNotes(u.id, dateKey));
     if (hasContent) btn.classList.add('has-content');
 
     grid.appendChild(btn);
@@ -3786,10 +3747,36 @@ function indentLevel(raw) {
   return Math.min(6, tabs + Math.floor(spaces / 2));
 }
 
+// Section headers: ">> BONUS <<", "-- bonus --", "## bonus", or just "bonus:" on its own line.
+const HEADER_RE = /^\s*(?:>{2,}|-{2,}|={2,}|\*{2,}|~{2,}|#{1,3}(?=\s))\s*(.*?)\s*(?:<{2,}|-{2,}|={2,}|\*{2,}|~{2,})?\s*$/;
+const PLAIN_BONUS_RE = /^\s*[✨✦⭐🌟💫]*\s*bonus(?:\s+(?:tasks?|wins?|stuff))?\s*:?\s*[✨✦⭐🌟💫]*\s*$/i;
+
+function headerInfo(raw) {
+  if (PLAIN_BONUS_RE.test(raw)) return { text: raw.trim().replace(/:\s*$/, ''), isBonus: true };
+  const m = raw.match(HEADER_RE);
+  if (!m) return null;
+  const text = m[1].replace(/:\s*$/, '').trim();
+  return { text, isBonus: /\bbonus\b/i.test(text) };
+}
+
 function parsePlannerLines(text) {
   const lines = (text || '').split('\n');
+  let inBonus = false;
   return lines.map((raw, i) => {
     if (raw.trim() === '') return { type: 'empty', raw, index: i };
+    const head = headerInfo(raw);
+    if (head) {
+      inBonus = head.isBonus;
+      return { type: 'header', raw, text: head.text, isBonus: head.isBonus, index: i };
+    }
+    const task = parseTaskLine(raw, i);
+    task.bonus = inBonus;
+    return task;
+  });
+}
+
+function parseTaskLine(raw, i) {
+  {
     const level = indentLevel(raw);
 
     const m = raw.match(CHECK_LINE_RE);
@@ -3810,7 +3797,40 @@ function parsePlannerLines(text) {
     const stripped = raw.trim().replace(/^[-*•]\s*/, '');
     const t = extractTiming(stripped || raw.trim());
     return { type: 'task', checked: false, raw, level, taskText: t.text || '(empty)', time: t.time, dur: t.dur, index: i };
-  });
+  }
+}
+
+function hasBonusHeader(text) {
+  return (text || '').split('\n').some(l => { const h = headerInfo(l); return h && h.isBonus; });
+}
+
+// Add lines to a list, keeping them ABOVE the bonus section (routines, moved maybes…)
+function appendToList(existing, addText) {
+  if (!addText) return existing;
+  if (!existing.trim()) return addText;
+  const lines = existing.split('\n');
+  const b = lines.findIndex(l => { const h = headerInfo(l); return h && h.isBonus; });
+  if (b === -1) return existing.replace(/\s+$/, '') + '\n' + addText;
+  let end = b;
+  while (end > 0 && lines[end - 1].trim() === '') end--;
+  const before = lines.slice(0, end).join('\n');
+  return (before ? before + '\n' : '') + addText + '\n\n' + lines.slice(b).join('\n');
+}
+
+// Older versions kept bonus wins in a separate box — fold them into each day's list.
+function mergeLegacyExtra() {
+  const extra = state.extra;
+  if (extra && typeof extra === 'object') {
+    Object.keys(extra).forEach(key => {
+      const add = (extra[key] || '').split('\n').filter(l => l.trim()).join('\n');
+      if (!add) return;
+      const cur = state.planner[key] || '';
+      state.planner[key] = hasBonusHeader(cur)
+        ? cur.replace(/\s+$/, '') + '\n' + add
+        : (cur.trim() ? cur.replace(/\s+$/, '') + '\n\n' : '') + '>> BONUS <<\n' + add;
+    });
+  }
+  delete state.extra;
 }
 
 // Set one raw line's checked state, keeping its indentation and bullet.
@@ -3832,6 +3852,7 @@ function descendantIndexes(parsed, idx) {
   const lvl = parsed[idx].level;
   for (let j = idx + 1; j < parsed.length; j++) {
     const p = parsed[j];
+    if (p.type === 'header') break;
     if (p.type !== 'task') continue;
     if (p.level <= lvl) break;
     out.push(j);
@@ -3854,6 +3875,7 @@ function setTaskTreeChecked(text, lineIndex, checked) {
   let childLevel = target.level;
   for (let j = lineIndex - 1; j >= 0 && childLevel > 0; j--) {
     const p = parsed[j];
+    if (p.type === 'header') break;
     if (p.type !== 'task' || p.level >= childLevel) continue;
     const desc = descendantIndexes(parsed, j);
     checks[j] = desc.length > 0 && desc.every(k => checks[k]);
@@ -3888,7 +3910,7 @@ function timingPillsHtml(line, interactive, list) {
 function buildChecklistItem(line, interactive, list = 'must') {
   const el = document.createElement('div');
   if (line.type === 'task') {
-    el.className = 'checklist-item' + (line.checked ? ' checked' : '') + (line.level > 0 ? ' sub' : '');
+    el.className = 'checklist-item' + (line.checked ? ' checked' : '') + (line.level > 0 ? ' sub' : '') + (line.bonus ? ' bonus' : '');
     if (line.level > 0) el.style.setProperty('--lvl', line.level);
     if (interactive) {
       el.dataset.lineIndex = line.index;
@@ -3896,14 +3918,14 @@ function buildChecklistItem(line, interactive, list = 'must') {
     } else {
       el.style.cursor = 'default';
     }
-    const moveBtn = (interactive && list === 'maybe' && line.level === 0)
+    const moveBtn = (interactive && list === 'maybe' && line.level === 0 && !line.bonus)
       ? `<button type="button" class="move-btn" data-move-index="${line.index}" aria-label="move to another day">📅 move</button>`
       : '';
-    const delBtn = (interactive && list === 'extra')
-      ? `<button type="button" class="extra-del" data-extra-del="${line.index}" aria-label="remove">×</button>`
-      : '';
-    const extras = timingPillsHtml(line, interactive, list) + moveBtn + delBtn;
+    const extras = timingPillsHtml(line, interactive, list) + moveBtn;
     el.innerHTML = `<span class="check-box"></span><span class="check-text">${escapeHtml(line.taskText)}</span>${extras ? `<span class="row-extras">${extras}</span>` : ''}`;
+  } else if (line.type === 'header') {
+    el.className = 'list-header' + (line.isBonus ? ' bonus' : '');
+    el.innerHTML = line.text ? `<span class="list-header-text">${escapeHtml(line.text)}</span>` : '';
   } else {
     el.className = 'checklist-item empty-line';
   }
@@ -3947,7 +3969,6 @@ function renderPlannerEditor() {
     timesBtn.style.display = 'none';
     tip.style.display = 'none';
     notesWrap.style.display = 'none';
-    document.getElementById('plannerExtraWrap').style.display = 'none';
 
     combinedWrap.innerHTML = '';
     state.users.forEach(user => {
@@ -3972,7 +3993,7 @@ function renderPlannerEditor() {
         parsePlannerLines(text).forEach(line => {
           const lineEl = buildChecklistItem(line, false);
           if (line.type === 'task') lineEl.style.paddingTop = lineEl.style.paddingBottom = '4px';
-          else lineEl.style.minHeight = '6px';
+          else if (line.type === 'empty') lineEl.style.minHeight = '6px';
           content.appendChild(lineEl);
         });
       }
@@ -4000,24 +4021,6 @@ function renderPlannerEditor() {
         }
       }
 
-      const extraText = getExtraEntry(user.id, plannerSelectedDate);
-      if (extraText) {
-        if (content.classList.contains('empty')) {
-          content.classList.remove('empty');
-          content.textContent = '';
-        }
-        const lbl = document.createElement('div');
-        lbl.className = 'planner-col-sub';
-        lbl.textContent = '✨ bonus';
-        content.appendChild(lbl);
-        parsePlannerLines(extraText).forEach(line => {
-          if (line.type !== 'task') return;
-          const lineEl = buildChecklistItem(line, false, 'extra');
-          lineEl.style.paddingTop = lineEl.style.paddingBottom = '4px';
-          content.appendChild(lineEl);
-        });
-      }
-
       const notes = getNotes(user.id, plannerSelectedDate);
       if (notes) {
         const n = document.createElement('div');
@@ -4033,8 +4036,6 @@ function renderPlannerEditor() {
     routinesBtn.style.display = 'flex';
     timesBtn.style.display = 'flex';
     notesWrap.style.display = 'block';
-    document.getElementById('plannerExtraWrap').style.display = 'block';
-    renderExtra();
     if (document.activeElement !== notesEl || !notesSaveTimeout) {
       notesEl.value = getNotes(state.profile, plannerSelectedDate);
     }
@@ -4045,7 +4046,7 @@ function renderPlannerEditor() {
       tip.style.display = 'block';
       tip.innerHTML = plannerList === 'maybe'
         ? `maybe = nice if it happens · unfinished ones can be moved to another day`
-        : `each line is a task · press <code>Tab</code> (or ⇥) for a sub-task`;
+        : `each line is a task · <code>Tab</code> (or ⇥) for a sub-task · <code>>> BONUS <<</code> starts your bonus list`;
       if (state.showTimes) tip.innerHTML += ` · add <code>@2pm</code> or <code>~30m</code> for times`;
       document.querySelectorAll('.list-toggle-btn').forEach(b =>
         b.classList.toggle('active', b.dataset.list === plannerList));
@@ -4053,6 +4054,7 @@ function renderPlannerEditor() {
         ? "things that'd be nice to get to…\n\nfix the car\n\tbuy the part\n\twatch the tutorial\n\nif they don't happen, move them to another day"
         : "what's the plan for today?\n\neach line becomes a task\n\tindent a line to make a sub-task\n\ngoals, reminders, vibes, anything...";
       editor.value = getListEntry(plannerList, state.profile, plannerSelectedDate);
+      document.getElementById('bonusHeaderBtn').style.display = plannerList === 'must' ? '' : 'none';
       modeIcon.textContent = '✓';
       modeLabel.textContent = 'check mode';
       modeBtn.classList.remove('in-check-mode');
@@ -4079,11 +4081,17 @@ function renderChecklist() {
 
   const lines = parsePlannerLines(getPlannerEntry(state.profile, plannerSelectedDate));
   const maybeLines = parsePlannerLines(getMaybeEntry(state.profile, plannerSelectedDate));
-  const tasks = lines.filter(l => l.type === 'task');
+  const tasks = lines.filter(l => l.type === 'task' && !l.bonus);
+  const bonusDone = lines.filter(l => l.type === 'task' && l.bonus && l.checked).length;
   const maybeTasks = maybeLines.filter(l => l.type === 'task');
 
   container.innerHTML = '';
-  if (tasks.length === 0) {
+  const winsText = bonusDone ? ` · ✦ ${bonusDone} bonus win${bonusDone === 1 ? '' : 's'}` : '';
+  if (tasks.length === 0 && lines.some(l => l.type === 'task')) {
+    lines.forEach(line => container.appendChild(buildChecklistItem(line, true, 'must')));
+    progress.textContent = winsText.replace(/^ · /, '');
+    progress.classList.remove('all-done');
+  } else if (tasks.length === 0) {
     container.innerHTML = `<div style="padding:20px;text-align:center;color:var(--plum-mist);font-family:'Fraunces',serif;font-style:italic;">${maybeTasks.length ? 'no must-dos — just maybes today 🌙' : 'nothing planned yet — switch to edit mode to add some'}</div>`;
     progress.textContent = '';
     progress.classList.remove('all-done');
@@ -4091,10 +4099,10 @@ function renderChecklist() {
     lines.forEach(line => container.appendChild(buildChecklistItem(line, true, 'must')));
     const done = tasks.filter(t => t.checked).length;
     if (done === tasks.length) {
-      progress.textContent = `all ${tasks.length} done 🎉`;
+      progress.textContent = `all ${tasks.length} done 🎉${winsText}`;
       progress.classList.add('all-done');
     } else {
-      progress.textContent = `${done} of ${tasks.length} done`;
+      progress.textContent = `${done} of ${tasks.length} done${winsText}`;
       progress.classList.remove('all-done');
     }
   }
@@ -4107,60 +4115,21 @@ function renderChecklist() {
     maybeLines.forEach(line => maybeList.appendChild(buildChecklistItem(line, true, 'maybe')));
     const mDone = maybeTasks.filter(t => t.checked).length;
     maybeCount.textContent = `· ${mDone} of ${maybeTasks.length}`;
-    const unfinishedTop = maybeLines.some(l => l.type === 'task' && l.level === 0 && !l.checked);
+    const unfinishedTop = maybeLines.some(l => l.type === 'task' && l.level === 0 && !l.checked && !l.bonus);
     document.getElementById('moveAllMaybeBtn').style.display = unfinishedTop ? 'inline-block' : 'none';
   }
-  renderExtra();
-}
-
-// ---------- extra (unplanned, already-done) tasks ----------
-function renderExtra() {
-  const wrap = document.getElementById('plannerExtraList');
-  const count = document.getElementById('extraCount');
-  if (!wrap || state.profile === 'combined') return;
-  const lines = parsePlannerLines(getExtraEntry(state.profile, plannerSelectedDate)).filter(l => l.type === 'task');
-  wrap.innerHTML = '';
-  lines.forEach(line => wrap.appendChild(buildChecklistItem(line, true, 'extra')));
-  const done = lines.filter(l => l.checked).length;
-  count.textContent = done ? `· ${done} win${done === 1 ? '' : 's'}` : '';
-}
-
-function addExtraTask() {
-  if (state.profile === 'combined') return;
-  const input = document.getElementById('extraInput');
-  const text = input.value.replace(/\s+/g, ' ').trim();
-  if (!text) { input.focus(); return; }
-  const existing = getExtraEntry(state.profile, plannerSelectedDate);
-  const line = `[x] ${text}`;
-  setExtraEntry(state.profile, plannerSelectedDate, existing.trim() ? existing.replace(/\s+$/, '') + '\n' + line : line);
-  input.value = '';
-  renderExtra();
-  renderCalendar();
-  SFX.check();
-  miniConfetti(document.getElementById('extraAddBtn'));
-  showToast('✨ bonus win logged!');
-}
-
-function deleteExtraTask(lineIndex) {
-  if (state.profile === 'combined') return;
-  const lines = getExtraEntry(state.profile, plannerSelectedDate).split('\n');
-  if (lineIndex < 0 || lineIndex >= lines.length) return;
-  lines.splice(lineIndex, 1);
-  setExtraEntry(state.profile, plannerSelectedDate, lines.join('\n').trim());
-  renderExtra();
-  renderCalendar();
-  SFX.delete();
 }
 
 function handleChecklistClick(itemEl) {
   const lineIndex = parseInt(itemEl.dataset.lineIndex, 10);
   if (isNaN(lineIndex)) return;
-  const list = ['maybe', 'extra'].includes(itemEl.dataset.list) ? itemEl.dataset.list : 'must';
+  const list = itemEl.dataset.list === 'maybe' ? 'maybe' : 'must';
+  const isBonus = itemEl.classList.contains('bonus');
 
   const currentText = getListEntry(list, state.profile, plannerSelectedDate);
   const wasChecked = itemEl.classList.contains('checked');
 
-  const tasksBefore = parsePlannerLines(currentText).filter(l => l.type === 'task');
+  const tasksBefore = parsePlannerLines(currentText).filter(l => l.type === 'task' && !l.bonus);
   const doneBefore = tasksBefore.filter(t => t.checked).length;
 
   const newText = setTaskTreeChecked(currentText, lineIndex, !wasChecked);
@@ -4175,9 +4144,11 @@ function handleChecklistClick(itemEl) {
     const box = itemEl.querySelector('.check-box');
     miniConfetti(box || itemEl);
 
-    const tasksAfter = parsePlannerLines(newText).filter(l => l.type === 'task');
+    const tasksAfter = parsePlannerLines(newText).filter(l => l.type === 'task' && !l.bonus);
     const doneAfter = tasksAfter.filter(t => t.checked).length;
-    if (list !== 'extra' && tasksAfter.length > 0 && doneAfter === tasksAfter.length && doneBefore < tasksBefore.length) {
+    if (isBonus) {
+      showToast('✦ bonus win!');
+    } else if (tasksAfter.length > 0 && doneAfter === tasksAfter.length && doneBefore < tasksBefore.length) {
       setTimeout(() => {
         launchConfetti();
         showToast(list === 'maybe'
@@ -4350,6 +4321,24 @@ function renderPlanner() {
   renderPlannerEditor();
 }
 
+// "✦ bonus" button: add the >> BONUS << divider (or jump to the bonus list if it's there)
+function insertBonusHeader() {
+  const ta = document.getElementById('plannerEditor');
+  if (!ta || state.profile === 'combined') return;
+  let v = ta.value;
+  if (!hasBonusHeader(v)) {
+    v = (v.trim() ? v.replace(/\s+$/, '') + '\n\n' : '') + '>> BONUS <<\n';
+  } else if (!v.endsWith('\n')) {
+    v += '\n';
+  }
+  ta.value = v;
+  ta.focus();
+  ta.setSelectionRange(v.length, v.length);
+  ta.scrollTop = ta.scrollHeight;
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
+  SFX.click();
+}
+
 function switchPlannerList(list) {
   if (list === plannerList) return;
   flushPlannerSaves();
@@ -4440,7 +4429,7 @@ function openMoveModal(lineIndex) {
   const parsed = parsePlannerLines(getMaybeEntry(state.profile, plannerSelectedDate));
   let what;
   if (lineIndex === 'all') {
-    const n = parsed.filter(l => l.type === 'task' && l.level === 0 && !l.checked).length;
+    const n = parsed.filter(l => l.type === 'task' && l.level === 0 && !l.checked && !l.bonus).length;
     if (!n) { showToast('no unfinished maybes to move'); return; }
     what = `${n} unfinished maybe${n === 1 ? '' : 's'} (with their sub-tasks)`;
   } else {
@@ -4513,7 +4502,7 @@ function moveMaybeTo(toDate) {
   const parsed = parsePlannerLines(lines.join('\n'));
   const ranges = [];
   if (lineIndex === 'all') {
-    parsed.forEach(l => { if (l.type === 'task' && l.level === 0 && !l.checked) ranges.push(blockRange(parsed, l.index)); });
+    parsed.forEach(l => { if (l.type === 'task' && l.level === 0 && !l.checked && !l.bonus) ranges.push(blockRange(parsed, l.index)); });
   } else {
     ranges.push(blockRange(parsed, lineIndex));
   }
@@ -4531,7 +4520,7 @@ function moveMaybeTo(toDate) {
   setMaybeEntry(state.profile, from, remaining);
 
   const existing = getMaybeEntry(state.profile, toDate);
-  const merged = existing.trim() ? existing.replace(/\s+$/, '') + '\n' + moving.join('\n') : moving.join('\n');
+  const merged = appendToList(existing, moving.join('\n'));
   setMaybeEntry(state.profile, toDate, merged);
 
   closeMoveModal();
@@ -4571,10 +4560,7 @@ function cleanRoutineLines(text) {
 }
 
 function appendRoutineText(existing, routine) {
-  const add = cleanRoutineLines(routine.text);
-  if (!add) return existing;
-  if (!existing.trim()) return add;
-  return existing.replace(/\s+$/, '') + '\n' + add;
+  return appendToList(existing, cleanRoutineLines(routine.text));
 }
 
 // Auto-add routines scheduled for this weekday — once per day, today or later only.
@@ -4995,7 +4981,7 @@ function deleteUser(alsoDeleteData) {
   if (alsoDeleteData) {
     // Delete logs and planner entries tied to this user
     state.logs = state.logs.filter(l => l.profile !== userId);
-    ['planner', 'maybe', 'extra', 'notes', 'routineLog'].forEach(bucket => {
+    ['planner', 'maybe', 'notes', 'routineLog'].forEach(bucket => {
       Object.keys(state[bucket] || {}).forEach(key => {
         if (key.startsWith(userId + ':')) delete state[bucket][key];
       });
@@ -5033,7 +5019,7 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#welcomeStartBtn')) { finishWelcome(); return; }
 
   // ---- indent / outdent buttons (planner + routine editors) ----
-  const indentBtn = e.target.closest('.indent-btn');
+  const indentBtn = e.target.closest('.indent-btn[data-indent]');
   if (indentBtn) {
     const ta = document.getElementById(indentBtn.dataset.target);
     if (ta) {
@@ -5051,8 +5037,7 @@ document.addEventListener('click', (e) => {
   // ---- time pill / move button inside a checklist row (before the row's check toggle) ----
   const timePill = e.target.closest('.time-pill[data-time-index]');
   if (timePill) { openTimingModal(timePill.dataset.list, parseInt(timePill.dataset.timeIndex, 10)); return; }
-  const extraDel = e.target.closest('[data-extra-del]');
-  if (extraDel) { deleteExtraTask(parseInt(extraDel.dataset.extraDel, 10)); return; }
+  if (e.target.closest('#bonusHeaderBtn')) { insertBonusHeader(); return; }
   const moveBtn = e.target.closest('.move-btn[data-move-index]');
   if (moveBtn) { openMoveModal(parseInt(moveBtn.dataset.moveIndex, 10)); return; }
   if (e.target.closest('#moveAllMaybeBtn')) { openMoveModal('all'); return; }
@@ -5228,14 +5213,9 @@ document.addEventListener('input', (e) => {
   }
 });
 
-document.getElementById('extraAddForm').addEventListener('submit', (e) => {
-  e.preventDefault();
-  addExtraTask();
-});
-
 // Keep focus in the editor when tapping ⇤ ⇥ on desktop
 document.addEventListener('mousedown', (e) => {
-  if (e.target.closest('.indent-btn')) e.preventDefault();
+  if (e.target.closest('.indent-btn')) e.preventDefault(); // incl. ✦ bonus
 });
 
 // Enter on an indented/bulleted line keeps the indent (works with phone keyboards too)
@@ -5327,7 +5307,6 @@ function exportData() {
       customEmojis: state.customEmojis,
       planner: state.planner,
       maybe: state.maybe,
-      extra: state.extra,
       notes: state.notes,
       routines: state.routines,
       routineLog: state.routineLog,
@@ -5390,6 +5369,7 @@ function confirmImport() {
   state.planner = imported.planner || {};
   state.maybe = imported.maybe || {};
   state.extra = imported.extra || {};
+  mergeLegacyExtra();
   state.notes = imported.notes || {};
   state.routines = Array.isArray(imported.routines) ? imported.routines : [];
   state.routineLog = imported.routineLog || {};
