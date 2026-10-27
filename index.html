@@ -1008,6 +1008,88 @@
   .streak-pill.bump { animation: streakBump 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
   @keyframes streakBump { 0% { transform: scale(1); } 40% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
+  /* ===== EXTRA ===== */
+  .planner-extra {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 2px dashed rgba(74,37,64,0.12);
+  }
+
+  .extra-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .extra-sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--plum-mist);
+    margin: 2px 4px 8px;
+  }
+
+  .extra-list {
+    background: #fffaf0;
+    border-color: rgba(232,168,56,0.35);
+    min-height: 0;
+    padding: 6px 4px;
+  }
+
+  .extra-list:empty { display: none; }
+
+  .extra-list .checklist-item.checked .check-box {
+    background: var(--butter-deep);
+    border-color: var(--butter-deep);
+  }
+
+  .extra-list .checklist-item.checked .check-text {
+    color: var(--plum);
+    text-decoration: none;
+  }
+
+  .extra-del {
+    flex-shrink: 0;
+    align-self: center;
+    border: none;
+    background: none;
+    color: var(--plum-mist);
+    font-size: 1.05rem;
+    line-height: 1;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .extra-del:hover { background: rgba(228,122,122,0.15); color: var(--rose); }
+
+  .extra-add {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .extra-add input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 14px;
+    border: 2px solid rgba(74,37,64,0.12);
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    color: var(--plum);
+    background: #fff;
+  }
+
+  .extra-add input:focus { outline: none; border-color: var(--butter-deep); }
+
+  .extra-add input::placeholder {
+    color: var(--plum-mist);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+  }
+
   /* ===== NOTES ===== */
   .planner-notes {
     margin-top: 18px;
@@ -1993,6 +2075,18 @@
       </div>
       <div id="plannerCombinedWrap" style="display:none;"></div>
 
+      <div class="planner-extra" id="plannerExtraWrap">
+        <div class="extra-header">
+          <span class="list-section-label" style="margin:0;">✨ bonus <span class="maybe-count" id="extraCount"></span></span>
+        </div>
+        <div class="extra-sub">bonus stuff you got done that wasn't on the list</div>
+        <div class="planner-checklist extra-list" id="plannerExtraList"></div>
+        <form class="extra-add" id="extraAddForm" autocomplete="off">
+          <input type="text" id="extraInput" placeholder="i also did…" maxlength="120" enterkeyhint="done" />
+          <button type="submit" class="btn-mini" id="extraAddBtn">＋ add</button>
+        </form>
+      </div>
+
       <div class="planner-notes" id="plannerNotesWrap">
         <div class="planner-notes-header">
           <span class="planner-notes-title">📝 notes</span>
@@ -2262,6 +2356,7 @@ let state = {
   routines: [],     // { id, owner, name, text, days: [0-6] }
   routineLog: {},   // 'profile:YYYY-MM-DD' -> [routineId] already auto-added that day
   maybe: {},        // 'profile:YYYY-MM-DD' -> "maybe" list text (same format as planner)
+  extra: {},        // 'profile:YYYY-MM-DD' -> extra (unplanned, already-done) tasks
   showTimes: false, // show time + duration pills next to tasks
   daysUsed: [],     // every YYYY-MM-DD the app was opened (for the streak)
   taskSortMode: 'alpha' // 'alpha' | 'frequency' | 'recent'
@@ -2354,6 +2449,7 @@ function migrateState() {
   if (!Array.isArray(state.routines)) state.routines = [];
   if (!state.routineLog || typeof state.routineLog !== 'object') state.routineLog = {};
   if (!state.maybe || typeof state.maybe !== 'object') state.maybe = {};
+  if (!state.extra || typeof state.extra !== 'object') state.extra = {};
   if (!Array.isArray(state.daysUsed)) state.daysUsed = [];
 
   // Ensure each user has a color (for older state that might be missing them)
@@ -3501,12 +3597,29 @@ function setMaybeEntry(profile, dateKey, text) {
   save();
 }
 
+function getExtraEntry(profile, dateKey) {
+  return (state.extra || {})[plannerKey(profile, dateKey)] || '';
+}
+
+function setExtraEntry(profile, dateKey, text) {
+  const key = plannerKey(profile, dateKey);
+  if (text && text.trim()) {
+    state.extra[key] = text;
+  } else {
+    delete state.extra[key];
+  }
+  save();
+}
+
 function getListEntry(list, profile, dateKey) {
-  return list === 'maybe' ? getMaybeEntry(profile, dateKey) : getPlannerEntry(profile, dateKey);
+  if (list === 'maybe') return getMaybeEntry(profile, dateKey);
+  if (list === 'extra') return getExtraEntry(profile, dateKey);
+  return getPlannerEntry(profile, dateKey);
 }
 
 function setListEntry(list, profile, dateKey, text) {
   if (list === 'maybe') setMaybeEntry(profile, dateKey, text);
+  else if (list === 'extra') setExtraEntry(profile, dateKey, text);
   else setPlannerEntry(profile, dateKey, text);
 }
 
@@ -3580,7 +3693,8 @@ function renderCalendar() {
 
     // Check if any user has plans or notes for this day
     const hasContent = state.users.some(u =>
-      getPlannerEntry(u.id, dateKey) || getMaybeEntry(u.id, dateKey) || getNotes(u.id, dateKey));
+      getPlannerEntry(u.id, dateKey) || getMaybeEntry(u.id, dateKey) ||
+      getExtraEntry(u.id, dateKey) || getNotes(u.id, dateKey));
     if (hasContent) btn.classList.add('has-content');
 
     grid.appendChild(btn);
@@ -3785,7 +3899,10 @@ function buildChecklistItem(line, interactive, list = 'must') {
     const moveBtn = (interactive && list === 'maybe' && line.level === 0)
       ? `<button type="button" class="move-btn" data-move-index="${line.index}" aria-label="move to another day">📅 move</button>`
       : '';
-    const extras = timingPillsHtml(line, interactive, list) + moveBtn;
+    const delBtn = (interactive && list === 'extra')
+      ? `<button type="button" class="extra-del" data-extra-del="${line.index}" aria-label="remove">×</button>`
+      : '';
+    const extras = timingPillsHtml(line, interactive, list) + moveBtn + delBtn;
     el.innerHTML = `<span class="check-box"></span><span class="check-text">${escapeHtml(line.taskText)}</span>${extras ? `<span class="row-extras">${extras}</span>` : ''}`;
   } else {
     el.className = 'checklist-item empty-line';
@@ -3830,6 +3947,7 @@ function renderPlannerEditor() {
     timesBtn.style.display = 'none';
     tip.style.display = 'none';
     notesWrap.style.display = 'none';
+    document.getElementById('plannerExtraWrap').style.display = 'none';
 
     combinedWrap.innerHTML = '';
     state.users.forEach(user => {
@@ -3882,6 +4000,24 @@ function renderPlannerEditor() {
         }
       }
 
+      const extraText = getExtraEntry(user.id, plannerSelectedDate);
+      if (extraText) {
+        if (content.classList.contains('empty')) {
+          content.classList.remove('empty');
+          content.textContent = '';
+        }
+        const lbl = document.createElement('div');
+        lbl.className = 'planner-col-sub';
+        lbl.textContent = '✨ bonus';
+        content.appendChild(lbl);
+        parsePlannerLines(extraText).forEach(line => {
+          if (line.type !== 'task') return;
+          const lineEl = buildChecklistItem(line, false, 'extra');
+          lineEl.style.paddingTop = lineEl.style.paddingBottom = '4px';
+          content.appendChild(lineEl);
+        });
+      }
+
       const notes = getNotes(user.id, plannerSelectedDate);
       if (notes) {
         const n = document.createElement('div');
@@ -3897,6 +4033,8 @@ function renderPlannerEditor() {
     routinesBtn.style.display = 'flex';
     timesBtn.style.display = 'flex';
     notesWrap.style.display = 'block';
+    document.getElementById('plannerExtraWrap').style.display = 'block';
+    renderExtra();
     if (document.activeElement !== notesEl || !notesSaveTimeout) {
       notesEl.value = getNotes(state.profile, plannerSelectedDate);
     }
@@ -3972,12 +4110,52 @@ function renderChecklist() {
     const unfinishedTop = maybeLines.some(l => l.type === 'task' && l.level === 0 && !l.checked);
     document.getElementById('moveAllMaybeBtn').style.display = unfinishedTop ? 'inline-block' : 'none';
   }
+  renderExtra();
+}
+
+// ---------- extra (unplanned, already-done) tasks ----------
+function renderExtra() {
+  const wrap = document.getElementById('plannerExtraList');
+  const count = document.getElementById('extraCount');
+  if (!wrap || state.profile === 'combined') return;
+  const lines = parsePlannerLines(getExtraEntry(state.profile, plannerSelectedDate)).filter(l => l.type === 'task');
+  wrap.innerHTML = '';
+  lines.forEach(line => wrap.appendChild(buildChecklistItem(line, true, 'extra')));
+  const done = lines.filter(l => l.checked).length;
+  count.textContent = done ? `· ${done} win${done === 1 ? '' : 's'}` : '';
+}
+
+function addExtraTask() {
+  if (state.profile === 'combined') return;
+  const input = document.getElementById('extraInput');
+  const text = input.value.replace(/\s+/g, ' ').trim();
+  if (!text) { input.focus(); return; }
+  const existing = getExtraEntry(state.profile, plannerSelectedDate);
+  const line = `[x] ${text}`;
+  setExtraEntry(state.profile, plannerSelectedDate, existing.trim() ? existing.replace(/\s+$/, '') + '\n' + line : line);
+  input.value = '';
+  renderExtra();
+  renderCalendar();
+  SFX.check();
+  miniConfetti(document.getElementById('extraAddBtn'));
+  showToast('✨ bonus win logged!');
+}
+
+function deleteExtraTask(lineIndex) {
+  if (state.profile === 'combined') return;
+  const lines = getExtraEntry(state.profile, plannerSelectedDate).split('\n');
+  if (lineIndex < 0 || lineIndex >= lines.length) return;
+  lines.splice(lineIndex, 1);
+  setExtraEntry(state.profile, plannerSelectedDate, lines.join('\n').trim());
+  renderExtra();
+  renderCalendar();
+  SFX.delete();
 }
 
 function handleChecklistClick(itemEl) {
   const lineIndex = parseInt(itemEl.dataset.lineIndex, 10);
   if (isNaN(lineIndex)) return;
-  const list = itemEl.dataset.list === 'maybe' ? 'maybe' : 'must';
+  const list = ['maybe', 'extra'].includes(itemEl.dataset.list) ? itemEl.dataset.list : 'must';
 
   const currentText = getListEntry(list, state.profile, plannerSelectedDate);
   const wasChecked = itemEl.classList.contains('checked');
@@ -3999,7 +4177,7 @@ function handleChecklistClick(itemEl) {
 
     const tasksAfter = parsePlannerLines(newText).filter(l => l.type === 'task');
     const doneAfter = tasksAfter.filter(t => t.checked).length;
-    if (tasksAfter.length > 0 && doneAfter === tasksAfter.length && doneBefore < tasksBefore.length) {
+    if (list !== 'extra' && tasksAfter.length > 0 && doneAfter === tasksAfter.length && doneBefore < tasksBefore.length) {
       setTimeout(() => {
         launchConfetti();
         showToast(list === 'maybe'
@@ -4817,7 +4995,7 @@ function deleteUser(alsoDeleteData) {
   if (alsoDeleteData) {
     // Delete logs and planner entries tied to this user
     state.logs = state.logs.filter(l => l.profile !== userId);
-    ['planner', 'maybe', 'notes', 'routineLog'].forEach(bucket => {
+    ['planner', 'maybe', 'extra', 'notes', 'routineLog'].forEach(bucket => {
       Object.keys(state[bucket] || {}).forEach(key => {
         if (key.startsWith(userId + ':')) delete state[bucket][key];
       });
@@ -4873,6 +5051,8 @@ document.addEventListener('click', (e) => {
   // ---- time pill / move button inside a checklist row (before the row's check toggle) ----
   const timePill = e.target.closest('.time-pill[data-time-index]');
   if (timePill) { openTimingModal(timePill.dataset.list, parseInt(timePill.dataset.timeIndex, 10)); return; }
+  const extraDel = e.target.closest('[data-extra-del]');
+  if (extraDel) { deleteExtraTask(parseInt(extraDel.dataset.extraDel, 10)); return; }
   const moveBtn = e.target.closest('.move-btn[data-move-index]');
   if (moveBtn) { openMoveModal(parseInt(moveBtn.dataset.moveIndex, 10)); return; }
   if (e.target.closest('#moveAllMaybeBtn')) { openMoveModal('all'); return; }
@@ -5048,6 +5228,11 @@ document.addEventListener('input', (e) => {
   }
 });
 
+document.getElementById('extraAddForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  addExtraTask();
+});
+
 // Keep focus in the editor when tapping ⇤ ⇥ on desktop
 document.addEventListener('mousedown', (e) => {
   if (e.target.closest('.indent-btn')) e.preventDefault();
@@ -5142,6 +5327,7 @@ function exportData() {
       customEmojis: state.customEmojis,
       planner: state.planner,
       maybe: state.maybe,
+      extra: state.extra,
       notes: state.notes,
       routines: state.routines,
       routineLog: state.routineLog,
@@ -5203,6 +5389,7 @@ function confirmImport() {
   state.customEmojis = imported.customEmojis || [];
   state.planner = imported.planner || {};
   state.maybe = imported.maybe || {};
+  state.extra = imported.extra || {};
   state.notes = imported.notes || {};
   state.routines = Array.isArray(imported.routines) ? imported.routines : [];
   state.routineLog = imported.routineLog || {};
