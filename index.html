@@ -985,6 +985,81 @@
     margin: 8px 0 2px;
   }
 
+  /* ===== POINT PILLS ===== */
+  .pts-pill {
+    flex-shrink: 0;
+    align-self: center;
+    border: none;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.74rem;
+    white-space: nowrap;
+    cursor: pointer;
+    background: rgba(232,168,56,0.18);
+    color: #8a5a14;
+  }
+
+  .pts-pill.default { background: rgba(74,37,64,0.06); color: var(--plum-mist); }
+  .pts-pill.custom { background: var(--butter); color: var(--plum); box-shadow: inset 0 0 0 1.5px var(--butter-deep); }
+  .pts-pill.saved { background: rgba(232,168,56,0.28); color: #7a4d10; }
+  .pts-pill.static { cursor: default; }
+  .checklist-item.checked .pts-pill { opacity: 0.6; }
+
+  .routine-group-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .group-title-done {
+    color: #5a8050;
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+
+  .group-title .pts-pill { order: 3; }
+  .group-title::after { order: 2; }
+
+  .pts-presets { grid-template-columns: repeat(4, 1fr); margin-bottom: 12px; }
+
+  .pts-saved {
+    background: #fffaf0;
+    border: 1.5px dashed rgba(232,168,56,0.55);
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 0.88rem;
+    color: var(--plum);
+  }
+
+  .pts-saved-line.muted {
+    margin-top: 6px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--plum-mist);
+    font-size: 0.82rem;
+  }
+
+  .pts-similar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
+  .pts-remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.88rem;
+    color: var(--plum-soft);
+    cursor: pointer;
+  }
+
+  .pts-remember input { width: 18px; height: 18px; accent-color: var(--plum); }
+
+  .routine-group.child { margin-left: 12px; }
+
   /* ===== TIMES ===== */
   .checklist-item { flex-wrap: wrap; }
   .checklist-item .check-text { flex: 1 1 120px; min-width: 0; }
@@ -1565,6 +1640,8 @@
     color: var(--plum);
   }
 
+  .tab[data-archived] { display: none; }
+
   .tab.active::after {
     content: '';
     position: absolute;
@@ -1784,6 +1861,157 @@
     position: relative;
     height: 220px;
   }
+
+  .stats-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 520px) {
+    .stats-tiles { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .stat-tile {
+    background: rgba(255,255,255,0.7);
+    border-radius: 18px;
+    padding: 14px 14px 12px;
+    box-shadow: 0 4px 16px var(--shadow-soft), inset 0 0 0 1px rgba(74,37,64,0.06);
+  }
+
+  .stat-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--plum-soft);
+  }
+
+  .stat-value {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.7rem;
+    color: var(--plum);
+    line-height: 1.15;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-unit {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--plum-mist);
+    margin-left: 3px;
+  }
+
+  .stats-sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--plum-mist);
+    margin: -8px 0 12px;
+  }
+
+  .stats-empty {
+    padding: 18px;
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--plum-mist);
+  }
+
+  .stats-rlist { display: flex; flex-direction: column; gap: 8px; }
+
+  .rstat-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 10px;
+    align-items: center;
+  }
+
+  .rstat-name {
+    font-weight: 700;
+    color: var(--plum);
+    font-size: 0.92rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rstat-count {
+    font-weight: 800;
+    color: var(--plum-soft);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rstat-bar {
+    grid-column: 1 / -1;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(74,37,64,0.07);
+    overflow: hidden;
+  }
+
+  .rstat-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    background: #b48aa9;
+  }
+
+  .rstat-row.master .rstat-bar span { background: var(--butter-deep); }
+
+  .mem-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 4px;
+    border-bottom: 1px solid rgba(74,37,64,0.07);
+  }
+
+  .mem-row:last-child { border-bottom: none; }
+  .mem-info { flex: 1; min-width: 0; }
+
+  .mem-name {
+    font-weight: 700;
+    color: var(--plum);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mem-meta {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    color: var(--plum-mist);
+  }
+
+  .mem-pts {
+    flex-shrink: 0;
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: var(--plum);
+    background: var(--butter);
+    border-radius: 999px;
+    padding: 3px 10px;
+  }
+
+  .mem-del {
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    color: var(--plum-mist);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    cursor: pointer;
+  }
+
+  .mem-del:hover { background: rgba(228,122,122,0.15); color: var(--rose); }
 
   .history-list {
     max-height: 320px;
@@ -2239,9 +2467,11 @@
 
   <div class="tabs">
     <button class="tab active" data-tab="planner">Planner</button>
-    <button class="tab" data-tab="log">Tasks</button>
     <button class="tab" data-tab="stats">Stats</button>
-    <button class="tab" data-tab="history">History</button>
+    <!-- ARCHIVED tabs: still here (and their sections below) so they can come back.
+         To restore one, take its id out of ARCHIVED_TABS in the script. -->
+    <button class="tab" data-tab="log" data-archived>Tasks</button>
+    <button class="tab" data-tab="history" data-archived>History</button>
   </div>
 
   <section id="tab-log" style="display:none;">
@@ -2255,17 +2485,28 @@
   </section>
 
   <section id="tab-stats" style="display:none;">
+    <div class="stats-tiles" id="statsTiles"></div>
     <div class="stats-section">
-      <div class="stats-title">last 7 days</div>
+      <div class="stats-title">points · last 7 days</div>
       <div class="chart-wrap"><canvas id="chartDaily"></canvas></div>
     </div>
     <div class="stats-section">
-      <div class="stats-title">points by task</div>
-      <div class="chart-wrap"><canvas id="chartTasks"></canvas></div>
+      <div class="stats-title">where your points came from · last 7 days</div>
+      <div class="chart-wrap" id="chartTasksWrap"><canvas id="chartTasks"></canvas></div>
+      <div class="stats-empty" id="chartTasksEmpty" style="display:none;">check some things off and this fills in ✨</div>
+    </div>
+    <div class="stats-section">
+      <div class="stats-title">routines finished · last 30 days</div>
+      <div class="stats-rlist" id="statsRoutines"></div>
     </div>
     <div class="stats-section" id="versusChartSection">
       <div class="stats-title">user comparison — all time</div>
       <div class="chart-wrap"><canvas id="chartVersus"></canvas></div>
+    </div>
+    <div class="stats-section">
+      <div class="stats-title">💾 saved points</div>
+      <div class="stats-sub">custom points you've set — they fill in automatically next time that task or routine shows up</div>
+      <div id="savedPointsList"></div>
     </div>
   </section>
 
@@ -2296,6 +2537,9 @@
           <div class="planner-save-indicator" id="plannerSaveIndicator">saved</div>
           <button class="planner-mode-btn" id="timesBtn" title="show / hide times + durations" aria-label="toggle times">
             <span>⏰</span>
+          </button>
+          <button class="planner-mode-btn" id="pointsBtn" title="show / hide points" aria-label="toggle points">
+            <span>🪙</span>
           </button>
           <button class="planner-mode-btn" id="routinesBtn" title="saved routines">
             <span>🔁</span>
@@ -2516,6 +2760,27 @@
   </div>
 </div>
 
+<!-- Points Modal -->
+<div class="modal-backdrop" id="pointsModal">
+  <div class="modal">
+    <div class="modal-title" style="margin-bottom:6px;">points 🪙</div>
+    <p class="routines-sub" id="ptsWhat" style="margin:0 0 14px;"></p>
+    <div class="field">
+      <label id="ptsLabel">points for this</label>
+      <input type="number" id="ptsInput" min="0" max="9999" inputmode="numeric" />
+    </div>
+    <div class="dur-chips pts-presets" id="ptsPresets"></div>
+    <div class="pts-saved" id="ptsSaved"></div>
+    <label class="pts-remember"><input type="checkbox" id="ptsRemember" checked /> remember this for next time 💾</label>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="ptsDefaultBtn">use default</button>
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost" id="ptsCancelBtn">cancel</button>
+      <button class="btn btn-primary" id="ptsSaveBtn">save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Routines Modal (list + edit views) -->
 <div class="modal-backdrop" id="routinesModal">
   <div class="modal routines-modal">
@@ -2648,6 +2913,8 @@ let state = {
   routineLog: {},   // 'profile:YYYY-MM-DD' -> [routineId] already auto-added that day
   routineSort: 'recent', // 'recent' (last tapped/opened first) | 'alpha'
   masterRoutines: [], // { id, owner, name, routineIds: [routineId…], days: [0-6], lastUsed }
+  pointMemory: {},  // 'task:taxes' / 'group:shower' / 'master:full morning' -> { pts, name, kind, updated }
+  showPoints: false, // show point pills on every task (custom/saved ones always show)
   routinesTab: 'routines', // which tab the routines page opens on: 'routines' | 'master'
 
   maybe: {},        // 'profile:YYYY-MM-DD' -> "maybe" list text (same format as planner)
@@ -2743,6 +3010,7 @@ function migrateState() {
   if (!Array.isArray(state.routines)) state.routines = [];
   if (state.routineSort !== 'alpha' && state.routineSort !== 'recent') state.routineSort = 'recent';
   if (!Array.isArray(state.masterRoutines)) state.masterRoutines = [];
+  if (!state.pointMemory || typeof state.pointMemory !== 'object') state.pointMemory = {};
   if (state.routinesTab !== 'master') state.routinesTab = 'routines';
   if (!state.routineLog || typeof state.routineLog !== 'object') state.routineLog = {};
   if (!state.maybe || typeof state.maybe !== 'object') state.maybe = {};
@@ -3008,11 +3276,8 @@ const SFX = {
 
 // ==================== RENDER ====================
 function totalPoints(profile, dayOnly = false) {
-  const day = todayKey();
-  return state.logs
-    .filter(l => (profile === 'combined' || l.profile === profile))
-    .filter(l => !dayOnly || todayKey(l.timestamp) === day)
-    .reduce((s, l) => s + l.points, 0);
+  // points now come from checking things off in the planner (plus any old Tasks-tab logs)
+  return dayOnly ? dayTotal(profile, todayKey()) : allTimePoints(profile);
 }
 
 function countLoggedToday(taskId, profile) {
@@ -3180,7 +3445,8 @@ function miniConfetti(fromEl) {
 }
 
 
-function launchConfetti() {
+// message/sound default to the daily-goal celebration; pass your own for other wins
+function launchConfetti(message = 'today\'s goal crushed 🎉', sound = true) {
   const canvas = document.getElementById('confettiCanvas');
   const ctx = canvas.getContext('2d');
   canvas.classList.add('active');
@@ -3283,8 +3549,8 @@ function launchConfetti() {
   animId = requestAnimationFrame(tick);
 
   // Big celebratory chord
-  SFX.goalHit();
-  showToast('today\'s goal crushed 🎉');
+  if (sound) SFX.goalHit();
+  if (message) showToast(message);
 }
 
 // ==================== GOAL MODAL ====================
@@ -3443,10 +3709,11 @@ function logTask(taskId, sourceEl) {
   }
 }
 
-function flyPoints(fromEl, points) {
-  const target = document.getElementById('pointsToday');
+function flyPoints(fromEl, points, toTally = true) {
   const fromRect = fromEl.getBoundingClientRect();
-  const toRect = target.getBoundingClientRect();
+  const toRect = toTally
+    ? document.getElementById('pointsToday').getBoundingClientRect()
+    : { left: fromRect.left, width: fromRect.width, top: fromRect.top - 70, height: 0 };
 
   const el = document.createElement('div');
   el.className = 'fly-points';
@@ -3707,9 +3974,111 @@ function deleteLog(logId) {
 let chartDaily, chartTasks, chartVersus;
 
 function renderCharts() {
-  renderDailyChart();
-  renderTasksChart();
-  renderVersusChart();
+  // each piece renders on its own, so one failure (e.g. charts library offline) can't blank the page
+  [renderStatsTiles, renderDailyChart, renderTasksChart, renderRoutineStats, renderVersusChart, renderSavedPoints]
+    .forEach(fn => {
+      if (typeof Chart === 'undefined' && [renderDailyChart, renderTasksChart, renderVersusChart].includes(fn)) return;
+      try { fn(); } catch (err) { console.warn('stats:', err); }
+    });
+}
+
+function statsProfiles() {
+  return state.profile === 'combined' ? state.users.map(u => u.id) : [state.profile];
+}
+
+function lastNDayKeys(n) {
+  const out = [];
+  const today = parseDateKey(todayKey());
+  for (let i = n - 1; i >= 0; i--) {
+    out.push(formatDateKey(new Date(today.getFullYear(), today.getMonth(), today.getDate() - i)));
+  }
+  return out;
+}
+
+// Add up planner points + activity across the active profile(s) and a set of days
+function statsOver(dayKeys) {
+  const t = { total: 0, tasks: 0, subs: 0, bonus: 0, optional: 0, routines: 0, masters: 0, allDone: 0, legacy: 0,
+    tasksDone: 0, routinesDone: 0, mastersDone: 0, perfectDays: 0, best: 0, routineCounts: {} };
+  dayKeys.forEach(d => {
+    let dayPts = 0;
+    let perfect = false;
+    statsProfiles().forEach(pid => {
+      const r = computeDayPoints(pid, d);
+      const legacy = legacyPoints(pid, d);
+      ['tasks', 'subs', 'bonus', 'optional', 'routines', 'masters', 'allDone'].forEach(k => { t[k] += r[k]; });
+      t.legacy += legacy;
+      t.tasksDone += r.tasksDone;
+      t.routinesDone += r.routinesDone.length;
+      t.mastersDone += r.mastersDone.length;
+      r.routinesDone.forEach(x => { const k = 'r|' + x.name; t.routineCounts[k] = (t.routineCounts[k] || 0) + 1; });
+      r.mastersDone.forEach(x => { const k = 'm|' + x.name; t.routineCounts[k] = (t.routineCounts[k] || 0) + 1; });
+      if (r.perfect) perfect = true;
+      dayPts += r.total + legacy;
+    });
+    if (perfect) t.perfectDays++;
+    t.total += dayPts;
+    t.best = Math.max(t.best, dayPts);
+  });
+  return t;
+}
+
+function renderStatsTiles() {
+  const wrap = document.getElementById('statsTiles');
+  if (!wrap) return;
+  const today = statsOver([todayKey()]);
+  const week = statsOver(lastNDayKeys(7));
+  const month = statsOver(lastNDayKeys(30));
+  const tiles = [
+    ['🪙 today', today.total, 'pts'],
+    ['📅 last 7 days', week.total, 'pts'],
+    ['✅ checked off · 7d', week.tasksDone, ''],
+    ['🔁 routines · 7d', week.routinesDone + week.mastersDone, ''],
+    ['🎉 all-done days · 30d', month.perfectDays, ''],
+    ['🏆 best day · 30d', month.best, 'pts']
+  ];
+  wrap.innerHTML = tiles.map(([label, val, unit]) =>
+    `<div class="stat-tile"><div class="stat-label">${label}</div><div class="stat-value">${val}${unit ? `<span class="stat-unit">${unit}</span>` : ''}</div></div>`
+  ).join('');
+}
+
+function renderRoutineStats() {
+  const wrap = document.getElementById('statsRoutines');
+  if (!wrap) return;
+  const counts = Object.entries(statsOver(lastNDayKeys(30)).routineCounts).sort((a, b) => b[1] - a[1]);
+  if (!counts.length) {
+    wrap.innerHTML = `<div class="stats-empty">finish a routine and it shows up here 🔁</div>`;
+    return;
+  }
+  const max = counts[0][1];
+  wrap.innerHTML = counts.slice(0, 10).map(([k, n]) => {
+    const isMaster = k.startsWith('m|');
+    const name = k.slice(2);
+    return `<div class="rstat-row${isMaster ? ' master' : ''}">
+      <span class="rstat-name">${isMaster ? '⭐ ' : ''}${escapeHtml(name)}</span>
+      <span class="rstat-count">${n}×</span>
+      <span class="rstat-bar"><span style="width:${Math.max(6, Math.round(n / max * 100))}%"></span></span>
+    </div>`;
+  }).join('');
+}
+
+function renderSavedPoints() {
+  const wrap = document.getElementById('savedPointsList');
+  if (!wrap) return;
+  const entries = Object.entries(state.pointMemory || {}).sort((a, b) => (b[1].updated || 0) - (a[1].updated || 0));
+  if (!entries.length) {
+    wrap.innerHTML = `<div class="stats-empty">nothing saved yet — turn on 🪙 in the planner and tap a point pill to set one</div>`;
+    return;
+  }
+  const kindLabel = { task: 'task', group: 'routine finish', master: 'master routine finish' };
+  wrap.innerHTML = entries.map(([key, m]) => `
+    <div class="mem-row">
+      <div class="mem-info">
+        <div class="mem-name">${escapeHtml(m.name || key.split(':')[1])}</div>
+        <div class="mem-meta">${kindLabel[m.kind] || 'task'} · saved ${new Date(m.updated || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+      </div>
+      <span class="mem-pts">${m.pts} pts</span>
+      <button type="button" class="mem-del" data-mem-del="${escapeHtml(key)}" aria-label="forget">×</button>
+    </div>`).join('');
 }
 
 function getLast7Days() {
@@ -3731,10 +4100,7 @@ function renderDailyChart() {
   const labels = days.map(d => d.toLocaleDateString('en-US', { weekday: 'short' }));
 
   function pointsFor(profile, day) {
-    const key = todayKey(day.getTime());
-    return state.logs
-      .filter(l => l.profile === profile && todayKey(l.timestamp) === key)
-      .reduce((s,l) => s + l.points, 0);
+    return dayTotal(profile, todayKey(day.getTime()));
   }
 
   const datasets = [];
@@ -3745,7 +4111,9 @@ function renderDailyChart() {
         label: user.name,
         data: days.map(d => pointsFor(user.id, d)),
         backgroundColor: user.color,
-        borderRadius: 10
+        borderRadius: 4,
+        borderColor: '#fdf6e8',
+        borderWidth: { top: 2 }
       });
     });
   } else {
@@ -3755,7 +4123,8 @@ function renderDailyChart() {
         label: user.name,
         data: days.map(d => pointsFor(user.id, d)),
         backgroundColor: user.color,
-        borderRadius: 10
+        borderRadius: 4,
+        maxBarThickness: 36
       });
     }
   }
@@ -3777,46 +4146,59 @@ function renderDailyChart() {
   });
 }
 
+// Where the last 7 days' points came from (one hue — it's magnitude, not identity)
 function renderTasksChart() {
   const ctx = document.getElementById('chartTasks');
   if (!ctx) return;
-
-  const relevant = state.logs.filter(l => state.profile === 'combined' || l.profile === state.profile);
-  const byTask = {};
-  relevant.forEach(l => {
-    const key = `${l.taskEmoji} ${l.taskName}`;
-    byTask[key] = (byTask[key] || 0) + l.points;
-  });
-
-  const entries = Object.entries(byTask).sort((a,b) => b[1] - a[1]).slice(0, 8);
+  const t = statsOver(lastNDayKeys(7));
+  const rows = [
+    ['tasks', t.tasks],
+    ['sub-tasks', t.subs],
+    ['routines finished', t.routines],
+    ['master routines', t.masters],
+    ['all-done bonus', t.allDone],
+    ['✦ bonus tasks', t.bonus],
+    ['optional tasks', t.optional],
+    ['old Tasks tab', t.legacy]
+  ].filter(r => r[1] > 0);
 
   if (chartTasks) chartTasks.destroy();
-  if (entries.length === 0) {
-    ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+  chartTasks = null;
+  const wrap = document.getElementById('chartTasksWrap');
+  const empty = document.getElementById('chartTasksEmpty');
+  if (!rows.length) {
+    wrap.style.display = 'none';
+    empty.style.display = 'block';
     return;
   }
-
-  const palette = ['#e8a838','#6b3a5e','#a4b89a','#e47a7a','#f5a978','#9b7590','#4a2540','#f5c96b'];
+  wrap.style.display = '';
+  empty.style.display = 'none';
+  wrap.style.height = Math.max(120, rows.length * 38 + 30) + 'px';
 
   chartTasks = new Chart(ctx, {
-    type: 'doughnut',
+    type: 'bar',
     data: {
-      labels: entries.map(e => e[0]),
-      datasets: [{
-        data: entries.map(e => e[1]),
-        backgroundColor: palette,
-        borderColor: '#fdf6e8',
-        borderWidth: 3
-      }]
+      labels: rows.map(r => r[0]),
+      datasets: [{ label: 'points', data: rows.map(r => r[1]), backgroundColor: '#8a5a7f', borderRadius: 4, maxBarThickness: 22 }]
     },
     options: {
+      indexAxis: 'y',
       responsive: true, maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'right', labels: { font: { family: 'Nunito', weight: '600', size: 11 }, color: '#4a2540', boxWidth: 14 } }
+        legend: { display: false },
+        tooltip: { callbacks: { label: (c) => ` ${c.raw} pts` } }
+      },
+      scales: {
+        x: { beginAtZero: true, grid: { color: 'rgba(74,37,64,0.08)' }, ticks: { color: '#6b3a5e', font: { family: 'Nunito' }, precision: 0 } },
+        y: { grid: { display: false }, ticks: { color: '#4a2540', font: { family: 'Nunito', weight: '700', size: 12 } } }
       }
     }
   });
 }
+
+/* Old "points by task" donut for the archived Tasks tab — kept for reference.
+function renderTasksChartLegacy() { ...see git history (commit before the points system)... }
+*/
 
 function renderVersusChart() {
   const ctx = document.getElementById('chartVersus');
@@ -3833,9 +4215,7 @@ function renderVersusChart() {
   if (section) section.style.display = '';
 
   const labels = state.users.map(u => u.name);
-  const data = state.users.map(u =>
-    state.logs.filter(l => l.profile === u.id).reduce((s,l) => s + l.points, 0)
-  );
+  const data = state.users.map(u => allTimePoints(u.id));
   const colors = state.users.map(u => u.color);
 
   chartVersus = new Chart(ctx, {
@@ -4071,11 +4451,15 @@ const HEADER_RE = /^\s*(?:>{2,}|-{2,}|={2,}|\*{2,}|~{2,}|#{1,3}(?=\s))\s*(.*?)\s
 const PLAIN_BONUS_RE = /^\s*[✨✦⭐🌟💫]*\s*bonus(?:\s+(?:tasks?|wins?|stuff))?\s*:?\s*[✨✦⭐🌟💫]*\s*$/i;
 
 function headerInfo(raw) {
-  if (PLAIN_BONUS_RE.test(raw)) return { text: raw.trim().replace(/:\s*$/, ''), isBonus: true };
-  const m = raw.match(HEADER_RE);
+  // a heading can carry its own points: ">> Shower << +20pts"
+  const p = extractPoints(raw);
+  const clean = p.text;
+  if (PLAIN_BONUS_RE.test(clean)) return { text: clean.trim().replace(/:\s*$/, ''), isBonus: true, pts: p.pts, child: false };
+  const m = clean.match(HEADER_RE);
   if (!m) return null;
   const text = m[1].replace(/:\s*$/, '').trim();
-  return { text, isBonus: /\bbonus\b/i.test(text) };
+  // ">>> name <<<" = a routine inside a master routine
+  return { text, isBonus: /\bbonus\b/i.test(text), pts: p.pts, child: /^\s*>{3,}/.test(clean) };
 }
 
 // Any header other than BONUS starts a colored group (routines use ">> Routine Name <<").
@@ -4094,7 +4478,7 @@ function parsePlannerLines(text) {
     if (head) {
       inBonus = head.isBonus;
       group = head.isBonus ? null : groupCount++;
-      return { type: 'header', raw, text: head.text, isBonus: head.isBonus, group, index: i };
+      return { type: 'header', raw, text: head.text, isBonus: head.isBonus, pts: head.pts, child: head.child, group, index: i };
     }
     const task = parseTaskLine(raw, i);
     task.bonus = inBonus;
@@ -4115,8 +4499,165 @@ function parseTaskLine(raw, i) {
     : (raw.trim().replace(/^[-*•]\s*/, '') || raw.trim());
   const optional = OPTIONAL_RE.test(text);
   if (optional) text = text.replace(OPTIONAL_RE, '');
-  const t = extractTiming(text);
-  return { type: 'task', checked, optional, raw, level, taskText: t.text || '(empty)', time: t.time, dur: t.dur, index: i };
+  const pp = extractPoints(text);
+  const t = extractTiming(pp.text);
+  return { type: 'task', checked, optional, raw, level, taskText: t.text || '(empty)', time: t.time, dur: t.dur, pts: pp.pts, index: i };
+}
+
+// ==================== POINTS (to-do list) ====================
+const POINTS_DEFAULT = { task: 10, sub: 5, routine: 15, master: 30, allDone: 50 };
+// "+100pts" on a task or heading sets its points
+const PTS_RE = /(^|\s)\+(\d{1,4})\s?(?:pts?|points?)(?=\s|$)/i;
+
+function extractPoints(text) {
+  const m = (text || '').match(PTS_RE);
+  if (!m) return { text: (text || '').trim(), pts: null };
+  return { text: text.replace(m[0], m[1]).replace(/\s{2,}/g, ' ').trim(), pts: parseInt(m[2], 10) };
+}
+
+function setLinePoints(raw, pts) {
+  let line = raw;
+  let m;
+  while ((m = line.match(PTS_RE))) line = line.replace(m[0], m[1]);
+  line = line.replace(/[ ]+$/, '').replace(/([^\s])[ ]{2,}/g, '$1 ');
+  if (pts !== null && pts !== undefined) line += ` +${pts}pts`;
+  return line;
+}
+
+// Saved points: "taxes" → 100, so next time it's already set
+function pointsKey(kind, name) {
+  const norm = (name || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  return `${kind}:${norm}`;
+}
+
+function savedPoints(kind, name) {
+  const hit = (state.pointMemory || {})[pointsKey(kind, name)];
+  return hit && Number.isFinite(hit.pts) ? hit : null;
+}
+
+// points for a task line → { pts, source: 'custom' | 'saved' | 'default' }
+function taskPointInfo(line) {
+  if (line.pts !== null && line.pts !== undefined) return { pts: line.pts, source: 'custom' };
+  const saved = savedPoints('task', line.taskText);
+  if (saved) return { pts: saved.pts, source: 'saved' };
+  return { pts: line.level > 0 ? POINTS_DEFAULT.sub : POINTS_DEFAULT.task, source: 'default' };
+}
+
+// points for finishing a routine block (kind 'group') or master routine (kind 'master')
+function headerPointInfo(line, kind) {
+  if (line.pts !== null && line.pts !== undefined) return { pts: line.pts, source: 'custom' };
+  const saved = savedPoints(kind, line.text);
+  if (saved) return { pts: saved.pts, source: 'saved' };
+  return { pts: kind === 'master' ? POINTS_DEFAULT.master : POINTS_DEFAULT.routine, source: 'default' };
+}
+
+// Work out routine blocks + master routines in a parsed list.
+// A master is a heading with no tasks of its own, followed by ">>> routine <<<" blocks.
+function analyzeList(lines) {
+  const groups = [];
+  const masters = [];
+  const groupByHeader = {};
+  const masterByHeader = {};
+  let currentMaster = null;
+  lines.forEach(line => {
+    if (line.type === 'header') {
+      if (line.isBonus) { currentMaster = null; return; }
+      const tasks = lines.filter(l => l.type === 'task' && l.group === line.group);
+      if (!tasks.length) {
+        if (!line.child) {
+          currentMaster = { header: line, groups: [] };
+          masters.push(currentMaster);
+          masterByHeader[line.index] = currentMaster;
+        }
+        return;
+      }
+      const counted = tasks.filter(countsTowardDone);
+      const pool = counted.length ? counted : tasks;
+      const g = { header: line, tasks, complete: pool.every(t => t.checked), master: null };
+      if (line.child && currentMaster) {
+        g.master = currentMaster;
+        currentMaster.groups.push(g);
+      } else if (!line.child) {
+        currentMaster = null;
+      }
+      groups.push(g);
+      groupByHeader[line.index] = g;
+    } else if (line.type === 'task' && line.group === null) {
+      currentMaster = null;
+    }
+  });
+  masters.forEach(m => { m.complete = m.groups.length > 0 && m.groups.every(g => g.complete); });
+  return { groups, masters, groupByHeader, masterByHeader };
+}
+
+// Points earned on one day (from what's checked off)
+function computeDayPoints(profile, dateKey) {
+  const r = { total: 0, tasks: 0, subs: 0, bonus: 0, optional: 0, routines: 0, masters: 0, allDone: 0,
+    tasksDone: 0, routinesDone: [], mastersDone: [], perfect: false };
+  ['must', 'maybe'].forEach(list => {
+    const text = getListEntry(list, profile, dateKey);
+    if (!text) return;
+    const lines = parsePlannerLines(text);
+    lines.forEach(l => {
+      if (l.type !== 'task' || !l.checked) return;
+      const p = taskPointInfo(l).pts;
+      r.tasksDone++;
+      if (l.bonus) r.bonus += p;
+      else if (l.optional) r.optional += p;
+      else if (l.level > 0) r.subs += p;
+      else r.tasks += p;
+    });
+    const a = analyzeList(lines);
+    a.groups.forEach(g => {
+      if (!g.complete) return;
+      const p = headerPointInfo(g.header, 'group').pts;
+      r.routines += p;
+      r.routinesDone.push({ key: list + ':' + g.header.index, name: g.header.text, pts: p });
+    });
+    a.masters.forEach(m => {
+      if (!m.complete) return;
+      const p = headerPointInfo(m.header, 'master').pts;
+      r.masters += p;
+      r.mastersDone.push({ key: list + ':' + m.header.index, name: m.header.text, pts: p });
+    });
+    if (list === 'must') {
+      const counted = lines.filter(countsTowardDone);
+      if (counted.length && counted.every(t => t.checked)) {
+        r.perfect = true;
+        r.allDone = POINTS_DEFAULT.allDone;
+      }
+    }
+  });
+  r.total = r.tasks + r.subs + r.bonus + r.optional + r.routines + r.masters + r.allDone;
+  return r;
+}
+
+// Points from the old tap-to-log Tasks tab (kept so past totals don't vanish)
+function legacyPoints(profile, dateKey = null) {
+  return (state.logs || [])
+    .filter(l => l.profile === profile && (!dateKey || todayKey(l.timestamp) === dateKey))
+    .reduce((s, l) => s + (l.points || 0), 0);
+}
+
+function dayTotal(profile, dateKey) {
+  if (profile === 'combined') return state.users.reduce((s, u) => s + dayTotal(u.id, dateKey), 0);
+  return computeDayPoints(profile, dateKey).total + legacyPoints(profile, dateKey);
+}
+
+function plannerDates(profile) {
+  const dates = new Set();
+  ['planner', 'maybe'].forEach(bucket => {
+    Object.keys(state[bucket] || {}).forEach(k => {
+      const i = k.lastIndexOf(':');
+      if (k.slice(0, i) === profile) dates.add(k.slice(i + 1));
+    });
+  });
+  return [...dates];
+}
+
+function allTimePoints(profile) {
+  if (profile === 'combined') return state.users.reduce((s, u) => s + allTimePoints(u.id), 0);
+  return plannerDates(profile).reduce((s, d) => s + computeDayPoints(profile, d).total, 0) + legacyPoints(profile);
 }
 
 // Tasks that count toward "X of Y done" (not bonus, not optional)
@@ -4243,14 +4784,21 @@ function renderLinesInto(container, lines, interactive, list = 'must', compact =
   let box = null;
   let boxGroup = null;
   let colorIdx = 0;
+  const analysis = analyzeList(lines);
   lines.forEach(line => {
     if (line.type === 'header' && !line.isBonus) {
       const hasTasks = lines.some(l => l.type === 'task' && l.group === line.group);
       if (!hasTasks) {
         // a heading with nothing under it (like a master routine's name) is a title
+        const master = analysis.masterByHeader[line.index];
         const t = document.createElement('div');
-        t.className = 'group-title';
-        t.innerHTML = `<span class="group-title-text">${escapeHtml(line.text || '')}</span>`;
+        t.className = 'group-title' + (master && master.complete ? ' complete' : '');
+        const pill = master && master.groups.length
+          ? pointPillHtml(headerPointInfo(line, 'master'), interactive,
+              `data-pts-index="${line.index}" data-pts-kind="master" data-list="${list}"`)
+          : '';
+        t.innerHTML = `<span class="group-title-text">${escapeHtml(line.text || '')}</span>` +
+          (master && master.complete ? '<span class="group-title-done">✓</span>' : '') + pill;
         container.appendChild(t);
         box = null;
         boxGroup = null;
@@ -4260,11 +4808,15 @@ function renderLinesInto(container, lines, interactive, list = 'must', compact =
       const done = groupTasks.filter(t => t.checked).length;
       box = document.createElement('div');
       box.className = 'routine-group ' + (colorIdx++ % 2 ? 'gold' : 'lavender') +
-        (groupTasks.length && done === groupTasks.length ? ' complete' : '');
+        (groupTasks.length && done === groupTasks.length ? ' complete' : '') + (line.child ? ' child' : '');
       const head = document.createElement('div');
       head.className = 'routine-group-head';
+      const gPill = pointPillHtml(headerPointInfo(line, 'group'), interactive,
+        `data-pts-index="${line.index}" data-pts-kind="group" data-list="${list}"`);
       head.innerHTML = `<span class="routine-group-name">${escapeHtml(line.text || 'routine')}</span>` +
-        (groupTasks.length ? `<span class="routine-group-count">${done === groupTasks.length ? '✓ done' : `${done}/${groupTasks.length}`}</span>` : '');
+        `<span class="routine-group-right">` +
+        (groupTasks.length ? `<span class="routine-group-count">${done === groupTasks.length ? '✓ done' : `${done}/${groupTasks.length}`}</span>` : '') +
+        gPill + `</span>`;
       box.appendChild(head);
       container.appendChild(box);
       boxGroup = line.group;
@@ -4285,6 +4837,15 @@ function renderLinesInto(container, lines, interactive, list = 'must', compact =
   });
 }
 
+function pointPillHtml(info, interactive, attrs) {
+  if (!state.showPoints && info.source === 'default') return '';
+  const cls = `pts-pill ${info.source}`;
+  const label = `+${info.pts}`;
+  return interactive
+    ? `<button type="button" class="${cls}" ${attrs} aria-label="set points">${label}</button>`
+    : `<span class="${cls} static">${label}</span>`;
+}
+
 function buildChecklistItem(line, interactive, list = 'must') {
   const el = document.createElement('div');
   if (line.type === 'task') {
@@ -4300,7 +4861,9 @@ function buildChecklistItem(line, interactive, list = 'must') {
     const moveBtn = (interactive && list === 'maybe' && line.level === 0 && !line.bonus)
       ? `<button type="button" class="move-btn" data-move-index="${line.index}" aria-label="move to another day">📅 move</button>`
       : '';
-    const extras = timingPillsHtml(line, interactive, list) + moveBtn;
+    const ptsPill = pointPillHtml(taskPointInfo(line), interactive,
+      `data-pts-index="${line.index}" data-pts-kind="task" data-list="${list}"`);
+    const extras = timingPillsHtml(line, interactive, list) + ptsPill + moveBtn;
     const optTag = line.optional ? '<span class="opt-tag">optional</span>' : '';
     el.innerHTML = `<span class="check-box"></span><span class="check-text">${optTag}${escapeHtml(line.taskText)}</span>${extras ? `<span class="row-extras">${extras}</span>` : ''}`;
   } else if (line.type === 'header') {
@@ -4327,6 +4890,7 @@ function renderPlannerEditor() {
   const routinesBtn = document.getElementById('routinesBtn');
   const timesBtn = document.getElementById('timesBtn');
   timesBtn.classList.toggle('in-check-mode', !!state.showTimes);
+  document.getElementById('pointsBtn').classList.toggle('in-check-mode', !!state.showPoints);
 
   dayTitle.textContent = prettyDate(plannerSelectedDate);
 
@@ -4347,6 +4911,7 @@ function renderPlannerEditor() {
     modeBtn.style.display = 'none';
     routinesBtn.style.display = 'none';
     timesBtn.style.display = 'none';
+    document.getElementById('pointsBtn').style.display = 'none';
     tip.style.display = 'none';
     notesWrap.style.display = 'none';
 
@@ -4410,6 +4975,7 @@ function renderPlannerEditor() {
     modeBtn.style.display = 'flex';
     routinesBtn.style.display = 'flex';
     timesBtn.style.display = 'flex';
+    document.getElementById('pointsBtn').style.display = 'flex';
     notesWrap.style.display = 'block';
     if (document.activeElement !== notesEl || !notesSaveTimeout) {
       notesEl.value = getNotes(state.profile, plannerSelectedDate);
@@ -4423,6 +4989,7 @@ function renderPlannerEditor() {
         ? `maybe = nice if it happens · unfinished ones can be moved to another day`
         : `each line is a task · <code>Tab</code> (or ⇥) for a sub-task · <code>optional:</code> (or ◌) for optional tasks · <code>>> name <<</code> starts a colored section (a blank line ends it) · <code>>> BONUS <<</code> starts your bonus list`;
       if (state.showTimes) tip.innerHTML += ` · add <code>@2pm</code> or <code>~30m</code> for times`;
+      if (state.showPoints) tip.innerHTML += ` · add <code>+20pts</code> to set points`;
       document.querySelectorAll('.list-toggle-btn').forEach(b =>
         b.classList.toggle('active', b.dataset.list === plannerList));
       editor.placeholder = plannerList === 'maybe'
@@ -4462,8 +5029,10 @@ function renderChecklist() {
   const maybeTasks = maybeLines.filter(l => l.type === 'task');
 
   container.innerHTML = '';
+  const dayPts = computeDayPoints(state.profile, plannerSelectedDate).total;
   const winsText = (optionalDone ? ` · +${optionalDone} optional` : '') +
-    (bonusDone ? ` · ✦ ${bonusDone} bonus win${bonusDone === 1 ? '' : 's'}` : '');
+    (bonusDone ? ` · ✦ ${bonusDone} bonus win${bonusDone === 1 ? '' : 's'}` : '') +
+    (dayPts ? ` · 🪙 ${dayPts} pts` : '');
   if (tasks.length === 0 && lines.some(l => l.type === 'task')) {
     renderLinesInto(container, lines, true, 'must');
     progress.textContent = winsText.replace(/^ · /, '');
@@ -4502,36 +5071,65 @@ function handleChecklistClick(itemEl) {
   if (isNaN(lineIndex)) return;
   const list = itemEl.dataset.list === 'maybe' ? 'maybe' : 'must';
   const isBonus = itemEl.classList.contains('bonus');
+  const profile = state.profile;
+  const date = plannerSelectedDate;
+  const isToday = date === todayKey();
 
-  const currentText = getListEntry(list, state.profile, plannerSelectedDate);
+  const currentText = getListEntry(list, profile, date);
   const wasChecked = itemEl.classList.contains('checked');
+  // remember where the checkbox was — the row gets re-drawn below
+  const box = itemEl.querySelector('.check-box') || itemEl;
+  const rect = box.getBoundingClientRect();
+  const anchor = { getBoundingClientRect: () => rect };
 
-  const tasksBefore = parsePlannerLines(currentText).filter(countsTowardDone);
-  const doneBefore = tasksBefore.filter(t => t.checked).length;
+  const before = computeDayPoints(profile, date);
+  const todayBefore = isToday ? totalPoints(profile, true) : 0;
 
   const newText = setTaskTreeChecked(currentText, lineIndex, !wasChecked);
-  setListEntry(list, state.profile, plannerSelectedDate, newText);
+  setListEntry(list, profile, date, newText);
+  const after = computeDayPoints(profile, date);
+  const delta = after.total - before.total;
+
   renderChecklist();
   renderCalendar(); // update content dots
+  setTimeout(() => renderPoints(delta !== 0 && isToday), delta > 0 && isToday ? 350 : 0);
 
   if (wasChecked) {
     SFX.uncheck();
-  } else {
-    SFX.check();
-    const box = itemEl.querySelector('.check-box');
-    miniConfetti(box || itemEl);
+    return;
+  }
+  SFX.check();
+  miniConfetti(anchor);
+  if (delta > 0) flyPoints(anchor, delta, isToday);
 
-    const tasksAfter = parsePlannerLines(newText).filter(countsTowardDone);
-    const doneAfter = tasksAfter.filter(t => t.checked).length;
-    if (isBonus) {
-      showToast('✦ bonus win!');
-    } else if (tasksAfter.length > 0 && doneAfter === tasksAfter.length && doneBefore < tasksBefore.length) {
-      setTimeout(() => {
-        launchConfetti();
-        showToast(list === 'maybe'
-          ? `every maybe done?? overachiever 👑`
-          : `all done — ${tasksAfter.length} must-do${tasksAfter.length === 1 ? '' : 's'} crushed`);
-      }, 300);
+  const fresh = (arr, old) => arr.filter(x => !old.some(y => y.key === x.key));
+  const newMasters = fresh(after.mastersDone, before.mastersDone);
+  const newRoutines = fresh(after.routinesDone, before.routinesDone);
+  let msg = null;
+  let big = false;
+  if (after.perfect && !before.perfect) {
+    msg = `all done — every must-do crushed 🎉 +${POINTS_DEFAULT.allDone} bonus`;
+    big = true;
+  } else if (newMasters.length) {
+    msg = `⭐ ${newMasters[0].name} complete! +${newMasters[0].pts}`;
+    big = true;
+  } else if (newRoutines.length) {
+    msg = `🔁 ${newRoutines[0].name} done! +${newRoutines[0].pts}`;
+  } else if (isBonus) {
+    msg = '✦ bonus win!';
+  }
+  if (big) {
+    setTimeout(() => { SFX.milestone(); launchConfetti(msg, false); }, 300);
+  } else if (msg) {
+    showToast(msg);
+  }
+
+  if (isToday) {
+    const todayAfter = totalPoints(profile, true);
+    if (checkGoalMet(profile)) {
+      setTimeout(() => launchConfetti(`daily goal hit 🎉 ${todayAfter} pts today`), big ? 2200 : 600);
+    } else if (!msg && Math.floor(todayAfter / 25) > Math.floor(todayBefore / 25)) {
+      setTimeout(() => { SFX.milestone(); burstSparkles(); showQuote(todayAfter); }, 450);
     }
   }
 }
@@ -4594,6 +5192,7 @@ function onPlannerInput() {
     const text = document.getElementById('plannerEditor').value;
     setListEntry(plannerList, state.profile, plannerSelectedDate, text);
     renderCalendar(); // refresh dots
+    if (plannerSelectedDate === todayKey()) renderPoints();
     showSaveIndicator('saved');
     setTimeout(() => hideSaveIndicator('plannerSaveIndicator'), 1500);
   }, 500);
@@ -4758,6 +5357,123 @@ function switchPlannerList(list) {
   plannerList = list === 'maybe' ? 'maybe' : 'must';
   SFX.click();
   renderPlannerEditor();
+}
+
+function toggleShowPoints() {
+  flushPlannerSaves();
+  state.showPoints = !state.showPoints;
+  save();
+  SFX.click();
+  showToast(state.showPoints ? '🪙 points on — tap one to change it' : 'points hidden (custom ones still show)');
+  renderPlannerEditor();
+}
+
+// ---------- point editor ----------
+let ptsTarget = null; // { list, lineIndex, kind, name, def }
+const PTS_PRESETS = [5, 10, 15, 20, 25, 30, 50, 100];
+
+function openPointsModal(list, lineIndex, kind) {
+  const text = getListEntry(list, state.profile, plannerSelectedDate);
+  const line = parsePlannerLines(text)[lineIndex];
+  if (!line) return;
+  let info, name, def, what;
+  if (kind === 'task') {
+    if (line.type !== 'task') return;
+    info = taskPointInfo(line);
+    name = line.taskText;
+    def = line.level > 0 ? POINTS_DEFAULT.sub : POINTS_DEFAULT.task;
+    what = `“${name}” — ${line.level > 0 ? 'sub-task' : 'task'} · default ${def}`;
+  } else {
+    if (line.type !== 'header') return;
+    info = headerPointInfo(line, kind);
+    name = line.text;
+    def = kind === 'master' ? POINTS_DEFAULT.master : POINTS_DEFAULT.routine;
+    what = `bonus for finishing ${kind === 'master' ? 'the master routine' : 'the routine'} “${name}” · default ${def}`;
+  }
+  ptsTarget = { list, lineIndex, kind, name, def };
+  document.getElementById('ptsWhat').textContent = what;
+  document.getElementById('ptsLabel').textContent = kind === 'task' ? 'points for this task' : 'points for finishing all of it';
+  const input = document.getElementById('ptsInput');
+  input.value = info.pts;
+  document.getElementById('ptsRemember').checked = true;
+  document.getElementById('ptsDefaultBtn').textContent = `use default (${def})`;
+
+  const presets = document.getElementById('ptsPresets');
+  presets.innerHTML = '';
+  PTS_PRESETS.forEach(n => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'day-chip' + (n === info.pts ? ' on' : '');
+    b.dataset.ptsPreset = n;
+    b.textContent = n;
+    presets.appendChild(b);
+  });
+
+  // what's been saved before for this (and similar names)
+  const savedBox = document.getElementById('ptsSaved');
+  const memKind = kind === 'task' ? 'task' : kind;
+  const exact = savedPoints(memKind, name);
+  const similar = similarSavedPoints(memKind, name).slice(0, 4);
+  let html = '';
+  if (exact) {
+    html += `<div class="pts-saved-line">💾 saved: <strong>${escapeHtml(exact.name || name)}</strong> = ${exact.pts} pts · ${new Date(exact.updated || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>`;
+  }
+  if (similar.length) {
+    html += `<div class="pts-saved-line muted">similar saved — tap to use:</div><div class="pts-similar">` +
+      similar.map(m => `<button type="button" class="pool-chip" data-pts-use="${m.pts}">${escapeHtml(m.name)} · ${m.pts}</button>`).join('') + '</div>';
+  }
+  savedBox.innerHTML = html;
+  savedBox.style.display = html ? 'block' : 'none';
+
+  SFX.click();
+  document.getElementById('pointsModal').classList.add('open');
+  setTimeout(() => { input.focus(); input.select(); }, 120);
+}
+
+// saved entries that share a word with this name ("do my taxes" ↔ "taxes")
+function similarSavedPoints(kind, name) {
+  const key = pointsKey(kind, name);
+  const words = key.split(':')[1].split(' ').filter(w => w.length >= 3);
+  if (!words.length) return [];
+  return Object.entries(state.pointMemory || {})
+    .filter(([k, v]) => k !== key && k.startsWith(kind + ':') && words.some(w => k.split(':')[1].split(' ').includes(w)))
+    .map(([, v]) => v)
+    .sort((a, b) => (b.updated || 0) - (a.updated || 0));
+}
+
+function closePointsModal() {
+  document.getElementById('pointsModal').classList.remove('open');
+  ptsTarget = null;
+}
+
+function savePoints(useDefault = false) {
+  if (!ptsTarget) return;
+  const { list, lineIndex, kind, name } = ptsTarget;
+  const memKind = kind === 'task' ? 'task' : kind;
+  const key = pointsKey(memKind, name);
+  let pts = null;
+  if (!useDefault) {
+    pts = parseInt(document.getElementById('ptsInput').value, 10);
+    if (!Number.isFinite(pts) || pts < 0) { showToast('enter a number of points'); return; }
+    pts = Math.min(9999, pts);
+  }
+  const text = getListEntry(list, state.profile, plannerSelectedDate);
+  const lines = text.split('\n');
+  if (lineIndex >= lines.length) { closePointsModal(); return; }
+  lines[lineIndex] = setLinePoints(lines[lineIndex], pts);
+  setListEntry(list, state.profile, plannerSelectedDate, lines.join('\n'));
+
+  if (useDefault) {
+    delete state.pointMemory[key];
+  } else if (document.getElementById('ptsRemember').checked) {
+    state.pointMemory[key] = { pts, name, kind: memKind, updated: Date.now() };
+  }
+  save();
+  closePointsModal();
+  SFX.add();
+  showToast(useDefault ? 'back to default points' : `🪙 ${name} = ${pts} pts${document.getElementById('ptsRemember').checked ? ' · saved 💾' : ''}`);
+  renderChecklist();
+  if (plannerSelectedDate === todayKey()) renderPoints(true);
 }
 
 function toggleShowTimes() {
@@ -4977,9 +5693,12 @@ function headingName(name, fallback = 'routine') {
 }
 
 // ">> Routine Name <<" + its tasks
-function routineBlock(routine) {
+function routineBlock(routine, child = false) {
   const tasks = cleanRoutineLines(routine.text);
-  return tasks ? `>> ${headingName(routine.name)} <<\n${tasks}` : '';
+  if (!tasks) return '';
+  return child
+    ? `>>> ${headingName(routine.name)} <<<\n${tasks}`
+    : `>> ${headingName(routine.name)} <<\n${tasks}`;
 }
 
 function appendRoutineText(existing, routine) {
@@ -4993,7 +5712,7 @@ function masterMembers(m) {
 }
 
 function masterBlock(m) {
-  const blocks = masterMembers(m).map(routineBlock).filter(Boolean);
+  const blocks = masterMembers(m).map(r => routineBlock(r, true)).filter(Boolean);
   if (!blocks.length) return '';
   return `>> ${headingName(m.name, 'master routine')} <<\n` + blocks.join('\n\n');
 }
@@ -5441,7 +6160,11 @@ function renderStreak(bump = false) {
 }
 
 // ==================== TABS ====================
+// Tabs that are tucked away (code kept, hidden from the app). Remove an id to bring it back.
+const ARCHIVED_TABS = ['log', 'history'];
+
 function switchTab(tab) {
+  if (ARCHIVED_TABS.includes(tab)) tab = 'planner';
   state.tab = tab;
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.getElementById('tab-log').style.display = tab === 'log' ? 'block' : 'none';
@@ -5705,6 +6428,35 @@ document.addEventListener('click', (e) => {
   const listBtn = e.target.closest('.list-toggle-btn');
   if (listBtn) { switchPlannerList(listBtn.dataset.list); return; }
   if (e.target.closest('#timesBtn')) { toggleShowTimes(); return; }
+  if (e.target.closest('#pointsBtn')) { toggleShowPoints(); return; }
+
+  // ---- point pills + point editor ----
+  const ptsPill = e.target.closest('.pts-pill[data-pts-index]');
+  if (ptsPill) {
+    openPointsModal(ptsPill.dataset.list, parseInt(ptsPill.dataset.ptsIndex, 10), ptsPill.dataset.ptsKind);
+    return;
+  }
+  const ptsPreset = e.target.closest('[data-pts-preset]');
+  if (ptsPreset) {
+    document.getElementById('ptsInput').value = ptsPreset.dataset.ptsPreset;
+    document.querySelectorAll('#ptsPresets .day-chip').forEach(c => c.classList.toggle('on', c === ptsPreset));
+    SFX.click();
+    return;
+  }
+  const ptsUse = e.target.closest('[data-pts-use]');
+  if (ptsUse) { document.getElementById('ptsInput').value = ptsUse.dataset.ptsUse; SFX.click(); return; }
+  if (e.target.closest('#ptsSaveBtn')) { savePoints(false); return; }
+  const memDel = e.target.closest('[data-mem-del]');
+  if (memDel) {
+    delete state.pointMemory[memDel.dataset.memDel];
+    save();
+    SFX.delete();
+    renderSavedPoints();
+    if (state.tab === 'planner') renderPlannerEditor();
+    return;
+  }
+  if (e.target.closest('#ptsDefaultBtn')) { savePoints(true); return; }
+  if (e.target.closest('#ptsCancelBtn') || e.target.id === 'pointsModal') { closePointsModal(); return; }
 
   // ---- time pill / move button inside a checklist row (before the row's check toggle) ----
   const timePill = e.target.closest('.time-pill[data-time-index]');
@@ -5960,7 +6712,14 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
+  if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'ptsInput') {
+    e.preventDefault();
+    savePoints(false);
+    return;
+  }
+
   if (e.key === 'Escape') {
+    closePointsModal();
     closeMoveModal();
     closeTimingModal();
     closeRoutinesModal();
@@ -6034,6 +6793,8 @@ function exportData() {
       notes: state.notes,
       routines: state.routines,
       masterRoutines: state.masterRoutines,
+      pointMemory: state.pointMemory,
+      showPoints: state.showPoints,
       routineLog: state.routineLog,
       routineSort: state.routineSort,
       showTimes: state.showTimes,
@@ -6099,6 +6860,8 @@ function confirmImport() {
   state.notes = imported.notes || {};
   state.routines = Array.isArray(imported.routines) ? imported.routines : [];
   state.masterRoutines = Array.isArray(imported.masterRoutines) ? imported.masterRoutines : [];
+  state.pointMemory = imported.pointMemory && typeof imported.pointMemory === 'object' ? imported.pointMemory : {};
+  state.showPoints = !!imported.showPoints;
   state.routineLog = imported.routineLog || {};
   state.routineSort = imported.routineSort === 'alpha' ? 'alpha' : 'recent';
   state.showTimes = !!imported.showTimes;
@@ -6123,6 +6886,12 @@ function confirmImport() {
   showToast('data imported ✓ welcome back');
   SFX.milestone();
 }
+
+// keep the hidden tab buttons in sync with ARCHIVED_TABS
+document.querySelectorAll('.tab').forEach(b => {
+  if (ARCHIVED_TABS.includes(b.dataset.tab)) b.setAttribute('data-archived', '');
+  else b.removeAttribute('data-archived');
+});
 
 // ==================== INIT ====================
 const isFreshInstall = load();
