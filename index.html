@@ -4451,7 +4451,7 @@ function toggleOptionalLines(ta) {
     let nl = line;
     if (line.trim() || lines.length === 1) {
       const [, pre, rest] = line.match(PREFIX_RE);
-      nl = allOptional ? pre + rest.replace(OPTIONAL_RE, '') : pre + 'optional: ' + rest.replace(OPTIONAL_RE, '');
+      nl = allOptional ? pre + rest.replace(OPTIONAL_RE, '') : pre + 'Optional: ' + rest.replace(OPTIONAL_RE, '');
     }
     const d = nl.length - line.length;
     if (i === 0) firstDelta = d;
