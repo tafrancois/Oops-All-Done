@@ -1,6 +1,6 @@
 // Task Planner service worker — offline caching
 // Bump this version string whenever you change files, so the browser fetches the new version
-const CACHE = 'task-planner-v13';
+const CACHE = 'task-planner-v14';
 
 const ASSETS = [
   './',

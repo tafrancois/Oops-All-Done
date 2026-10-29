@@ -1262,6 +1262,10 @@
     margin: -8px 0 14px;
   }
 
+  .routines-sort { margin: 0 0 10px; padding: 0; }
+  .routines-sort .sort-btn { background: #fff; }
+  .routines-sort .sort-btn.active { background: var(--plum); }
+
   .routines-list {
     display: flex;
     flex-direction: column;
@@ -2356,6 +2360,11 @@
     <div id="routinesListView">
       <div class="modal-title">routines 🔁</div>
       <p class="routines-sub">saved task lists. pick days and they drop into your planner on their own — or tap <strong>＋ add</strong> to drop one in right now.</p>
+      <div class="sort-bar routines-sort" id="routinesSortBar">
+        <span class="sort-label">sort:</span>
+        <button class="sort-btn" data-rsort="recent">recent</button>
+        <button class="sort-btn" data-rsort="alpha">A–Z</button>
+      </div>
       <div class="routines-list" id="routinesList"></div>
       <div class="modal-actions">
         <button class="btn btn-ghost" id="routinesCloseBtn">done</button>
@@ -2443,6 +2452,8 @@ let state = {
   notes: {},        // 'profile:YYYY-MM-DD' -> freeform notes text
   routines: [],     // { id, owner, name, text, days: [0-6] }
   routineLog: {},   // 'profile:YYYY-MM-DD' -> [routineId] already auto-added that day
+  routineSort: 'recent', // 'recent' (last tapped/opened first) | 'alpha'
+
   maybe: {},        // 'profile:YYYY-MM-DD' -> "maybe" list text (same format as planner)
   showTimes: false, // show time + duration pills next to tasks
   daysUsed: [],     // every YYYY-MM-DD the app was opened (for the streak)
@@ -2534,6 +2545,7 @@ function migrateState() {
   // Planner extras added in Task Planner
   if (!state.notes || typeof state.notes !== 'object') state.notes = {};
   if (!Array.isArray(state.routines)) state.routines = [];
+  if (state.routineSort !== 'alpha' && state.routineSort !== 'recent') state.routineSort = 'recent';
   if (!state.routineLog || typeof state.routineLog !== 'object') state.routineLog = {};
   if (!state.maybe || typeof state.maybe !== 'object') state.maybe = {};
   mergeLegacyExtra();
@@ -4808,9 +4820,36 @@ function showRoutineListView() {
   document.getElementById('routineEditView').style.display = 'none';
 }
 
+// Remember when a routine was last tapped (added or opened) for "recent" sorting
+function touchRoutine(r) {
+  if (r) r.lastUsed = Date.now();
+}
+
+function sortedRoutines() {
+  const list = myRoutines().map((r, i) => ({ r, i }));
+  if (state.routineSort === 'alpha') {
+    list.sort((a, b) => a.r.name.localeCompare(b.r.name, undefined, { sensitivity: 'base', numeric: true }));
+  } else {
+    // most recently tapped first; never-tapped ones keep their saved order at the end
+    list.sort((a, b) => (b.r.lastUsed || 0) - (a.r.lastUsed || 0) || a.i - b.i);
+  }
+  return list.map(x => x.r);
+}
+
+function setRoutineSort(mode) {
+  if (mode !== 'alpha' && mode !== 'recent') return;
+  state.routineSort = mode;
+  save();
+  SFX.click();
+  renderRoutinesList();
+}
+
 function renderRoutinesList() {
   const list = document.getElementById('routinesList');
-  const routines = myRoutines();
+  const routines = sortedRoutines();
+  document.querySelectorAll('#routinesSortBar [data-rsort]').forEach(b =>
+    b.classList.toggle('active', b.dataset.rsort === state.routineSort));
+  document.getElementById('routinesSortBar').style.display = routines.length > 1 ? 'flex' : 'none';
   list.innerHTML = '';
   if (!routines.length) {
     list.innerHTML = `<div class="routines-empty">no routines yet — make one and it can show up on its own ✨</div>`;
@@ -4837,6 +4876,7 @@ function renderRoutinesList() {
 function openRoutineEditor(id = null) {
   editingRoutineId = id;
   const r = id ? state.routines.find(x => x.id === id) : null;
+  if (r) { touchRoutine(r); save(); }
   document.getElementById('routineEditTitle').textContent = r ? 'edit routine' : 'new routine';
   document.getElementById('routineNameInput').value = r ? r.name : '';
   document.getElementById('routineTextInput').value = r ? r.text : '';
@@ -4881,9 +4921,9 @@ function saveRoutine() {
 
   if (editingRoutineId) {
     const r = state.routines.find(x => x.id === editingRoutineId);
-    if (r) Object.assign(r, { name, text, days });
+    if (r) Object.assign(r, { name, text, days, lastUsed: Date.now() });
   } else {
-    state.routines.push({ id: 'r_' + uid(), owner: state.profile, name, text, days });
+    state.routines.push({ id: 'r_' + uid(), owner: state.profile, name, text, days, lastUsed: Date.now() });
   }
   save();
   SFX.add();
@@ -4906,6 +4946,7 @@ function addRoutineToDay(id) {
   if (state.profile === 'combined') return;
   const r = state.routines.find(x => x.id === id);
   if (!r) return;
+  touchRoutine(r);
   flushPlannerSaves();
   const text = appendRoutineText(getPlannerEntry(state.profile, plannerSelectedDate), r);
   setPlannerEntry(state.profile, plannerSelectedDate, text);
@@ -5275,6 +5316,8 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#routinesBtn')) { openRoutinesModal(); return; }
   if (e.target.closest('#routinesCloseBtn') || e.target.id === 'routinesModal') { closeRoutinesModal(); return; }
   if (e.target.closest('#newRoutineBtn')) { openRoutineEditor(); return; }
+  const rSort = e.target.closest('[data-rsort]');
+  if (rSort) { setRoutineSort(rSort.dataset.rsort); return; }
   const rAdd = e.target.closest('[data-routine-add]');
   if (rAdd) { addRoutineToDay(rAdd.dataset.routineAdd); return; }
   const rEdit = e.target.closest('[data-routine-edit]');
@@ -5514,6 +5557,7 @@ function exportData() {
       notes: state.notes,
       routines: state.routines,
       routineLog: state.routineLog,
+      routineSort: state.routineSort,
       showTimes: state.showTimes,
       daysUsed: state.daysUsed,
       taskSortMode: state.taskSortMode
@@ -5577,6 +5621,7 @@ function confirmImport() {
   state.notes = imported.notes || {};
   state.routines = Array.isArray(imported.routines) ? imported.routines : [];
   state.routineLog = imported.routineLog || {};
+  state.routineSort = imported.routineSort === 'alpha' ? 'alpha' : 'recent';
   state.showTimes = !!imported.showTimes;
   state.daysUsed = Array.isArray(imported.daysUsed) ? imported.daysUsed : [];
   backfillDaysUsed();
