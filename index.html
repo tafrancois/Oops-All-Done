@@ -1008,6 +1008,62 @@
   .streak-pill.bump { animation: streakBump 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
   @keyframes streakBump { 0% { transform: scale(1); } 40% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
+  /* ===== ROUTINE / HEADING GROUPS ===== */
+  .routine-group {
+    --rg-bg: #f3ecf8;
+    --rg-bar: rgba(122,69,112,0.28);
+    --rg-text: #6b3a5e;
+    margin: 10px 2px;
+    padding: 2px 0 6px;
+    background: var(--rg-bg);
+    border-top: 1.5px solid var(--rg-bar);
+    border-bottom: 1.5px solid var(--rg-bar);
+    border-radius: 6px;
+  }
+
+  .routine-group.gold {
+    --rg-bg: #fdf4de;
+    --rg-bar: rgba(232,168,56,0.45);
+    --rg-text: #8a5a14;
+  }
+
+  .routine-group:first-child { margin-top: 2px; }
+  .routine-group:last-child { margin-bottom: 2px; }
+
+  .routine-group-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px 4px;
+  }
+
+  .routine-group-name {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    color: var(--rg-text);
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .routine-group-count {
+    flex-shrink: 0;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.75rem;
+    color: var(--rg-text);
+    opacity: 0.7;
+  }
+
+  .routine-group.complete .routine-group-count { opacity: 1; }
+
+  .routine-group .checklist-item:hover { background: rgba(255,255,255,0.55); }
+  .routine-group .check-box { background: rgba(255,255,255,0.85); }
+  .routine-group .checklist-item.checked .check-box { background: #7fa873; }
+
   /* ===== SECTION HEADERS (>> BONUS <<) ===== */
   .list-header {
     display: flex;
@@ -3759,18 +3815,27 @@ function headerInfo(raw) {
   return { text, isBonus: /\bbonus\b/i.test(text) };
 }
 
+// Any header other than BONUS starts a colored group (routines use ">> Routine Name <<").
+// The group runs until a blank line, the next header, or the end of the list.
 function parsePlannerLines(text) {
   const lines = (text || '').split('\n');
   let inBonus = false;
+  let group = null;
+  let groupCount = 0;
   return lines.map((raw, i) => {
-    if (raw.trim() === '') return { type: 'empty', raw, index: i };
+    if (raw.trim() === '') {
+      group = null;
+      return { type: 'empty', raw, index: i };
+    }
     const head = headerInfo(raw);
     if (head) {
       inBonus = head.isBonus;
-      return { type: 'header', raw, text: head.text, isBonus: head.isBonus, index: i };
+      group = head.isBonus ? null : groupCount++;
+      return { type: 'header', raw, text: head.text, isBonus: head.isBonus, group, index: i };
     }
     const task = parseTaskLine(raw, i);
     task.bonus = inBonus;
+    task.group = group;
     return task;
   });
 }
@@ -3805,16 +3870,18 @@ function hasBonusHeader(text) {
 }
 
 // Add lines to a list, keeping them ABOVE the bonus section (routines, moved maybes…)
-function appendToList(existing, addText) {
+// block = true puts a blank line before it, so it starts its own section.
+function appendToList(existing, addText, block = false) {
   if (!addText) return existing;
   if (!existing.trim()) return addText;
+  const sep = block ? '\n\n' : '\n';
   const lines = existing.split('\n');
   const b = lines.findIndex(l => { const h = headerInfo(l); return h && h.isBonus; });
-  if (b === -1) return existing.replace(/\s+$/, '') + '\n' + addText;
+  if (b === -1) return existing.replace(/\s+$/, '') + sep + addText;
   let end = b;
   while (end > 0 && lines[end - 1].trim() === '') end--;
   const before = lines.slice(0, end).join('\n');
-  return (before ? before + '\n' : '') + addText + '\n\n' + lines.slice(b).join('\n');
+  return (before ? before + sep : '') + addText + '\n\n' + lines.slice(b).join('\n');
 }
 
 // Older versions kept bonus wins in a separate box — fold them into each day's list.
@@ -3907,6 +3974,42 @@ function timingPillsHtml(line, interactive, list) {
     : `<span class="time-pill static">${inner}</span>`;
 }
 
+// Render parsed lines into a container, wrapping each routine/heading group in a
+// colored block that alternates lavender → gold → lavender…
+function renderLinesInto(container, lines, interactive, list = 'must', compact = false) {
+  let box = null;
+  let boxGroup = null;
+  lines.forEach(line => {
+    if (line.type === 'header' && !line.isBonus) {
+      const groupTasks = lines.filter(l => l.type === 'task' && l.group === line.group);
+      const done = groupTasks.filter(t => t.checked).length;
+      box = document.createElement('div');
+      box.className = 'routine-group ' + (line.group % 2 ? 'gold' : 'lavender') +
+        (groupTasks.length && done === groupTasks.length ? ' complete' : '');
+      const head = document.createElement('div');
+      head.className = 'routine-group-head';
+      head.innerHTML = `<span class="routine-group-name">${escapeHtml(line.text || 'routine')}</span>` +
+        (groupTasks.length ? `<span class="routine-group-count">${done === groupTasks.length ? '✓ done' : `${done}/${groupTasks.length}`}</span>` : '');
+      box.appendChild(head);
+      container.appendChild(box);
+      boxGroup = line.group;
+      return;
+    }
+    const el = buildChecklistItem(line, interactive, list);
+    if (compact) {
+      if (line.type === 'task') el.style.paddingTop = el.style.paddingBottom = '4px';
+      else if (line.type === 'empty') el.style.minHeight = '6px';
+    }
+    if (box && line.type === 'task' && line.group === boxGroup) {
+      box.appendChild(el);
+    } else {
+      box = null;
+      boxGroup = null;
+      container.appendChild(el);
+    }
+  });
+}
+
 function buildChecklistItem(line, interactive, list = 'must') {
   const el = document.createElement('div');
   if (line.type === 'task') {
@@ -3990,12 +4093,7 @@ function renderPlannerEditor() {
         content.classList.add('empty');
       } else {
         content.style.whiteSpace = 'normal';
-        parsePlannerLines(text).forEach(line => {
-          const lineEl = buildChecklistItem(line, false);
-          if (line.type === 'task') lineEl.style.paddingTop = lineEl.style.paddingBottom = '4px';
-          else if (line.type === 'empty') lineEl.style.minHeight = '6px';
-          content.appendChild(lineEl);
-        });
+        renderLinesInto(content, parsePlannerLines(text), false, 'must', true);
       }
       col.appendChild(content);
 
@@ -4046,7 +4144,7 @@ function renderPlannerEditor() {
       tip.style.display = 'block';
       tip.innerHTML = plannerList === 'maybe'
         ? `maybe = nice if it happens · unfinished ones can be moved to another day`
-        : `each line is a task · <code>Tab</code> (or ⇥) for a sub-task · <code>>> BONUS <<</code> starts your bonus list`;
+        : `each line is a task · <code>Tab</code> (or ⇥) for a sub-task · <code>>> name <<</code> starts a colored section (a blank line ends it) · <code>>> BONUS <<</code> starts your bonus list`;
       if (state.showTimes) tip.innerHTML += ` · add <code>@2pm</code> or <code>~30m</code> for times`;
       document.querySelectorAll('.list-toggle-btn').forEach(b =>
         b.classList.toggle('active', b.dataset.list === plannerList));
@@ -4088,7 +4186,7 @@ function renderChecklist() {
   container.innerHTML = '';
   const winsText = bonusDone ? ` · ✦ ${bonusDone} bonus win${bonusDone === 1 ? '' : 's'}` : '';
   if (tasks.length === 0 && lines.some(l => l.type === 'task')) {
-    lines.forEach(line => container.appendChild(buildChecklistItem(line, true, 'must')));
+    renderLinesInto(container, lines, true, 'must');
     progress.textContent = winsText.replace(/^ · /, '');
     progress.classList.remove('all-done');
   } else if (tasks.length === 0) {
@@ -4096,7 +4194,7 @@ function renderChecklist() {
     progress.textContent = '';
     progress.classList.remove('all-done');
   } else {
-    lines.forEach(line => container.appendChild(buildChecklistItem(line, true, 'must')));
+    renderLinesInto(container, lines, true, 'must');
     const done = tasks.filter(t => t.checked).length;
     if (done === tasks.length) {
       progress.textContent = `all ${tasks.length} done 🎉${winsText}`;
@@ -4112,7 +4210,7 @@ function renderChecklist() {
     maybeWrap.style.display = 'none';
   } else {
     maybeWrap.style.display = 'block';
-    maybeLines.forEach(line => maybeList.appendChild(buildChecklistItem(line, true, 'maybe')));
+    renderLinesInto(maybeList, maybeLines, true, 'maybe');
     const mDone = maybeTasks.filter(t => t.checked).length;
     maybeCount.textContent = `· ${mDone} of ${maybeTasks.length}`;
     const unfinishedTop = maybeLines.some(l => l.type === 'task' && l.level === 0 && !l.checked && !l.bonus);
@@ -4560,7 +4658,10 @@ function cleanRoutineLines(text) {
 }
 
 function appendRoutineText(existing, routine) {
-  return appendToList(existing, cleanRoutineLines(routine.text));
+  const tasks = cleanRoutineLines(routine.text);
+  if (!tasks) return existing;
+  const name = (routine.name || 'routine').replace(/[<>]/g, '').trim() || 'routine';
+  return appendToList(existing, `>> ${name} <<\n${tasks}`, true);
 }
 
 // Auto-add routines scheduled for this weekday — once per day, today or later only.
