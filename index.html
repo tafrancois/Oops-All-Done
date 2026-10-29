@@ -799,9 +799,60 @@
 
   .indent-bar {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 6px;
     margin-top: 8px;
+  }
+
+  .opt-btn { color: var(--plum-soft); }
+
+  @media (max-width: 420px) {
+    .indent-btn { padding: 6px 10px; font-size: 0.78rem; }
+    .indent-btn[data-indent] { padding: 6px 13px; font-size: 0.95rem; }
+    .ib-word { display: none; }
+    .indent-bar { gap: 5px; }
+  }
+
+  /* ===== OPTIONAL TASKS ===== */
+  .checklist-item.optional .check-text {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--plum-mist);
+  }
+
+  .checklist-item.optional .check-box {
+    border-style: dashed;
+    border-color: rgba(171,133,160,0.7);
+    background: transparent;
+  }
+
+  .checklist-item.optional.checked .check-box {
+    border-style: solid;
+    background: #b5c9ac;
+    border-color: #b5c9ac;
+  }
+
+  .checklist-item.optional.checked .check-text {
+    color: #8aa582;
+    text-decoration-color: rgba(138,165,130,0.5);
+  }
+
+  .opt-tag {
+    display: inline-block;
+    font-family: 'Nunito', sans-serif;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--plum-mist);
+    background: rgba(171,133,160,0.14);
+    border-radius: 999px;
+    padding: 2px 7px;
+    margin-right: 7px;
+    vertical-align: 2px;
+    text-decoration: none;
   }
 
   .indent-btn {
@@ -2104,8 +2155,9 @@
         ></textarea>
         <div class="indent-bar">
           <button type="button" class="indent-btn bonus-header-btn" id="bonusHeaderBtn" aria-label="add bonus section">✦ bonus</button>
-          <button type="button" class="indent-btn" data-indent="out" data-target="plannerEditor" aria-label="outdent line">⇤ outdent</button>
-          <button type="button" class="indent-btn" data-indent="in" data-target="plannerEditor" aria-label="indent line">⇥ indent</button>
+          <button type="button" class="indent-btn opt-btn" data-optional data-target="plannerEditor" aria-label="mark line optional">◌ optional</button>
+          <button type="button" class="indent-btn" data-indent="out" data-target="plannerEditor" aria-label="outdent line">⇤<span class="ib-word"> outdent</span></button>
+          <button type="button" class="indent-btn" data-indent="in" data-target="plannerEditor" aria-label="indent line">⇥<span class="ib-word"> indent</span></button>
         </div>
       </div>
       <div id="plannerChecklistWrap" style="display:none;">
@@ -2318,11 +2370,12 @@
         <input type="text" id="routineNameInput" placeholder="e.g. morning reset" maxlength="40" />
       </div>
       <div class="field">
-        <label>tasks (one per line · indent for sub-tasks)</label>
+        <label>tasks (one per line · indent for sub-tasks · ◌ marks optional)</label>
         <textarea id="routineTextInput" class="planner-editor routine-editor" placeholder="brush teeth&#10;skincare&#10;	cleanser&#10;	moisturizer&#10;make bed" spellcheck="true"></textarea>
         <div class="indent-bar">
-          <button type="button" class="indent-btn" data-indent="out" data-target="routineTextInput" aria-label="outdent line">⇤ outdent</button>
-          <button type="button" class="indent-btn" data-indent="in" data-target="routineTextInput" aria-label="indent line">⇥ indent</button>
+          <button type="button" class="indent-btn opt-btn" data-optional data-target="routineTextInput" aria-label="mark line optional" style="margin-right:auto;">◌ optional</button>
+          <button type="button" class="indent-btn" data-indent="out" data-target="routineTextInput" aria-label="outdent line">⇤<span class="ib-word"> outdent</span></button>
+          <button type="button" class="indent-btn" data-indent="in" data-target="routineTextInput" aria-label="indent line">⇥<span class="ib-word"> indent</span></button>
         </div>
       </div>
       <div class="field">
@@ -3840,29 +3893,25 @@ function parsePlannerLines(text) {
   });
 }
 
+// "optional: wash the car", "? wash the car" or "(optional) wash the car"
+const OPTIONAL_RE = /^(?:optional\s*:\s*|\(optional\)\s*|\?\s+)/i;
+
 function parseTaskLine(raw, i) {
-  {
-    const level = indentLevel(raw);
+  const level = indentLevel(raw);
+  const m = raw.match(CHECK_LINE_RE);
+  const checked = !!m && m[3].toLowerCase() === 'x';
+  let text = m
+    ? m[4].replace(/^[-*•]\s*/, '').trim()
+    : (raw.trim().replace(/^[-*•]\s*/, '') || raw.trim());
+  const optional = OPTIONAL_RE.test(text);
+  if (optional) text = text.replace(OPTIONAL_RE, '');
+  const t = extractTiming(text);
+  return { type: 'task', checked, optional, raw, level, taskText: t.text || '(empty)', time: t.time, dur: t.dur, index: i };
+}
 
-    const m = raw.match(CHECK_LINE_RE);
-    if (m) {
-      const t = extractTiming(m[4].replace(/^[-*•]\s*/, '').trim());
-      return {
-        type: 'task',
-        checked: m[3].toLowerCase() === 'x',
-        raw,
-        level,
-        taskText: t.text || '(empty)',
-        time: t.time,
-        dur: t.dur,
-        index: i
-      };
-    }
-
-    const stripped = raw.trim().replace(/^[-*•]\s*/, '');
-    const t = extractTiming(stripped || raw.trim());
-    return { type: 'task', checked: false, raw, level, taskText: t.text || '(empty)', time: t.time, dur: t.dur, index: i };
-  }
+// Tasks that count toward "X of Y done" (not bonus, not optional)
+function countsTowardDone(l) {
+  return l.type === 'task' && !l.bonus && !l.optional;
 }
 
 function hasBonusHeader(text) {
@@ -3937,15 +3986,19 @@ function setTaskTreeChecked(text, lineIndex, checked) {
 
   const checks = parsed.map(p => (p.type === 'task' ? p.checked : null));
   checks[lineIndex] = checked;
-  descendantIndexes(parsed, lineIndex).forEach(j => { checks[j] = checked; });
+  // checking a parent checks its required sub-tasks; optional ones stay as they are
+  descendantIndexes(parsed, lineIndex).forEach(j => {
+    if (!checked || !parsed[j].optional) checks[j] = checked;
+  });
 
   let childLevel = target.level;
   for (let j = lineIndex - 1; j >= 0 && childLevel > 0; j--) {
     const p = parsed[j];
     if (p.type === 'header') break;
     if (p.type !== 'task' || p.level >= childLevel) continue;
-    const desc = descendantIndexes(parsed, j);
-    checks[j] = desc.length > 0 && desc.every(k => checks[k]);
+    const required = descendantIndexes(parsed, j).filter(k => !parsed[k].optional);
+    // a parent auto-checks when its required sub-tasks are done (optional ones don't matter)
+    if (required.length) checks[j] = required.every(k => checks[k]);
     childLevel = p.level;
   }
 
@@ -3981,7 +4034,7 @@ function renderLinesInto(container, lines, interactive, list = 'must', compact =
   let boxGroup = null;
   lines.forEach(line => {
     if (line.type === 'header' && !line.isBonus) {
-      const groupTasks = lines.filter(l => l.type === 'task' && l.group === line.group);
+      const groupTasks = lines.filter(l => countsTowardDone(l) && l.group === line.group);
       const done = groupTasks.filter(t => t.checked).length;
       box = document.createElement('div');
       box.className = 'routine-group ' + (line.group % 2 ? 'gold' : 'lavender') +
@@ -4013,7 +4066,8 @@ function renderLinesInto(container, lines, interactive, list = 'must', compact =
 function buildChecklistItem(line, interactive, list = 'must') {
   const el = document.createElement('div');
   if (line.type === 'task') {
-    el.className = 'checklist-item' + (line.checked ? ' checked' : '') + (line.level > 0 ? ' sub' : '') + (line.bonus ? ' bonus' : '');
+    el.className = 'checklist-item' + (line.checked ? ' checked' : '') + (line.level > 0 ? ' sub' : '') +
+      (line.bonus ? ' bonus' : '') + (line.optional ? ' optional' : '');
     if (line.level > 0) el.style.setProperty('--lvl', line.level);
     if (interactive) {
       el.dataset.lineIndex = line.index;
@@ -4025,7 +4079,8 @@ function buildChecklistItem(line, interactive, list = 'must') {
       ? `<button type="button" class="move-btn" data-move-index="${line.index}" aria-label="move to another day">📅 move</button>`
       : '';
     const extras = timingPillsHtml(line, interactive, list) + moveBtn;
-    el.innerHTML = `<span class="check-box"></span><span class="check-text">${escapeHtml(line.taskText)}</span>${extras ? `<span class="row-extras">${extras}</span>` : ''}`;
+    const optTag = line.optional ? '<span class="opt-tag">optional</span>' : '';
+    el.innerHTML = `<span class="check-box"></span><span class="check-text">${optTag}${escapeHtml(line.taskText)}</span>${extras ? `<span class="row-extras">${extras}</span>` : ''}`;
   } else if (line.type === 'header') {
     el.className = 'list-header' + (line.isBonus ? ' bonus' : '');
     el.innerHTML = line.text ? `<span class="list-header-text">${escapeHtml(line.text)}</span>` : '';
@@ -4144,7 +4199,7 @@ function renderPlannerEditor() {
       tip.style.display = 'block';
       tip.innerHTML = plannerList === 'maybe'
         ? `maybe = nice if it happens · unfinished ones can be moved to another day`
-        : `each line is a task · <code>Tab</code> (or ⇥) for a sub-task · <code>>> name <<</code> starts a colored section (a blank line ends it) · <code>>> BONUS <<</code> starts your bonus list`;
+        : `each line is a task · <code>Tab</code> (or ⇥) for a sub-task · <code>optional:</code> (or ◌) for optional tasks · <code>>> name <<</code> starts a colored section (a blank line ends it) · <code>>> BONUS <<</code> starts your bonus list`;
       if (state.showTimes) tip.innerHTML += ` · add <code>@2pm</code> or <code>~30m</code> for times`;
       document.querySelectorAll('.list-toggle-btn').forEach(b =>
         b.classList.toggle('active', b.dataset.list === plannerList));
@@ -4179,12 +4234,14 @@ function renderChecklist() {
 
   const lines = parsePlannerLines(getPlannerEntry(state.profile, plannerSelectedDate));
   const maybeLines = parsePlannerLines(getMaybeEntry(state.profile, plannerSelectedDate));
-  const tasks = lines.filter(l => l.type === 'task' && !l.bonus);
+  const tasks = lines.filter(countsTowardDone);
   const bonusDone = lines.filter(l => l.type === 'task' && l.bonus && l.checked).length;
+  const optionalDone = lines.filter(l => l.type === 'task' && !l.bonus && l.optional && l.checked).length;
   const maybeTasks = maybeLines.filter(l => l.type === 'task');
 
   container.innerHTML = '';
-  const winsText = bonusDone ? ` · ✦ ${bonusDone} bonus win${bonusDone === 1 ? '' : 's'}` : '';
+  const winsText = (optionalDone ? ` · +${optionalDone} optional` : '') +
+    (bonusDone ? ` · ✦ ${bonusDone} bonus win${bonusDone === 1 ? '' : 's'}` : '');
   if (tasks.length === 0 && lines.some(l => l.type === 'task')) {
     renderLinesInto(container, lines, true, 'must');
     progress.textContent = winsText.replace(/^ · /, '');
@@ -4227,7 +4284,7 @@ function handleChecklistClick(itemEl) {
   const currentText = getListEntry(list, state.profile, plannerSelectedDate);
   const wasChecked = itemEl.classList.contains('checked');
 
-  const tasksBefore = parsePlannerLines(currentText).filter(l => l.type === 'task' && !l.bonus);
+  const tasksBefore = parsePlannerLines(currentText).filter(countsTowardDone);
   const doneBefore = tasksBefore.filter(t => t.checked).length;
 
   const newText = setTaskTreeChecked(currentText, lineIndex, !wasChecked);
@@ -4242,7 +4299,7 @@ function handleChecklistClick(itemEl) {
     const box = itemEl.querySelector('.check-box');
     miniConfetti(box || itemEl);
 
-    const tasksAfter = parsePlannerLines(newText).filter(l => l.type === 'task' && !l.bonus);
+    const tasksAfter = parsePlannerLines(newText).filter(countsTowardDone);
     const doneAfter = tasksAfter.filter(t => t.checked).length;
     if (isBonus) {
       showToast('✦ bonus win!');
@@ -4360,6 +4417,42 @@ function indentSelection(ta, dir) {
   const newEnd = start === end ? newStart : Math.max(newStart, end + totalDelta);
   ta.setSelectionRange(newStart, newEnd);
   ta.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// "◌ optional" button: add or remove "optional: " on the current line(s).
+function toggleOptionalLines(ta) {
+  const v = ta.value;
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const lineStart = v.lastIndexOf('\n', start - 1) + 1;
+  const endProbe = (end > start && v[end - 1] === '\n') ? end - 1 : end;
+  let blockEnd = v.indexOf('\n', endProbe);
+  if (blockEnd === -1) blockEnd = v.length;
+
+  const PREFIX_RE = /^([ \t]*(?:[-*•]\s*)?(?:\[[ xX]\]\s*)?)(.*)$/;
+  const lines = v.slice(lineStart, blockEnd).split('\n');
+  // if every non-blank line is already optional, remove; otherwise add
+  const filled = lines.filter(l => l.trim());
+  const allOptional = filled.length > 0 && filled.every(l => OPTIONAL_RE.test(l.match(PREFIX_RE)[2]));
+  let firstDelta = 0, totalDelta = 0;
+  const out = lines.map((line, i) => {
+    let nl = line;
+    if (line.trim() || lines.length === 1) {
+      const [, pre, rest] = line.match(PREFIX_RE);
+      nl = allOptional ? pre + rest.replace(OPTIONAL_RE, '') : pre + 'optional: ' + rest.replace(OPTIONAL_RE, '');
+    }
+    const d = nl.length - line.length;
+    if (i === 0) firstDelta = d;
+    totalDelta += d;
+    return nl;
+  });
+
+  ta.value = v.slice(0, lineStart) + out.join('\n') + v.slice(blockEnd);
+  const newStart = Math.max(lineStart, start + firstDelta);
+  const newEnd = start === end ? newStart : Math.max(newStart, end + totalDelta);
+  ta.setSelectionRange(newStart, newEnd);
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
+  SFX.click();
 }
 
 // Enter on an indented / bulleted line keeps the same indent + bullet.
@@ -5120,6 +5213,16 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#welcomeStartBtn')) { finishWelcome(); return; }
 
   // ---- indent / outdent buttons (planner + routine editors) ----
+  const optBtn = e.target.closest('.indent-btn[data-optional]');
+  if (optBtn) {
+    const ta = document.getElementById(optBtn.dataset.target);
+    if (ta) {
+      toggleOptionalLines(ta);
+      ta.focus({ preventScroll: true });
+    }
+    return;
+  }
+
   const indentBtn = e.target.closest('.indent-btn[data-indent]');
   if (indentBtn) {
     const ta = document.getElementById(indentBtn.dataset.target);
