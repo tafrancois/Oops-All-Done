@@ -1262,6 +1262,168 @@
     margin: -8px 0 14px;
   }
 
+  .rtab-toggle {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    margin: -6px 0 12px;
+    background: rgba(74,37,64,0.08);
+    border-radius: 999px;
+  }
+
+  .rtab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 10px;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--plum-soft);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .rtab-btn.active {
+    background: var(--plum);
+    color: var(--cream);
+    box-shadow: 0 3px 10px rgba(74,37,64,0.25);
+  }
+
+  .rtab-btn.active[data-rtab="master"] {
+    background: linear-gradient(135deg, var(--plum), #8a4f7d);
+  }
+
+  .routine-card.master { border-color: rgba(232,168,56,0.45); background: #fffdf6; }
+
+  .routine-members {
+    font-size: 0.78rem;
+    color: var(--plum-soft);
+    margin-top: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .master-picked {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .master-empty {
+    padding: 14px;
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.88rem;
+    color: var(--plum-mist);
+    border: 2px dashed rgba(74,37,64,0.12);
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  .mp-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 2px solid rgba(74,37,64,0.1);
+    border-radius: 12px;
+    padding: 6px 6px 6px 10px;
+  }
+
+  .mp-row:nth-child(odd) { background: #f6f0fa; }
+  .mp-row:nth-child(even) { background: #fdf6e3; }
+
+  .mp-num {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--plum);
+    color: var(--cream);
+    font-weight: 800;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mp-name {
+    flex: 1;
+    min-width: 0;
+    font-weight: 700;
+    color: var(--plum);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mp-btn {
+    flex-shrink: 0;
+    border: none;
+    background: rgba(74,37,64,0.07);
+    color: var(--plum);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .mp-btn:disabled { opacity: 0.25; cursor: default; }
+  .mp-btn.del:hover { background: rgba(228,122,122,0.18); color: var(--rose); }
+
+  .master-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .pool-chip {
+    border: 2px solid rgba(74,37,64,0.14);
+    background: #fff;
+    color: var(--plum);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .pool-chip:active { transform: scale(0.94); }
+  .pool-chip.used { border-color: rgba(232,168,56,0.6); background: #fdf4de; }
+
+  /* master title inside the to-do list (a heading with no tasks of its own) */
+  .group-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 12px 2px;
+  }
+
+  .group-title-text {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: var(--plum);
+    letter-spacing: -0.01em;
+  }
+
+  .group-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, rgba(232,168,56,0.6), transparent);
+  }
+
   .routines-sort { margin: 0 0 10px; padding: 0; }
   .routines-sort .sort-btn { background: #fff; }
   .routines-sort .sort-btn.active { background: var(--plum); }
@@ -2359,7 +2521,11 @@
   <div class="modal routines-modal">
     <div id="routinesListView">
       <div class="modal-title">routines 🔁</div>
-      <p class="routines-sub">saved task lists. pick days and they drop into your planner on their own — or tap <strong>＋ add</strong> to drop one in right now.</p>
+      <div class="rtab-toggle" role="tablist" aria-label="routine type">
+        <button type="button" class="rtab-btn" data-rtab="routines">🔁 routines</button>
+        <button type="button" class="rtab-btn" data-rtab="master">⭐ master</button>
+      </div>
+      <p class="routines-sub" id="routinesSubText"></p>
       <div class="sort-bar routines-sort" id="routinesSortBar">
         <span class="sort-label">sort:</span>
         <button class="sort-btn" data-rsort="recent">recent</button>
@@ -2369,6 +2535,7 @@
       <div class="modal-actions">
         <button class="btn btn-ghost" id="routinesCloseBtn">done</button>
         <button class="btn btn-primary" id="newRoutineBtn">＋ new routine</button>
+        <button class="btn btn-primary" id="newMasterBtn" style="display:none;">＋ new master</button>
       </div>
     </div>
 
@@ -2397,6 +2564,33 @@
         <div style="flex:1;"></div>
         <button class="btn btn-ghost" id="routineCancelBtn">cancel</button>
         <button class="btn btn-primary" id="routineSaveBtn">save</button>
+      </div>
+    </div>
+
+    <div id="masterEditView" style="display:none;">
+      <div class="modal-title" id="masterEditTitle">new master routine</div>
+      <div class="field">
+        <label>name</label>
+        <input type="text" id="masterNameInput" placeholder="e.g. Full Morning" maxlength="40" />
+      </div>
+      <div class="field">
+        <label>routines in it (in order)</label>
+        <div class="master-picked" id="masterPicked"></div>
+      </div>
+      <div class="field">
+        <label>tap a routine to add it</label>
+        <div class="master-pool" id="masterPool"></div>
+      </div>
+      <div class="field">
+        <label>auto-add on these days (leave blank for manual only)</label>
+        <div class="day-chips" id="masterDayChips"></div>
+        <button type="button" class="day-all-btn" id="masterEveryDayBtn">every day</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="masterDeleteBtn" style="display:none;">delete</button>
+        <div style="flex:1;"></div>
+        <button class="btn btn-ghost" id="masterCancelBtn">cancel</button>
+        <button class="btn btn-primary" id="masterSaveBtn">save</button>
       </div>
     </div>
   </div>
@@ -2453,6 +2647,8 @@ let state = {
   routines: [],     // { id, owner, name, text, days: [0-6] }
   routineLog: {},   // 'profile:YYYY-MM-DD' -> [routineId] already auto-added that day
   routineSort: 'recent', // 'recent' (last tapped/opened first) | 'alpha'
+  masterRoutines: [], // { id, owner, name, routineIds: [routineId…], days: [0-6], lastUsed }
+  routinesTab: 'routines', // which tab the routines page opens on: 'routines' | 'master'
 
   maybe: {},        // 'profile:YYYY-MM-DD' -> "maybe" list text (same format as planner)
   showTimes: false, // show time + duration pills next to tasks
@@ -2546,6 +2742,8 @@ function migrateState() {
   if (!state.notes || typeof state.notes !== 'object') state.notes = {};
   if (!Array.isArray(state.routines)) state.routines = [];
   if (state.routineSort !== 'alpha' && state.routineSort !== 'recent') state.routineSort = 'recent';
+  if (!Array.isArray(state.masterRoutines)) state.masterRoutines = [];
+  if (state.routinesTab !== 'master') state.routinesTab = 'routines';
   if (!state.routineLog || typeof state.routineLog !== 'object') state.routineLog = {};
   if (!state.maybe || typeof state.maybe !== 'object') state.maybe = {};
   mergeLegacyExtra();
@@ -4044,12 +4242,24 @@ function timingPillsHtml(line, interactive, list) {
 function renderLinesInto(container, lines, interactive, list = 'must', compact = false) {
   let box = null;
   let boxGroup = null;
+  let colorIdx = 0;
   lines.forEach(line => {
     if (line.type === 'header' && !line.isBonus) {
+      const hasTasks = lines.some(l => l.type === 'task' && l.group === line.group);
+      if (!hasTasks) {
+        // a heading with nothing under it (like a master routine's name) is a title
+        const t = document.createElement('div');
+        t.className = 'group-title';
+        t.innerHTML = `<span class="group-title-text">${escapeHtml(line.text || '')}</span>`;
+        container.appendChild(t);
+        box = null;
+        boxGroup = null;
+        return;
+      }
       const groupTasks = lines.filter(l => countsTowardDone(l) && l.group === line.group);
       const done = groupTasks.filter(t => t.checked).length;
       box = document.createElement('div');
-      box.className = 'routine-group ' + (line.group % 2 ? 'gold' : 'lavender') +
+      box.className = 'routine-group ' + (colorIdx++ % 2 ? 'gold' : 'lavender') +
         (groupTasks.length && done === groupTasks.length ? ' complete' : '');
       const head = document.createElement('div');
       head.className = 'routine-group-head';
@@ -4762,11 +4972,35 @@ function cleanRoutineLines(text) {
   return (text || '').split('\n').filter(l => l.trim()).map(l => setLineChecked(l, false)).join('\n');
 }
 
-function appendRoutineText(existing, routine) {
+function headingName(name, fallback = 'routine') {
+  return (name || fallback).replace(/[<>]/g, '').trim() || fallback;
+}
+
+// ">> Routine Name <<" + its tasks
+function routineBlock(routine) {
   const tasks = cleanRoutineLines(routine.text);
-  if (!tasks) return existing;
-  const name = (routine.name || 'routine').replace(/[<>]/g, '').trim() || 'routine';
-  return appendToList(existing, `>> ${name} <<\n${tasks}`, true);
+  return tasks ? `>> ${headingName(routine.name)} <<\n${tasks}` : '';
+}
+
+function appendRoutineText(existing, routine) {
+  const block = routineBlock(routine);
+  return block ? appendToList(existing, block, true) : existing;
+}
+
+// ---------- master routines (routines made of routines) ----------
+function masterMembers(m) {
+  return (m.routineIds || []).map(id => state.routines.find(r => r.id === id)).filter(Boolean);
+}
+
+function masterBlock(m) {
+  const blocks = masterMembers(m).map(routineBlock).filter(Boolean);
+  if (!blocks.length) return '';
+  return `>> ${headingName(m.name, 'master routine')} <<\n` + blocks.join('\n\n');
+}
+
+function appendMasterText(existing, m) {
+  const block = masterBlock(m);
+  return block ? appendToList(existing, block, true) : existing;
 }
 
 // Auto-add routines scheduled for this weekday — once per day, today or later only.
@@ -4776,16 +5010,18 @@ function applyAutoRoutines(profile, dateKey) {
   const dow = parseDateKey(dateKey).getDay();
   const key = plannerKey(profile, dateKey);
   const already = state.routineLog[key] || [];
-  const due = (state.routines || []).filter(r =>
-    r.owner === profile && Array.isArray(r.days) && r.days.includes(dow) && !already.includes(r.id)
-  );
-  if (!due.length) return [];
+  const isDue = (x, logId) =>
+    x.owner === profile && Array.isArray(x.days) && x.days.includes(dow) && !already.includes(logId);
+  const due = (state.routines || []).filter(r => isDue(r, r.id));
+  const dueMasters = (state.masterRoutines || []).filter(m => isDue(m, 'm:' + m.id));
+  if (!due.length && !dueMasters.length) return [];
 
   let text = getPlannerEntry(profile, dateKey);
+  dueMasters.forEach(m => { text = appendMasterText(text, m); });
   due.forEach(r => { text = appendRoutineText(text, r); });
-  state.routineLog[key] = [...already, ...due.map(r => r.id)];
+  state.routineLog[key] = [...already, ...dueMasters.map(m => 'm:' + m.id), ...due.map(r => r.id)];
   setPlannerEntry(profile, dateKey, text); // also saves
-  return due;
+  return [...dueMasters, ...due];
 }
 
 // Forget auto-add bookkeeping for days that are already over.
@@ -4811,13 +5047,25 @@ function openRoutinesModal() {
 function closeRoutinesModal() {
   document.getElementById('routinesModal').classList.remove('open');
   editingRoutineId = null;
+  editingMasterId = null;
 }
 
 function showRoutineListView() {
   editingRoutineId = null;
+  editingMasterId = null;
   renderRoutinesList();
   document.getElementById('routinesListView').style.display = 'block';
   document.getElementById('routineEditView').style.display = 'none';
+  document.getElementById('masterEditView').style.display = 'none';
+}
+
+function setRoutinesTab(tab) {
+  tab = tab === 'master' ? 'master' : 'routines';
+  if (tab === state.routinesTab) return;
+  state.routinesTab = tab;
+  save();
+  SFX.click();
+  renderRoutinesList();
 }
 
 // Remember when a routine was last tapped (added or opened) for "recent" sorting
@@ -4825,8 +5073,8 @@ function touchRoutine(r) {
   if (r) r.lastUsed = Date.now();
 }
 
-function sortedRoutines() {
-  const list = myRoutines().map((r, i) => ({ r, i }));
+function sortedRoutines(source = myRoutines()) {
+  const list = source.map((r, i) => ({ r, i }));
   if (state.routineSort === 'alpha') {
     list.sort((a, b) => a.r.name.localeCompare(b.r.name, undefined, { sensitivity: 'base', numeric: true }));
   } else {
@@ -4845,6 +5093,15 @@ function setRoutineSort(mode) {
 }
 
 function renderRoutinesList() {
+  const isMaster = state.routinesTab === 'master';
+  document.querySelectorAll('.rtab-btn').forEach(b => b.classList.toggle('active', b.dataset.rtab === state.routinesTab));
+  document.getElementById('newRoutineBtn').style.display = isMaster ? 'none' : '';
+  document.getElementById('newMasterBtn').style.display = isMaster ? '' : 'none';
+  document.getElementById('routinesSubText').innerHTML = isMaster
+    ? 'routines made of routines. tap <strong>＋ add</strong> and they all drop into your list in order, each as its own block.'
+    : 'saved task lists. pick days and they drop into your planner on their own — or tap <strong>＋ add</strong> to drop one in right now.';
+  if (isMaster) { renderMasterList(); return; }
+
   const list = document.getElementById('routinesList');
   const routines = sortedRoutines();
   document.querySelectorAll('#routinesSortBar [data-rsort]').forEach(b =>
@@ -4932,11 +5189,180 @@ function saveRoutine() {
   renderCalendar();
 }
 
+let editingMasterId = null;
+let masterPicks = [];
+let masterDays = [];
+
+function myMasters() {
+  return (state.masterRoutines || []).filter(m => m.owner === state.profile);
+}
+
+function renderMasterList() {
+  const list = document.getElementById('routinesList');
+  const masters = sortedRoutines(myMasters());
+  document.querySelectorAll('#routinesSortBar [data-rsort]').forEach(b =>
+    b.classList.toggle('active', b.dataset.rsort === state.routineSort));
+  document.getElementById('routinesSortBar').style.display = masters.length > 1 ? 'flex' : 'none';
+  list.innerHTML = '';
+  if (!masters.length) {
+    list.innerHTML = myRoutines().length
+      ? `<div class="routines-empty">no master routines yet — bundle a few routines together, like a Full Morning ☀️</div>`
+      : `<div class="routines-empty">make a few regular routines first, then bundle them here ⭐</div>`;
+    return;
+  }
+  const dayLabel = prettyDate(plannerSelectedDate).toLowerCase();
+  masters.forEach(m => {
+    const members = masterMembers(m);
+    const k = members.length;
+    const card = document.createElement('div');
+    card.className = 'routine-card master';
+    card.innerHTML = `
+      <div class="routine-info">
+        <div class="routine-name">⭐ ${escapeHtml(m.name)}</div>
+        <div class="routine-meta${m.days && m.days.length ? ' auto' : ''}">${k} routine${k === 1 ? '' : 's'} · ${routineDaysLabel(m.days)}</div>
+        ${k ? `<div class="routine-members">${members.map(r => escapeHtml(r.name)).join(' · ')}</div>` : ''}
+      </div>
+      <div class="routine-card-btns">
+        <button class="btn-mini" data-master-add="${m.id}" title="add to ${escapeHtml(dayLabel)}">＋ add</button>
+        <button class="btn-mini ghost" data-master-edit="${m.id}">edit</button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function openMasterEditor(id = null) {
+  editingMasterId = id;
+  const m = id ? state.masterRoutines.find(x => x.id === id) : null;
+  if (m) { touchRoutine(m); save(); }
+  document.getElementById('masterEditTitle').textContent = m ? 'edit master routine' : 'new master routine';
+  document.getElementById('masterNameInput').value = m ? m.name : '';
+  masterPicks = m ? masterMembers(m).map(r => r.id) : [];
+  masterDays = m && Array.isArray(m.days) ? [...m.days] : [];
+  document.getElementById('masterDeleteBtn').style.display = m ? 'inline-block' : 'none';
+  renderMasterEditor();
+  document.getElementById('routinesListView').style.display = 'none';
+  document.getElementById('masterEditView').style.display = 'block';
+  SFX.click();
+  if (!m) setTimeout(() => document.getElementById('masterNameInput').focus(), 100);
+}
+
+function renderMasterEditor() {
+  const picked = document.getElementById('masterPicked');
+  picked.innerHTML = '';
+  if (!masterPicks.length) {
+    picked.innerHTML = `<div class="master-empty">nothing in it yet — tap routines below to add them</div>`;
+  } else {
+    masterPicks.forEach((rid, i) => {
+      const r = state.routines.find(x => x.id === rid);
+      if (!r) return;
+      const row = document.createElement('div');
+      row.className = 'mp-row';
+      row.innerHTML = `
+        <span class="mp-num">${i + 1}</span>
+        <span class="mp-name">${escapeHtml(r.name)}</span>
+        <button type="button" class="mp-btn" data-mp-up="${i}" aria-label="move up" ${i === 0 ? 'disabled' : ''}>↑</button>
+        <button type="button" class="mp-btn" data-mp-down="${i}" aria-label="move down" ${i === masterPicks.length - 1 ? 'disabled' : ''}>↓</button>
+        <button type="button" class="mp-btn del" data-mp-del="${i}" aria-label="remove">×</button>`;
+      picked.appendChild(row);
+    });
+  }
+
+  const pool = document.getElementById('masterPool');
+  pool.innerHTML = '';
+  const all = myRoutines().slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true }));
+  if (!all.length) {
+    pool.innerHTML = `<div class="master-empty" style="width:100%;">no regular routines yet — make some on the 🔁 routines tab</div>`;
+  }
+  all.forEach(r => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pool-chip' + (masterPicks.includes(r.id) ? ' used' : '');
+    b.dataset.mpAdd = r.id;
+    b.textContent = (masterPicks.includes(r.id) ? '✓ ' : '＋ ') + r.name;
+    pool.appendChild(b);
+  });
+
+  const chips = document.getElementById('masterDayChips');
+  chips.innerHTML = '';
+  DAY_LETTERS.forEach((letter, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'day-chip' + (masterDays.includes(i) ? ' on' : '');
+    b.dataset.day = i;
+    b.textContent = letter;
+    b.setAttribute('aria-label', DAY_SHORT[i]);
+    b.setAttribute('aria-pressed', masterDays.includes(i));
+    chips.appendChild(b);
+  });
+  document.getElementById('masterEveryDayBtn').textContent = masterDays.length === 7 ? 'clear days' : 'every day';
+}
+
+function masterPickAction(kind, val) {
+  if (kind === 'add') {
+    masterPicks.push(val);
+    SFX.add();
+  } else {
+    const i = parseInt(val, 10);
+    if (kind === 'up' && i > 0) [masterPicks[i - 1], masterPicks[i]] = [masterPicks[i], masterPicks[i - 1]];
+    if (kind === 'down' && i < masterPicks.length - 1) [masterPicks[i + 1], masterPicks[i]] = [masterPicks[i], masterPicks[i + 1]];
+    if (kind === 'del') masterPicks.splice(i, 1);
+    SFX.click();
+  }
+  renderMasterEditor();
+}
+
+function saveMaster() {
+  const name = document.getElementById('masterNameInput').value.trim();
+  if (!name) { showToast('give your master routine a name'); return; }
+  if (!masterPicks.length) { showToast('add at least one routine'); return; }
+  const days = [...masterDays].sort((a, b) => a - b);
+  if (editingMasterId) {
+    const m = state.masterRoutines.find(x => x.id === editingMasterId);
+    if (m) Object.assign(m, { name, routineIds: [...masterPicks], days, lastUsed: Date.now() });
+  } else {
+    state.masterRoutines.push({ id: 'm_' + uid(), owner: state.profile, name, routineIds: [...masterPicks], days, lastUsed: Date.now() });
+  }
+  save();
+  SFX.add();
+  showRoutineListView();
+  renderPlannerEditor(); // a master due on the selected day drops in right away
+  renderCalendar();
+}
+
+function deleteMaster() {
+  const m = state.masterRoutines.find(x => x.id === editingMasterId);
+  if (!m) return;
+  if (!confirm(`delete the "${m.name}" master routine? (its routines stay, and so do tasks it already added)`)) return;
+  state.masterRoutines = state.masterRoutines.filter(x => x.id !== m.id);
+  save();
+  SFX.delete();
+  showRoutineListView();
+}
+
+function addMasterToDay(id) {
+  if (state.profile === 'combined') return;
+  const m = state.masterRoutines.find(x => x.id === id);
+  if (!m) return;
+  const k = masterMembers(m).length;
+  if (!k) { showToast('this master routine is empty — edit it to add routines'); return; }
+  touchRoutine(m);
+  flushPlannerSaves();
+  setPlannerEntry(state.profile, plannerSelectedDate, appendMasterText(getPlannerEntry(state.profile, plannerSelectedDate), m));
+  closeRoutinesModal();
+  renderCalendar();
+  renderPlannerEditor();
+  SFX.milestone();
+  showToast(`⭐ added "${m.name}" — ${k} routine${k === 1 ? '' : 's'}`);
+}
+
 function deleteRoutine() {
   const r = state.routines.find(x => x.id === editingRoutineId);
   if (!r) return;
-  if (!confirm(`delete the "${r.name}" routine? (tasks it already added stay put)`)) return;
+  const inMasters = state.masterRoutines.filter(m => (m.routineIds || []).includes(r.id)).length;
+  const extra = inMasters ? ` it'll also be taken out of ${inMasters} master routine${inMasters === 1 ? '' : 's'}.` : '';
+  if (!confirm(`delete the "${r.name}" routine? (tasks it already added stay put)${extra}`)) return;
   state.routines = state.routines.filter(x => x.id !== r.id);
+  state.masterRoutines.forEach(m => { m.routineIds = (m.routineIds || []).filter(id => id !== r.id); });
   save();
   SFX.delete();
   showRoutineListView();
@@ -5222,6 +5648,7 @@ function deleteUser(alsoDeleteData) {
       });
     });
     state.routines = (state.routines || []).filter(r => r.owner !== userId);
+    state.masterRoutines = (state.masterRoutines || []).filter(m => m.owner !== userId);
   }
   // Otherwise, logs and planner entries stay in storage as "orphaned" data
 
@@ -5316,6 +5743,38 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#routinesBtn')) { openRoutinesModal(); return; }
   if (e.target.closest('#routinesCloseBtn') || e.target.id === 'routinesModal') { closeRoutinesModal(); return; }
   if (e.target.closest('#newRoutineBtn')) { openRoutineEditor(); return; }
+  const rTab = e.target.closest('[data-rtab]');
+  if (rTab) { setRoutinesTab(rTab.dataset.rtab); return; }
+  if (e.target.closest('#newMasterBtn')) { openMasterEditor(); return; }
+  const mAdd = e.target.closest('[data-master-add]');
+  if (mAdd) { addMasterToDay(mAdd.dataset.masterAdd); return; }
+  const mEdit = e.target.closest('[data-master-edit]');
+  if (mEdit) { openMasterEditor(mEdit.dataset.masterEdit); return; }
+  const mpAdd = e.target.closest('[data-mp-add]');
+  if (mpAdd) { masterPickAction('add', mpAdd.dataset.mpAdd); return; }
+  const mpUp = e.target.closest('[data-mp-up]');
+  if (mpUp) { masterPickAction('up', mpUp.dataset.mpUp); return; }
+  const mpDown = e.target.closest('[data-mp-down]');
+  if (mpDown) { masterPickAction('down', mpDown.dataset.mpDown); return; }
+  const mpDel = e.target.closest('[data-mp-del]');
+  if (mpDel) { masterPickAction('del', mpDel.dataset.mpDel); return; }
+  const mDay = e.target.closest('#masterDayChips .day-chip');
+  if (mDay) {
+    const d = parseInt(mDay.dataset.day, 10);
+    masterDays = masterDays.includes(d) ? masterDays.filter(x => x !== d) : [...masterDays, d];
+    SFX.click();
+    renderMasterEditor();
+    return;
+  }
+  if (e.target.closest('#masterEveryDayBtn')) {
+    masterDays = masterDays.length === 7 ? [] : [0, 1, 2, 3, 4, 5, 6];
+    SFX.click();
+    renderMasterEditor();
+    return;
+  }
+  if (e.target.closest('#masterSaveBtn')) { saveMaster(); return; }
+  if (e.target.closest('#masterCancelBtn')) { SFX.click(); showRoutineListView(); return; }
+  if (e.target.closest('#masterDeleteBtn')) { deleteMaster(); return; }
   const rSort = e.target.closest('[data-rsort]');
   if (rSort) { setRoutineSort(rSort.dataset.rsort); return; }
   const rAdd = e.target.closest('[data-routine-add]');
@@ -5460,6 +5919,24 @@ document.addEventListener('input', (e) => {
   }
 });
 
+// Swipe left/right on the routines page to flip between 🔁 routines and ⭐ master
+(() => {
+  const view = document.getElementById('routinesListView');
+  let sx = null, sy = null;
+  view.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    sx = t.clientX; sy = t.clientY;
+  }, { passive: true });
+  view.addEventListener('touchend', (e) => {
+    if (sx === null) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - sx, dy = t.clientY - sy;
+    sx = sy = null;
+    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
+    setRoutinesTab(dx < 0 ? 'master' : 'routines');
+  }, { passive: true });
+})();
+
 // Keep focus in the editor when tapping ⇤ ⇥ on desktop
 document.addEventListener('mousedown', (e) => {
   if (e.target.closest('.indent-btn')) e.preventDefault(); // incl. ✦ bonus
@@ -5556,6 +6033,7 @@ function exportData() {
       maybe: state.maybe,
       notes: state.notes,
       routines: state.routines,
+      masterRoutines: state.masterRoutines,
       routineLog: state.routineLog,
       routineSort: state.routineSort,
       showTimes: state.showTimes,
@@ -5620,6 +6098,7 @@ function confirmImport() {
   mergeLegacyExtra();
   state.notes = imported.notes || {};
   state.routines = Array.isArray(imported.routines) ? imported.routines : [];
+  state.masterRoutines = Array.isArray(imported.masterRoutines) ? imported.masterRoutines : [];
   state.routineLog = imported.routineLog || {};
   state.routineSort = imported.routineSort === 'alpha' ? 'alpha' : 'recent';
   state.showTimes = !!imported.showTimes;
