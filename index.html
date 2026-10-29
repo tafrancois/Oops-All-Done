@@ -512,8 +512,27 @@
 
   .planner-header-right {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+    position: relative;
+  }
+
+  /* "saving…/saved" floats above the buttons instead of taking up room in the row */
+  .planner-header-right > .planner-save-indicator {
+    position: absolute;
+    right: 4px;
+    top: -20px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 420px) {
+    .planner-header { gap: 6px; }
+    .planner-header-right { gap: 6px; }
+    .planner-mode-btn { padding: 6px 10px; }
   }
 
   .planner-mode-btn {
@@ -551,6 +570,7 @@
   }
 
   .planner-tip code {
+    white-space: nowrap;
     font-family: 'Nunito', monospace;
     font-style: normal;
     background: rgba(74,37,64,0.1);
@@ -1371,6 +1391,47 @@
   }
 
   .routine-card.master { border-color: rgba(232,168,56,0.45); background: #fffdf6; }
+
+  .owner-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .owner-chip.on {
+    background: var(--plum);
+    border-color: var(--plum);
+    color: var(--cream);
+  }
+
+  .others-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 2px dashed rgba(74,37,64,0.15);
+    border-radius: 14px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.88rem;
+    color: var(--plum-soft);
+  }
+
+  .others-toggle {
+    flex-shrink: 0;
+    border: none;
+    background: rgba(74,37,64,0.08);
+    color: var(--plum);
+    font-family: 'Nunito', sans-serif;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 0.8rem;
+    padding: 5px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .routine-card.other { background: rgba(255,255,255,0.55); border-style: dashed; }
+  .routine-card.other .routine-name { color: var(--plum-soft); }
+  .other-btns { flex-direction: column; align-items: stretch; }
+  .other-btns .btn-mini { padding: 7px 10px; font-size: 0.78rem; }
 
   .routine-members {
     font-size: 0.78rem;
@@ -2819,6 +2880,10 @@
           <button type="button" class="indent-btn" data-indent="in" data-target="routineTextInput" aria-label="indent line">⇥<span class="ib-word"> indent</span></button>
         </div>
       </div>
+      <div class="field owner-field" id="routineOwnerField">
+        <label>who's it for</label>
+        <div class="owner-chips" id="routineOwnerChips"></div>
+      </div>
       <div class="field">
         <label>auto-add on these days (leave blank for manual only)</label>
         <div class="day-chips" id="routineDayChips"></div>
@@ -2845,6 +2910,10 @@
       <div class="field">
         <label>tap a routine to add it</label>
         <div class="master-pool" id="masterPool"></div>
+      </div>
+      <div class="field owner-field" id="masterOwnerField">
+        <label>who's it for</label>
+        <div class="owner-chips" id="masterOwnerChips"></div>
       </div>
       <div class="field">
         <label>auto-add on these days (leave blank for manual only)</label>
@@ -4987,9 +5056,9 @@ function renderPlannerEditor() {
       tip.style.display = 'block';
       tip.innerHTML = plannerList === 'maybe'
         ? `maybe = nice if it happens · unfinished ones can be moved to another day`
-        : `each line is a task · <code>Tab</code> (or ⇥) for a sub-task · <code>optional:</code> (or ◌) for optional tasks · <code>>> name <<</code> starts a colored section (a blank line ends it) · <code>>> BONUS <<</code> starts your bonus list`;
-      if (state.showTimes) tip.innerHTML += ` · add <code>@2pm</code> or <code>~30m</code> for times`;
-      if (state.showPoints) tip.innerHTML += ` · add <code>+20pts</code> to set points`;
+        : `<code>⇥</code> sub-task · <code>◌</code> optional · <code>>> name <<</code> section · <code>>> BONUS <<</code> bonus list`;
+      if (state.showTimes) tip.innerHTML += ` · <code>@2pm</code> <code>~30m</code> times`;
+      if (state.showPoints) tip.innerHTML += ` · <code>+20pts</code> points`;
       document.querySelectorAll('.list-toggle-btn').forEach(b =>
         b.classList.toggle('active', b.dataset.list === plannerList));
       editor.placeholder = plannerList === 'maybe'
@@ -4998,7 +5067,7 @@ function renderPlannerEditor() {
       editor.value = getListEntry(plannerList, state.profile, plannerSelectedDate);
       document.getElementById('bonusHeaderBtn').style.display = plannerList === 'must' ? '' : 'none';
       modeIcon.textContent = '✓';
-      modeLabel.textContent = 'check mode';
+      modeLabel.textContent = 'check';
       modeBtn.classList.remove('in-check-mode');
     } else {
       editorWrap.style.display = 'none';
@@ -5666,8 +5735,81 @@ const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 let editingRoutineId = null;
 let routineDays = [];
 
+// owner: 'all' (🌐 everyone) or one user's id
+function canUse(x, profile = state.profile) {
+  return x.owner === 'all' || x.owner === profile;
+}
+
 function myRoutines() {
-  return (state.routines || []).filter(r => r.owner === state.profile);
+  return (state.routines || []).filter(r => canUse(r));
+}
+
+function ownerBadge(x) {
+  if (state.users.length < 2) return '';
+  if (x.owner === 'all') return ' · 🌐 everyone';
+  return ` · 👤 ${escapeHtml(getUser(x.owner) ? getUser(x.owner).name : 'removed user')}`;
+}
+
+let routineOwner = 'all';
+let masterOwner = 'all';
+let showOtherRoutines = false;
+
+function renderOwnerChips(kind) {
+  const field = document.getElementById(kind === 'master' ? 'masterOwnerField' : 'routineOwnerField');
+  const wrap = document.getElementById(kind === 'master' ? 'masterOwnerChips' : 'routineOwnerChips');
+  const current = kind === 'master' ? masterOwner : routineOwner;
+  field.style.display = state.users.length > 1 ? '' : 'none';
+  const opts = [['all', '🌐 everyone'], ...state.users.map(u => [u.id, `👤 ${u.name} only`])];
+  wrap.innerHTML = opts.map(([val, label]) =>
+    `<button type="button" class="pool-chip owner-chip${val === current ? ' on' : ''}" data-owner-pick="${escapeHtml(val)}" data-owner-for="${kind}">${escapeHtml(label)}</button>`
+  ).join('');
+}
+
+function pickOwner(kind, val) {
+  if (kind === 'master') masterOwner = val; else routineOwner = val;
+  SFX.click();
+  renderOwnerChips(kind);
+}
+
+// Routines that only another person can use — shown tucked away so they can be moved or shared
+function renderOtherRoutines(list, kind) {
+  const src = kind === 'master' ? (state.masterRoutines || []) : (state.routines || []);
+  const others = src.filter(x => x.owner !== 'all' && x.owner !== state.profile);
+  if (!others.length) return;
+  const noun = kind === 'master' ? 'master routine' : 'routine';
+  const owners = [...new Set(others.map(x => getUser(x.owner) ? getUser(x.owner).name : 'a removed user'))].join(' & ');
+  const note = document.createElement('div');
+  note.className = 'others-note';
+  note.innerHTML = `<span>🔒 ${others.length} ${noun}${others.length === 1 ? '' : 's'} only for ${escapeHtml(owners)}</span>
+    <button type="button" class="others-toggle" data-show-others>${showOtherRoutines ? 'hide' : 'show'}</button>`;
+  list.appendChild(note);
+  if (!showOtherRoutines) return;
+  const me = getUser(state.profile);
+  others.forEach(x => {
+    const card = document.createElement('div');
+    card.className = 'routine-card other';
+    card.innerHTML = `
+      <div class="routine-info">
+        <div class="routine-name">${kind === 'master' ? '⭐ ' : ''}${escapeHtml(x.name)}</div>
+        <div class="routine-meta">${ownerBadge(x).replace(/^ · /, '')}</div>
+      </div>
+      <div class="routine-card-btns other-btns">
+        <button class="btn-mini ghost" data-owner-set="${x.id}" data-owner-val="${escapeHtml(state.profile)}" data-owner-kind="${kind}">↪ move to ${escapeHtml(me ? me.name : 'me')}</button>
+        <button class="btn-mini" data-owner-set="${x.id}" data-owner-val="all" data-owner-kind="${kind}">🌐 share</button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function setOwner(kind, id, val) {
+  const src = kind === 'master' ? state.masterRoutines : state.routines;
+  const x = src.find(r => r.id === id);
+  if (!x) return;
+  x.owner = val;
+  save();
+  SFX.add();
+  showToast(val === 'all' ? `🌐 "${x.name}" is shared with everyone` : `↪ "${x.name}" moved to ${getUserName(val)}`);
+  renderRoutinesList();
 }
 
 function routineTaskCount(r) {
@@ -5730,7 +5872,7 @@ function applyAutoRoutines(profile, dateKey) {
   const key = plannerKey(profile, dateKey);
   const already = state.routineLog[key] || [];
   const isDue = (x, logId) =>
-    x.owner === profile && Array.isArray(x.days) && x.days.includes(dow) && !already.includes(logId);
+    canUse(x, profile) && Array.isArray(x.days) && x.days.includes(dow) && !already.includes(logId);
   const due = (state.routines || []).filter(r => isDue(r, r.id));
   const dueMasters = (state.masterRoutines || []).filter(m => isDue(m, 'm:' + m.id));
   if (!due.length && !dueMasters.length) return [];
@@ -5759,6 +5901,7 @@ function openRoutinesModal() {
   }
   flushPlannerSaves();
   SFX.click();
+  showOtherRoutines = false;
   showRoutineListView();
   document.getElementById('routinesModal').classList.add('open');
 }
@@ -5829,6 +5972,7 @@ function renderRoutinesList() {
   list.innerHTML = '';
   if (!routines.length) {
     list.innerHTML = `<div class="routines-empty">no routines yet — make one and it can show up on its own ✨</div>`;
+    renderOtherRoutines(list, 'routine');
     return;
   }
   const dayLabel = prettyDate(plannerSelectedDate).toLowerCase();
@@ -5839,7 +5983,7 @@ function renderRoutinesList() {
     card.innerHTML = `
       <div class="routine-info">
         <div class="routine-name">${escapeHtml(r.name)}</div>
-        <div class="routine-meta${r.days && r.days.length ? ' auto' : ''}">${n} task${n === 1 ? '' : 's'} · ${routineDaysLabel(r.days)}</div>
+        <div class="routine-meta${r.days && r.days.length ? ' auto' : ''}">${n} task${n === 1 ? '' : 's'} · ${routineDaysLabel(r.days)}${ownerBadge(r)}</div>
       </div>
       <div class="routine-card-btns">
         <button class="btn-mini" data-routine-add="${r.id}" title="add to ${escapeHtml(dayLabel)}">＋ add</button>
@@ -5847,6 +5991,7 @@ function renderRoutinesList() {
       </div>`;
     list.appendChild(card);
   });
+  renderOtherRoutines(list, 'routine');
 }
 
 function openRoutineEditor(id = null) {
@@ -5857,8 +6002,10 @@ function openRoutineEditor(id = null) {
   document.getElementById('routineNameInput').value = r ? r.name : '';
   document.getElementById('routineTextInput').value = r ? r.text : '';
   routineDays = r && Array.isArray(r.days) ? [...r.days] : [];
+  routineOwner = r ? (r.owner || 'all') : 'all';
   document.getElementById('routineDeleteBtn').style.display = r ? 'inline-block' : 'none';
   renderDayChips();
+  renderOwnerChips('routine');
   document.getElementById('routinesListView').style.display = 'none';
   document.getElementById('routineEditView').style.display = 'block';
   SFX.click();
@@ -5897,9 +6044,12 @@ function saveRoutine() {
 
   if (editingRoutineId) {
     const r = state.routines.find(x => x.id === editingRoutineId);
-    if (r) Object.assign(r, { name, text, days, lastUsed: Date.now() });
+    if (r) Object.assign(r, { name, text, days, owner: routineOwner, lastUsed: Date.now() });
   } else {
-    state.routines.push({ id: 'r_' + uid(), owner: state.profile, name, text, days, lastUsed: Date.now() });
+    state.routines.push({ id: 'r_' + uid(), owner: routineOwner, name, text, days, lastUsed: Date.now() });
+  }
+  if (routineOwner !== 'all' && routineOwner !== state.profile) {
+    showToast(`saved for ${getUserName(routineOwner)} — find it under "only for ${getUserName(routineOwner)}"`);
   }
   save();
   SFX.add();
@@ -5913,7 +6063,7 @@ let masterPicks = [];
 let masterDays = [];
 
 function myMasters() {
-  return (state.masterRoutines || []).filter(m => m.owner === state.profile);
+  return (state.masterRoutines || []).filter(m => canUse(m));
 }
 
 function renderMasterList() {
@@ -5927,6 +6077,7 @@ function renderMasterList() {
     list.innerHTML = myRoutines().length
       ? `<div class="routines-empty">no master routines yet — bundle a few routines together, like a Full Morning ☀️</div>`
       : `<div class="routines-empty">make a few regular routines first, then bundle them here ⭐</div>`;
+    renderOtherRoutines(list, 'master');
     return;
   }
   const dayLabel = prettyDate(plannerSelectedDate).toLowerCase();
@@ -5938,7 +6089,7 @@ function renderMasterList() {
     card.innerHTML = `
       <div class="routine-info">
         <div class="routine-name">⭐ ${escapeHtml(m.name)}</div>
-        <div class="routine-meta${m.days && m.days.length ? ' auto' : ''}">${k} routine${k === 1 ? '' : 's'} · ${routineDaysLabel(m.days)}</div>
+        <div class="routine-meta${m.days && m.days.length ? ' auto' : ''}">${k} routine${k === 1 ? '' : 's'} · ${routineDaysLabel(m.days)}${ownerBadge(m)}</div>
         ${k ? `<div class="routine-members">${members.map(r => escapeHtml(r.name)).join(' · ')}</div>` : ''}
       </div>
       <div class="routine-card-btns">
@@ -5947,6 +6098,7 @@ function renderMasterList() {
       </div>`;
     list.appendChild(card);
   });
+  renderOtherRoutines(list, 'master');
 }
 
 function openMasterEditor(id = null) {
@@ -5957,8 +6109,10 @@ function openMasterEditor(id = null) {
   document.getElementById('masterNameInput').value = m ? m.name : '';
   masterPicks = m ? masterMembers(m).map(r => r.id) : [];
   masterDays = m && Array.isArray(m.days) ? [...m.days] : [];
+  masterOwner = m ? (m.owner || 'all') : 'all';
   document.getElementById('masterDeleteBtn').style.display = m ? 'inline-block' : 'none';
   renderMasterEditor();
+  renderOwnerChips('master');
   document.getElementById('routinesListView').style.display = 'none';
   document.getElementById('masterEditView').style.display = 'block';
   SFX.click();
@@ -6037,9 +6191,9 @@ function saveMaster() {
   const days = [...masterDays].sort((a, b) => a - b);
   if (editingMasterId) {
     const m = state.masterRoutines.find(x => x.id === editingMasterId);
-    if (m) Object.assign(m, { name, routineIds: [...masterPicks], days, lastUsed: Date.now() });
+    if (m) Object.assign(m, { name, routineIds: [...masterPicks], days, owner: masterOwner, lastUsed: Date.now() });
   } else {
-    state.masterRoutines.push({ id: 'm_' + uid(), owner: state.profile, name, routineIds: [...masterPicks], days, lastUsed: Date.now() });
+    state.masterRoutines.push({ id: 'm_' + uid(), owner: masterOwner, name, routineIds: [...masterPicks], days, lastUsed: Date.now() });
   }
   save();
   SFX.add();
@@ -6495,6 +6649,11 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#routinesBtn')) { openRoutinesModal(); return; }
   if (e.target.closest('#routinesCloseBtn') || e.target.id === 'routinesModal') { closeRoutinesModal(); return; }
   if (e.target.closest('#newRoutineBtn')) { openRoutineEditor(); return; }
+  const ownerPick = e.target.closest('[data-owner-pick]');
+  if (ownerPick) { pickOwner(ownerPick.dataset.ownerFor, ownerPick.dataset.ownerPick); return; }
+  if (e.target.closest('[data-show-others]')) { showOtherRoutines = !showOtherRoutines; SFX.click(); renderRoutinesList(); return; }
+  const ownerSet = e.target.closest('[data-owner-set]');
+  if (ownerSet) { setOwner(ownerSet.dataset.ownerKind, ownerSet.dataset.ownerSet, ownerSet.dataset.ownerVal); return; }
   const rTab = e.target.closest('[data-rtab]');
   if (rTab) { setRoutinesTab(rTab.dataset.rtab); return; }
   if (e.target.closest('#newMasterBtn')) { openMasterEditor(); return; }
