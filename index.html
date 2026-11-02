@@ -1282,6 +1282,134 @@
     margin-right: auto;
   }
 
+  /* ===== ALREADY-ADDED + VERSIONS + DELETE ===== */
+  .on-list-badge {
+    display: inline-block;
+    margin-top: 5px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.72rem;
+    color: #4f7446;
+    background: rgba(127,168,115,0.18);
+    border-radius: 999px;
+    padding: 2px 9px;
+  }
+
+  .confirm-backdrop { z-index: 130; }
+
+  .restore-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+
+  .restore-link {
+    border: none;
+    background: none;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--plum-soft);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    padding: 4px 2px;
+  }
+
+  .version-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .version-card {
+    background: #fff;
+    border: 2px solid rgba(74,37,64,0.1);
+    border-radius: 14px;
+    padding: 10px 12px;
+  }
+
+  .version-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .version-label { font-weight: 800; font-size: 0.85rem; color: var(--plum); }
+  .version-top .btn-mini { padding: 7px 12px; font-size: 0.8rem; }
+
+  .version-preview {
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--plum-soft);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .version-more, .version-meta {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    color: var(--plum-mist);
+    margin-top: 4px;
+  }
+
+  .row-del {
+    flex-shrink: 0;
+    align-self: center;
+    border: none;
+    background: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.4;
+    filter: grayscale(1);
+    transition: opacity 0.15s, background 0.15s;
+  }
+
+  .row-del:hover, .row-del:focus-visible { opacity: 1; filter: none; background: rgba(228,122,122,0.15); }
+
+  .undo-bar {
+    position: fixed;
+    left: 50%;
+    bottom: 86px;
+    transform: translate(-50%, 160%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: calc(100vw - 32px);
+    background: var(--plum);
+    color: var(--cream);
+    padding: 10px 10px 10px 18px;
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(74,37,64,0.4);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    z-index: 210;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s;
+  }
+
+  .undo-bar.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+
+  #undoMsg { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+  #undoBtn {
+    flex-shrink: 0;
+    border: none;
+    background: var(--butter);
+    color: var(--plum);
+    font-family: 'Nunito', sans-serif;
+    font-style: normal;
+    font-weight: 800;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
   /* ===== NOTES ===== */
   .planner-notes {
     margin-top: 18px;
@@ -2645,6 +2773,10 @@
       </div>
       <div id="plannerCombinedWrap" style="display:none;"></div>
 
+      <div class="restore-row" id="restoreRow" style="display:none;">
+        <button type="button" class="restore-link" id="restoreBtn">🕘 earlier versions</button>
+      </div>
+
       <div class="planner-notes" id="plannerNotesWrap">
         <div class="planner-notes-header">
           <span class="planner-notes-title">📝 notes</span>
@@ -2948,6 +3080,38 @@
 </div>
 
 <!-- Confetti canvas -->
+<!-- Earlier versions of a day -->
+<div class="modal-backdrop" id="historyModal">
+  <div class="modal routines-modal">
+    <div class="modal-title" style="margin-bottom:6px;">earlier versions 🕘</div>
+    <p class="routines-sub"><strong id="historyDay"></strong> · tap restore to bring one back. what's there now gets saved as a version too, so nothing's lost.</p>
+    <div class="version-list" id="versionList"></div>
+    <div class="modal-actions">
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost" id="historyCloseBtn">close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm pop-up (styled, used for "already added" etc.) -->
+<div class="modal-backdrop confirm-backdrop" id="confirmModal">
+  <div class="modal">
+    <div class="modal-title" id="confirmTitle" style="margin-bottom:8px;"></div>
+    <p class="routines-sub" id="confirmMsg" style="margin:0 0 6px;"></p>
+    <div class="modal-actions">
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost" id="confirmNoBtn">cancel</button>
+      <button class="btn btn-primary" id="confirmYesBtn">yes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Undo bar (after deleting a task) -->
+<div class="undo-bar" id="undoBar">
+  <span id="undoMsg"></span>
+  <button type="button" id="undoBtn">undo</button>
+</div>
+
 <canvas id="confettiCanvas"></canvas>
 
 <script>
@@ -3080,6 +3244,7 @@ function migrateState() {
   if (state.routineSort !== 'alpha' && state.routineSort !== 'recent') state.routineSort = 'recent';
   if (!Array.isArray(state.masterRoutines)) state.masterRoutines = [];
   if (!state.pointMemory || typeof state.pointMemory !== 'object') state.pointMemory = {};
+  if (!state.history || typeof state.history !== 'object') state.history = {};
   if (state.routinesTab !== 'master') state.routinesTab = 'routines';
   if (!state.routineLog || typeof state.routineLog !== 'object') state.routineLog = {};
   if (!state.maybe || typeof state.maybe !== 'object') state.maybe = {};
@@ -3128,8 +3293,22 @@ function getUserColor(id) {
   return u ? u.color : USER_COLORS[0];
 }
 
+let storageWarned = false;
 function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) { console.warn(e); }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    // storage full? make room by trimming old versions, then try again
+    if (state.history && Object.keys(state.history).length) {
+      trimHistory(true);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); return; } catch (e2) { console.warn(e2); }
+    }
+    console.warn(e);
+    if (!storageWarned && typeof showToast === 'function') {
+      storageWarned = true;
+      showToast('⚠️ phone storage for this app is full — export a backup');
+    }
+  }
 }
 
 function uid() { return Math.random().toString(36).slice(2, 10); }
@@ -4321,6 +4500,7 @@ function getPlannerEntry(profile, dateKey) {
 
 function setPlannerEntry(profile, dateKey, text) {
   const key = plannerKey(profile, dateKey);
+  recordVersion('planner', key, state.planner[key] || '', text || '');
   if (text && text.trim()) {
     state.planner[key] = text;
   } else {
@@ -4335,6 +4515,7 @@ function getMaybeEntry(profile, dateKey) {
 
 function setMaybeEntry(profile, dateKey, text) {
   const key = plannerKey(profile, dateKey);
+  recordVersion('maybe', key, state.maybe[key] || '', text || '');
   if (text && text.trim()) {
     state.maybe[key] = text;
   } else {
@@ -4359,12 +4540,127 @@ function getNotes(profile, dateKey) {
 
 function setNotes(profile, dateKey, text) {
   const key = plannerKey(profile, dateKey);
+  recordVersion('notes', key, state.notes[key] || '', text || '');
   if (text && text.trim()) {
     state.notes[key] = text;
   } else {
     delete state.notes[key];
   }
   save();
+}
+
+// ==================== VERSION HISTORY ====================
+// Before a day's list/notes change, the old text is kept (every few minutes while editing,
+// and ALWAYS right before a big deletion) so "🕘 earlier versions" can bring it back.
+const HISTORY_PER_DAY = 20;
+const HISTORY_DAYS = 45;
+const HISTORY_GAP = 4 * 60 * 1000;
+
+function recordVersion(bucket, key, oldText, newText, force = false) {
+  if (!oldText || !oldText.trim() || oldText === newText) return;
+  if (!state.history || typeof state.history !== 'object') state.history = {};
+  const hk = bucket + '|' + key;
+  const arr = state.history[hk] || (state.history[hk] = []);
+  const last = arr[arr.length - 1];
+  if (last && last.text === oldText) return;
+  const oldLen = oldText.trim().length;
+  const bigDrop = oldLen > 12 && (newText || '').trim().length < oldLen * 0.6;
+  if (!force && !bigDrop && last && Date.now() - last.t < HISTORY_GAP) return;
+  arr.push({ t: Date.now(), text: oldText });
+  if (arr.length > HISTORY_PER_DAY) arr.splice(0, arr.length - HISTORY_PER_DAY);
+}
+
+function trimHistory(hard = false) {
+  const h = state.history || {};
+  const cutoff = Date.now() - (hard ? 7 : HISTORY_DAYS) * 86400000;
+  Object.keys(h).forEach(k => {
+    let arr = (h[k] || []).filter(v => v && v.t >= cutoff);
+    if (hard) arr = arr.slice(-3);
+    if (arr.length) h[k] = arr; else delete h[k];
+  });
+}
+
+function dayVersions(profile, dateKey) {
+  const key = plannerKey(profile, dateKey);
+  const out = [];
+  ['planner', 'maybe', 'notes'].forEach(bucket => {
+    ((state.history || {})[bucket + '|' + key] || []).forEach((v, i) => out.push({ bucket, i, t: v.t, text: v.text }));
+  });
+  return out.sort((a, b) => b.t - a.t);
+}
+
+function updateRestoreRow() {
+  const row = document.getElementById('restoreRow');
+  if (!row) return;
+  const show = state.profile !== 'combined' && dayVersions(state.profile, plannerSelectedDate).length > 0;
+  row.style.display = show ? '' : 'none';
+}
+
+function versionTime(t) {
+  const d = new Date(t);
+  const dk = formatDateKey(d);
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).toLowerCase().replace(' ', '');
+  if (dk === todayKey()) return `today ${time}`;
+  if (dk === shiftDateKey(todayKey(), -1)) return `yesterday ${time}`;
+  return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time}`;
+}
+
+function openHistoryModal() {
+  if (state.profile === 'combined') return;
+  flushPlannerSaves();
+  renderHistoryModal();
+  SFX.click();
+  document.getElementById('historyModal').classList.add('open');
+}
+
+function closeHistoryModal() {
+  document.getElementById('historyModal').classList.remove('open');
+}
+
+function renderHistoryModal() {
+  const wrap = document.getElementById('versionList');
+  const versions = dayVersions(state.profile, plannerSelectedDate);
+  document.getElementById('historyDay').textContent = prettyDate(plannerSelectedDate);
+  if (!versions.length) {
+    wrap.innerHTML = `<div class="routines-empty">no earlier versions of this day yet</div>`;
+    return;
+  }
+  const label = { planner: '✅ must-do', maybe: '🌱 maybe', notes: '📝 notes' };
+  const current = { planner: getPlannerEntry(state.profile, plannerSelectedDate), maybe: getMaybeEntry(state.profile, plannerSelectedDate), notes: getNotes(state.profile, plannerSelectedDate) };
+  wrap.innerHTML = versions.map(v => {
+    const lines = v.text.split('\n').filter(l => l.trim());
+    const nowCount = current[v.bucket].split('\n').filter(l => l.trim()).length;
+    const preview = lines.slice(0, 4).map(l =>
+      escapeHtml(l.replace(/^\s*([-*•]\s*)?\[[ xX]\]\s*/, '$1').replace(/\t/g, '   '))).join('<br>');
+    return `<div class="version-card">
+      <div class="version-top">
+        <span class="version-label">${label[v.bucket]} · ${versionTime(v.t)}</span>
+        <button type="button" class="btn-mini" data-restore="${v.bucket}|${v.i}">restore</button>
+      </div>
+      <div class="version-preview">${preview}${lines.length > 4 ? `<div class="version-more">+ ${lines.length - 4} more line${lines.length - 4 === 1 ? '' : 's'}</div>` : ''}</div>
+      <div class="version-meta">${lines.length} line${lines.length === 1 ? '' : 's'} then · ${nowCount} now</div>
+    </div>`;
+  }).join('');
+}
+
+function restoreVersion(ref) {
+  const [bucket, idxStr] = ref.split('|');
+  const key = plannerKey(state.profile, plannerSelectedDate);
+  const arr = (state.history || {})[bucket + '|' + key] || [];
+  const v = arr[parseInt(idxStr, 10)];
+  if (!v) return;
+  const currentText = (state[bucket] || {})[key] || '';
+  recordVersion(bucket, key, currentText, v.text, true); // keep what's there now, too
+  if (bucket === 'planner') setPlannerEntry(state.profile, plannerSelectedDate, v.text);
+  else if (bucket === 'maybe') setMaybeEntry(state.profile, plannerSelectedDate, v.text);
+  else setNotes(state.profile, plannerSelectedDate, v.text);
+  if (bucket !== 'notes') plannerList = bucket === 'maybe' ? 'maybe' : 'must';
+  closeHistoryModal();
+  renderCalendar();
+  renderPlannerEditor();
+  if (plannerSelectedDate === todayKey()) renderPoints(true);
+  SFX.milestone();
+  showToast('🕘 restored — the version you replaced is saved too');
 }
 
 function parseDateKey(key) {
@@ -4867,7 +5163,8 @@ function renderLinesInto(container, lines, interactive, list = 'must', compact =
               `data-pts-index="${line.index}" data-pts-kind="master" data-list="${list}"`)
           : '';
         t.innerHTML = `<span class="group-title-text">${escapeHtml(line.text || '')}</span>` +
-          (master && master.complete ? '<span class="group-title-done">✓</span>' : '') + pill;
+          (master && master.complete ? '<span class="group-title-done">✓</span>' : '') + pill +
+          (interactive ? `<button type="button" class="row-del" style="order:4" data-del-index="${line.index}" data-del-kind="master" data-list="${list}" aria-label="delete master routine">🗑</button>` : '');
         container.appendChild(t);
         box = null;
         boxGroup = null;
@@ -4885,7 +5182,7 @@ function renderLinesInto(container, lines, interactive, list = 'must', compact =
       head.innerHTML = `<span class="routine-group-name">${escapeHtml(line.text || 'routine')}</span>` +
         `<span class="routine-group-right">` +
         (groupTasks.length ? `<span class="routine-group-count">${done === groupTasks.length ? '✓ done' : `${done}/${groupTasks.length}`}</span>` : '') +
-        gPill + `</span>`;
+        gPill + (interactive ? `<button type="button" class="row-del" data-del-index="${line.index}" data-del-kind="group" data-list="${list}" aria-label="delete routine">🗑</button>` : '') + `</span>`;
       box.appendChild(head);
       container.appendChild(box);
       boxGroup = line.group;
@@ -4932,7 +5229,10 @@ function buildChecklistItem(line, interactive, list = 'must') {
       : '';
     const ptsPill = pointPillHtml(taskPointInfo(line), interactive,
       `data-pts-index="${line.index}" data-pts-kind="task" data-list="${list}"`);
-    const extras = timingPillsHtml(line, interactive, list) + ptsPill + moveBtn;
+    const delBtn = interactive
+      ? `<button type="button" class="row-del" data-del-index="${line.index}" data-del-kind="task" data-list="${list}" aria-label="delete task">🗑</button>`
+      : '';
+    const extras = timingPillsHtml(line, interactive, list) + ptsPill + moveBtn + delBtn;
     const optTag = line.optional ? '<span class="opt-tag">optional</span>' : '';
     el.innerHTML = `<span class="check-box"></span><span class="check-text">${optTag}${escapeHtml(line.taskText)}</span>${extras ? `<span class="row-extras">${extras}</span>` : ''}`;
   } else if (line.type === 'header') {
@@ -5081,6 +5381,7 @@ function renderPlannerEditor() {
   }
 
   hideSaveIndicator();
+  updateRestoreRow();
 }
 
 function renderChecklist() {
@@ -5729,6 +6030,85 @@ function moveMaybeTo(toDate) {
   showToast(`📅 moved ${n === 1 ? 'it' : n + ' maybes'} to ${prettyDate(toDate).toLowerCase()}`);
 }
 
+// ---------- deleting from check mode ----------
+let undoInfo = null;
+let undoTimer = null;
+
+function deleteRange(list, lineIndex, kind) {
+  const text = getListEntry(list, state.profile, plannerSelectedDate);
+  const parsed = parsePlannerLines(text);
+  const line = parsed[lineIndex];
+  if (!line) return null;
+  let from = lineIndex, to = lineIndex, name = '', count = 0;
+  if (kind === 'task') {
+    if (line.type !== 'task') return null;
+    [from, to] = blockRange(parsed, lineIndex);
+    name = line.taskText;
+    count = parsed.slice(from, to + 1).filter(l => l.type === 'task').length;
+  } else {
+    if (line.type !== 'header') return null;
+    const a = analyzeList(parsed);
+    let tasks = [];
+    if (kind === 'master' && a.masterByHeader[lineIndex]) {
+      a.masterByHeader[lineIndex].groups.forEach(g => { tasks = tasks.concat(g.tasks); });
+    } else if (a.groupByHeader[lineIndex]) {
+      tasks = a.groupByHeader[lineIndex].tasks;
+    }
+    if (tasks.length) to = Math.max(...tasks.map(t => t.index));
+    name = line.text;
+    count = tasks.length;
+  }
+  return { text, from, to, name, count };
+}
+
+function deleteFromList(list, lineIndex, kind, confirmed = false) {
+  if (state.profile === 'combined') return;
+  const r = deleteRange(list, lineIndex, kind);
+  if (!r) return;
+  if (kind !== 'task' && !confirmed) {
+    askConfirm(kind === 'master' ? 'remove master routine? ⭐' : 'remove routine? 🔁',
+      `take "${r.name}" and its ${r.count} task${r.count === 1 ? '' : 's'} off this day's list? (the saved routine itself stays)`,
+      'remove', () => deleteFromList(list, lineIndex, kind, true));
+    return;
+  }
+  const lines = r.text.split('\n');
+  lines.splice(r.from, r.to - r.from + 1);
+  const newText = lines.join('\n').replace(/\n{3,}/g, '\n\n').replace(/^\n+|\n+$/g, '');
+  setListEntry(list, state.profile, plannerSelectedDate, newText);
+  showUndo({ list, profile: state.profile, date: plannerSelectedDate, text: r.text },
+    kind === 'task'
+      ? `removed “${r.name}”${r.count > 1 ? ` + ${r.count - 1} sub-task${r.count === 2 ? '' : 's'}` : ''}`
+      : `removed “${r.name}” (${r.count} task${r.count === 1 ? '' : 's'})`);
+  SFX.delete();
+  renderChecklist();
+  renderCalendar();
+  updateRestoreRow();
+  if (plannerSelectedDate === todayKey()) renderPoints();
+}
+
+function showUndo(info, msg) {
+  undoInfo = info;
+  document.getElementById('undoMsg').textContent = msg;
+  const bar = document.getElementById('undoBar');
+  bar.classList.add('show');
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(() => { bar.classList.remove('show'); undoInfo = null; }, 6000);
+}
+
+function doUndo() {
+  if (!undoInfo) return;
+  const { list, profile, date, text } = undoInfo;
+  setListEntry(list, profile, date, text);
+  undoInfo = null;
+  clearTimeout(undoTimer);
+  document.getElementById('undoBar').classList.remove('show');
+  SFX.add();
+  renderPlannerEditor();
+  renderCalendar();
+  if (date === todayKey()) renderPoints();
+  showToast('↩ brought it back');
+}
+
 // ==================== ROUTINES ====================
 const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -5984,6 +6364,7 @@ function renderRoutinesList() {
       <div class="routine-info">
         <div class="routine-name">${escapeHtml(r.name)}</div>
         <div class="routine-meta${r.days && r.days.length ? ' auto' : ''}">${n} task${n === 1 ? '' : 's'} · ${routineDaysLabel(r.days)}${ownerBadge(r)}</div>
+        ${onListBadge(r, 'routine')}
       </div>
       <div class="routine-card-btns">
         <button class="btn-mini" data-routine-add="${r.id}" title="add to ${escapeHtml(dayLabel)}">＋ add</button>
@@ -6090,6 +6471,7 @@ function renderMasterList() {
       <div class="routine-info">
         <div class="routine-name">⭐ ${escapeHtml(m.name)}</div>
         <div class="routine-meta${m.days && m.days.length ? ' auto' : ''}">${k} routine${k === 1 ? '' : 's'} · ${routineDaysLabel(m.days)}${ownerBadge(m)}</div>
+        ${onListBadge(m, 'master')}
         ${k ? `<div class="routine-members">${members.map(r => escapeHtml(r.name)).join(' · ')}</div>` : ''}
       </div>
       <div class="routine-card-btns">
@@ -6212,12 +6594,19 @@ function deleteMaster() {
   showRoutineListView();
 }
 
-function addMasterToDay(id) {
+function addMasterToDay(id, force = false) {
   if (state.profile === 'combined') return;
   const m = state.masterRoutines.find(x => x.id === id);
   if (!m) return;
   const k = masterMembers(m).length;
   if (!k) { showToast('this master routine is empty — edit it to add routines'); return; }
+  const already = onListCount(m, 'master');
+  if (already && !force) {
+    askConfirm('already added ⭐',
+      `"${m.name}" is already on your to-do list${dayWord() === 'today' ? '' : ' for ' + dayWord()}${already > 1 ? ` (${already} times)` : ''}. add it again?`,
+      'add again', () => addMasterToDay(id, true));
+    return;
+  }
   touchRoutine(m);
   flushPlannerSaves();
   setPlannerEntry(state.profile, plannerSelectedDate, appendMasterText(getPlannerEntry(state.profile, plannerSelectedDate), m));
@@ -6241,10 +6630,60 @@ function deleteRoutine() {
   showRoutineListView();
 }
 
-function addRoutineToDay(id) {
+let confirmYes = null;
+function askConfirm(title, msg, yesLabel, onYes) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmYesBtn').textContent = yesLabel;
+  confirmYes = onYes;
+  SFX.click();
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function closeConfirm(run) {
+  document.getElementById('confirmModal').classList.remove('open');
+  const fn = confirmYes;
+  confirmYes = null;
+  if (run && fn) fn();
+}
+
+// How many times a routine (or master routine) is already on the selected day's list
+function onListCount(x, kind, profile = state.profile, date = plannerSelectedDate) {
+  const want = headingName(x.name, kind === 'master' ? 'master routine' : 'routine').toLowerCase();
+  let n = 0;
+  ['must', 'maybe'].forEach(list => {
+    parsePlannerLines(getListEntry(list, profile, date)).forEach(l => {
+      if (l.type !== 'header' || l.isBonus) return;
+      if ((l.text || '').toLowerCase() !== want) return;
+      if (kind === 'master' && l.child) return;
+      n++;
+    });
+  });
+  return n;
+}
+
+function dayWord(date = plannerSelectedDate) {
+  const p = prettyDate(date);
+  return ['Today', 'Tomorrow', 'Yesterday'].includes(p) ? p.toLowerCase() : 'this day';
+}
+
+function onListBadge(x, kind) {
+  const n = onListCount(x, kind);
+  if (!n) return '';
+  return `<div class="on-list-badge">✓ already on ${dayWord()}${n > 1 ? ` · ×${n}` : ''}</div>`;
+}
+
+function addRoutineToDay(id, force = false) {
   if (state.profile === 'combined') return;
   const r = state.routines.find(x => x.id === id);
   if (!r) return;
+  const already = onListCount(r, 'routine');
+  if (already && !force) {
+    askConfirm('already added 🔁',
+      `"${r.name}" is already on your to-do list${dayWord() === 'today' ? '' : ' for ' + dayWord()}${already > 1 ? ` (${already} times)` : ''}. add it again?`,
+      'add again', () => addRoutineToDay(id, true));
+    return;
+  }
   touchRoutine(r);
   flushPlannerSaves();
   const text = appendRoutineText(getPlannerEntry(state.profile, plannerSelectedDate), r);
@@ -6585,6 +7024,9 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#pointsBtn')) { toggleShowPoints(); return; }
 
   // ---- point pills + point editor ----
+  const rowDel = e.target.closest('.row-del[data-del-index]');
+  if (rowDel) { deleteFromList(rowDel.dataset.list, parseInt(rowDel.dataset.delIndex, 10), rowDel.dataset.delKind); return; }
+
   const ptsPill = e.target.closest('.pts-pill[data-pts-index]');
   if (ptsPill) {
     openPointsModal(ptsPill.dataset.list, parseInt(ptsPill.dataset.ptsIndex, 10), ptsPill.dataset.ptsKind);
@@ -6644,6 +7086,15 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#timingSaveBtn')) { saveTiming(false); return; }
   if (e.target.closest('#timingClearBtn')) { saveTiming(true); return; }
   if (e.target.closest('#timingCancelBtn') || e.target.id === 'timingModal') { closeTimingModal(); return; }
+
+  // ---- confirm pop-up, earlier versions, delete + undo ----
+  if (e.target.closest('#confirmYesBtn')) { closeConfirm(true); return; }
+  if (e.target.closest('#confirmNoBtn') || e.target.id === 'confirmModal') { closeConfirm(false); return; }
+  if (e.target.closest('#restoreBtn')) { openHistoryModal(); return; }
+  const restoreBtn = e.target.closest('[data-restore]');
+  if (restoreBtn) { restoreVersion(restoreBtn.dataset.restore); return; }
+  if (e.target.closest('#historyCloseBtn') || e.target.id === 'historyModal') { closeHistoryModal(); return; }
+  if (e.target.closest('#undoBtn')) { doUndo(); return; }
 
   // ---- routines ----
   if (e.target.closest('#routinesBtn')) { openRoutinesModal(); return; }
@@ -6878,6 +7329,8 @@ document.addEventListener('keydown', (e) => {
   }
 
   if (e.key === 'Escape') {
+    if (document.getElementById('confirmModal').classList.contains('open')) { closeConfirm(false); return; }
+    closeHistoryModal();
     closePointsModal();
     closeMoveModal();
     closeTimingModal();
@@ -6925,6 +7378,7 @@ document.addEventListener('visibilitychange', () => {
     renderStreak(true);
     renderPoints();
     pruneRoutineLog();
+    trimHistory();
     if (wasOnToday) {
       plannerSelectedDate = t;
       plannerCalendarMonth = null;
@@ -6953,6 +7407,7 @@ function exportData() {
       routines: state.routines,
       masterRoutines: state.masterRoutines,
       pointMemory: state.pointMemory,
+      history: state.history,
       showPoints: state.showPoints,
       routineLog: state.routineLog,
       routineSort: state.routineSort,
@@ -7020,6 +7475,7 @@ function confirmImport() {
   state.routines = Array.isArray(imported.routines) ? imported.routines : [];
   state.masterRoutines = Array.isArray(imported.masterRoutines) ? imported.masterRoutines : [];
   state.pointMemory = imported.pointMemory && typeof imported.pointMemory === 'object' ? imported.pointMemory : {};
+  state.history = imported.history && typeof imported.history === 'object' ? imported.history : {};
   state.showPoints = !!imported.showPoints;
   state.routineLog = imported.routineLog || {};
   state.routineSort = imported.routineSort === 'alpha' ? 'alpha' : 'recent';
@@ -7059,6 +7515,7 @@ lastSeenToday = todayKey();
 backfillDaysUsed();
 recordDayUsed();
 pruneRoutineLog();
+trimHistory();
 save();
 renderProfiles();
 renderTasks();
