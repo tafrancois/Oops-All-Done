@@ -1184,6 +1184,56 @@
     padding: 10px 14px 4px;
   }
 
+  .check-all {
+    flex-shrink: 0;
+    align-self: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    border-radius: 8px;
+    border: 2.5px solid var(--rg-text, var(--plum-soft));
+    background: rgba(255,255,255,0.85);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .check-all:active { transform: scale(0.88); }
+
+  .check-all.all {
+    background: #7fa873;
+    border-color: #7fa873;
+  }
+
+  .check-all.all::after {
+    content: '✓✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 900;
+    font-size: 0.62rem;
+    letter-spacing: -2px;
+  }
+
+  .check-all.some::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    top: 50%;
+    height: 3px;
+    margin-top: -1.5px;
+    border-radius: 2px;
+    background: var(--rg-text, var(--plum-soft));
+  }
+
+  .routine-group-head { align-items: center; }
+  .routine-group-head .routine-group-name { flex: 1; }
+  .group-title .check-all { margin-right: 0; --rg-text: var(--plum); }
+
   .routine-group-name {
     font-family: 'Fraunces', serif;
     font-style: italic;
@@ -1806,15 +1856,20 @@
   /* ===== TABS ===== */
   .tabs {
     display: flex;
-    gap: 4px;
+    gap: 2px;
     justify-content: center;
     margin-bottom: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
+  .tabs::-webkit-scrollbar { display: none; }
+
   .tab {
+    flex-shrink: 0;
     border: none;
     background: transparent;
-    padding: 10px 20px;
+    padding: 10px 12px;
     font-family: 'Fraunces', serif;
     font-style: italic;
     font-weight: 600;
@@ -1830,6 +1885,12 @@
   }
 
   .tab[data-archived] { display: none; }
+  .tab.tab-icon { font-style: normal; font-size: 1.1rem; padding: 10px 10px; filter: grayscale(0.4); }
+  .tab.tab-icon.active { filter: none; }
+
+  @media (max-width: 400px) {
+    .tab { padding: 9px 8px; font-size: 1rem; }
+  }
 
   .tab.active::after {
     content: '';
@@ -2584,9 +2645,1187 @@
     color: var(--plum);
   }
 
-  /* Push page content up so it doesn't hide behind the bar */
-  body {
-    padding-bottom: 80px;
+  /* ===== SHEETS (full-screen, swipe down to close) ===== */
+  .sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: none;
+    background: rgba(42, 21, 32, 0.45);
+    backdrop-filter: blur(6px);
+  }
+
+  .sheet.open { display: block; animation: fadeIn 0.2s; }
+  #moodSheet { z-index: 140; }
+  .confirm-backdrop { z-index: 180 !important; }
+  body.sheet-open { overflow: hidden; }
+
+  .sheet-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: max(env(safe-area-inset-top), 12px);
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--cream);
+    border-radius: 26px 26px 0 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(42,21,32,0.25);
+    animation: sheetUp 0.32s cubic-bezier(0.2, 0.9, 0.3, 1);
+    overflow: hidden;
+  }
+
+  @keyframes sheetUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .sheet-grabber {
+    flex-shrink: 0;
+    width: 40px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(74,37,64,0.2);
+    margin: 8px auto 4px;
+  }
+
+  .sheet-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .who-tag {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.72rem;
+    margin-left: 8px;
+    font-style: normal;
+  }
+
+  /* ===== JOURNAL LIST ===== */
+  .j-head { display: flex; align-items: baseline; justify-content: space-between; margin: 0 4px 10px; }
+
+  .j-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--plum);
+  }
+
+  .j-count { font-family: 'Nunito', sans-serif; font-style: normal; font-weight: 700; font-size: 0.8rem; color: var(--plum-mist); margin-left: 6px; }
+
+  .j-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 14px;
+    padding: 4px 6px 4px 12px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px var(--shadow-soft), inset 0 0 0 1px rgba(74,37,64,0.07);
+  }
+
+  .j-search-icon { font-size: 0.9rem; opacity: 0.55; }
+
+  .j-search input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 8px 0;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .j-search input::-webkit-search-cancel-button { display: none; }
+
+  .j-search button {
+    border: none;
+    background: rgba(74,37,64,0.08);
+    color: var(--plum-soft);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .j-month {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 1.02rem;
+    color: var(--plum-soft);
+    margin: 16px 6px 8px;
+  }
+
+  .j-month.small { font-size: 0.9rem; margin: 14px 6px 6px; }
+
+  .j-group {
+    background: rgba(255,255,255,0.78);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px var(--shadow-soft), inset 0 0 0 1px rgba(74,37,64,0.05);
+  }
+
+  .j-card {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    padding: 13px 16px;
+    border-bottom: 1px solid rgba(74,37,64,0.07);
+    font-family: 'Times New Roman', Times, serif;
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  .j-card:last-child { border-bottom: none; }
+  .j-card:active { background: rgba(245,201,107,0.15); }
+  .j-card-title { font-weight: 700; font-size: 17px; line-height: 1.3; }
+
+  .j-card-prev {
+    font-size: 16px;
+    color: #6f5a68;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .j-empty {
+    text-align: center;
+    padding: 40px 20px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--plum-mist);
+    line-height: 1.6;
+  }
+
+  .j-empty-big { font-size: 2.6rem; margin-bottom: 8px; font-style: normal; }
+
+  mark {
+    background: rgba(245,201,107,0.65);
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 1px;
+  }
+
+  mark.cur { background: var(--butter-deep); box-shadow: 0 0 0 2px rgba(232,168,56,0.4); }
+
+  .fab {
+    position: fixed;
+    right: 20px;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(145deg, var(--plum-soft), var(--plum));
+    color: var(--cream);
+    font-size: 2.6rem;
+    font-weight: 300;
+    line-height: 1;
+    box-shadow: 0 10px 28px rgba(74,37,64,0.45);
+    z-index: 70;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .fab:active { transform: scale(0.9); }
+  body.on-journal .fab { display: flex; }
+  body.sheet-open .fab { display: none !important; }
+
+  /* ===== JOURNAL ENTRY ===== */
+  .entry-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 12px 10px;
+    border-bottom: 1px solid rgba(74,37,64,0.08);
+  }
+
+  .eb-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(74,37,64,0.07);
+    font-size: 1.05rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .eb-count {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    background: var(--plum);
+    color: var(--cream);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.6rem;
+    padding: 1px 5px;
+    border-radius: 999px;
+  }
+
+  .eb-count:empty { display: none; }
+
+  .eb-done {
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: none;
+    background: var(--plum);
+    color: var(--cream);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.92rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  #entrySheet:not(.editing) .edit-only { display: none; }
+
+  .find-bar {
+    flex-shrink: 0;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(245,201,107,0.18);
+    border-bottom: 1px solid rgba(74,37,64,0.08);
+  }
+
+  .find-bar.open { display: flex; }
+
+  .find-bar input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: #fff;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
+    outline: none;
+  }
+
+  .find-count { font-weight: 800; font-size: 0.8rem; color: var(--plum-soft); min-width: 34px; text-align: center; }
+
+  .find-bar button {
+    border: none;
+    background: rgba(74,37,64,0.08);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--plum);
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+
+  .entry-body {
+    padding: 16px 20px calc(100px + env(safe-area-inset-bottom));
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
+    color: var(--ink);
+  }
+
+  .entry-date {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--plum-mist);
+    margin-bottom: 10px;
+  }
+
+  .entry-date.edit {
+    background: rgba(74,37,64,0.07);
+    border-radius: 999px;
+    padding: 7px 14px;
+    color: var(--plum-soft);
+    cursor: pointer;
+  }
+
+  .ed-pen { opacity: 0.6; }
+
+  .entry-date input, .m-time input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .entry-title-input {
+    display: block;
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--ink);
+    padding: 4px 0 10px;
+    outline: none;
+  }
+
+  .entry-title-input::placeholder { color: rgba(110,90,104,0.45); font-weight: 400; font-style: italic; }
+
+  .entry-title {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.25;
+    margin: 0 0 12px;
+  }
+
+  .entry-text {
+    display: block;
+    width: 100%;
+    border: none;
+    background: transparent;
+    resize: none;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink);
+    outline: none;
+    min-height: 1.6em;
+  }
+
+  .entry-text[data-block="0"] { min-height: 4.8em; }
+  .entry-text::placeholder { color: rgba(110,90,104,0.45); font-style: italic; }
+
+  .entry-p {
+    white-space: pre-wrap;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    margin: 0 0 4px;
+  }
+
+  .entry-p.muted { color: var(--plum-mist); font-style: italic; }
+
+  /* photos: a sleek strip between two thin full-width lines */
+  .img-block {
+    display: grid;
+    gap: 6px;
+    margin: 14px -20px;
+    padding: 14px 20px;
+    border-top: 1px solid rgba(74,37,64,0.22);
+    border-bottom: 1px solid rgba(74,37,64,0.22);
+  }
+
+  .img-block.one { grid-template-columns: 1fr; }
+  .img-block.two { grid-template-columns: repeat(2, 1fr); }
+  .img-block.many { grid-template-columns: repeat(3, 1fr); }
+
+  .img-tile {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(74,37,64,0.06);
+    cursor: zoom-in;
+  }
+
+  .img-block.one .img-tile { aspect-ratio: 4 / 3; max-height: 260px; }
+  #entrySheet.editing .img-tile { cursor: default; }
+  .img-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-tile.missing::after { content: '📷'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.4; }
+
+  .img-x {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(20,10,16,0.62);
+    color: #fff;
+    font-size: 1.05rem;
+    line-height: 1;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+  }
+
+  .entry-moods { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+
+  .mood-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: none;
+    border-radius: 999px;
+    padding: 5px 12px 5px 5px;
+    background: linear-gradient(90deg, var(--m-b, #eee), rgba(255,255,255,0.8));
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--plum);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .mood-chip.add { padding: 7px 14px; background: rgba(74,37,64,0.07); color: var(--plum-soft); }
+  .mood-chip em { font-weight: 600; color: var(--plum-mist); }
+
+  /* ===== PHOTO VIEWER ===== */
+  .img-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 170;
+    background: rgba(10,5,8,0.96);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    overflow: hidden;
+  }
+
+  .img-viewer.open { display: flex; animation: fadeIn 0.2s; }
+
+  .img-viewer img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    will-change: transform;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .viewer-btn {
+    position: absolute;
+    border: none;
+    background: rgba(255,255,255,0.14);
+    color: #fff;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+  }
+
+  .viewer-close { top: calc(14px + env(safe-area-inset-top)); right: 14px; }
+  .viewer-prev { left: 12px; top: 50%; margin-top: -21px; }
+  .viewer-next { right: 12px; top: 50%; margin-top: -21px; }
+  @media (hover: none) { .viewer-prev, .viewer-next { display: none; } }
+
+  .viewer-count {
+    position: absolute;
+    top: calc(24px + env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.8);
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  /* ===== MOOD ORB ===== */
+  .mood-orb {
+    --size: 210px;
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+    margin: 0 auto;
+    transform: scale(var(--orb-scale, 1));
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .mood-orb .ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--m-a);
+    opacity: 0.45;
+    animation: orbPulse 4.5s ease-in-out infinite;
+    transition: border-color 0.5s;
+  }
+
+  .mood-orb .r2 { inset: 13%; animation-delay: -1.5s; opacity: 0.55; }
+  .mood-orb .r3 { inset: 26%; animation-delay: -3s; opacity: 0.65; }
+
+  @keyframes orbPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.045); }
+  }
+
+  .mood-orb .petal {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 34%;
+    height: 50%;
+    margin: -25% 0 0 -17%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.9), var(--m-b) 55%, transparent 75%);
+    opacity: var(--petal, 0);
+    transform: rotate(calc(var(--i) * 60deg)) translateY(-26%);
+    transition: opacity 0.5s, background 0.5s;
+  }
+
+  .mood-orb .petals { position: absolute; inset: 0; animation: petalSpin 26s linear infinite; }
+
+  @keyframes petalSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  .mood-orb .core {
+    position: absolute;
+    inset: 34%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 45% 38%, #fff 0%, var(--m-b) 38%, var(--m-a) 100%);
+    box-shadow: 0 0 40px var(--m-b), 0 0 90px var(--m-b);
+    filter: blur(var(--orb-blur, 0px));
+    transition: background 0.5s, box-shadow 0.5s, filter 0.5s;
+  }
+
+  /* ===== MOOD CHECK-IN SHEET ===== */
+  .mood-panel {
+    background: linear-gradient(180deg, var(--m-bg, #eef2f3) 0%, var(--cream) 78%);
+    transition: background 0.5s;
+  }
+
+  .mood-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 14px 6px;
+  }
+
+  .mb-btn {
+    min-width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 2px 10px rgba(74,37,64,0.12);
+    font-size: 1.5rem;
+    color: var(--plum);
+    cursor: pointer;
+    padding: 0 12px;
+  }
+
+  .mb-btn.wide { font-size: 0.95rem; font-weight: 800; font-family: 'Nunito', sans-serif; }
+  .mb-btn.final { background: var(--plum); color: var(--cream); font-size: 1.2rem; }
+
+  .mb-close {
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    border: none;
+    background: none;
+    color: var(--plum-mist);
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 2px 6px;
+  }
+
+  .mood-dots { display: flex; gap: 6px; }
+  .mood-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(74,37,64,0.18); transition: all 0.3s; }
+  .mood-dots span.done { background: var(--m-a); }
+  .mood-dots span.on { width: 22px; border-radius: 4px; background: var(--plum); }
+
+  .mood-body { padding: 6px 20px calc(40px + env(safe-area-inset-bottom)); }
+
+  .m-q {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.45rem;
+    line-height: 1.2;
+    color: var(--ink);
+    margin: 6px 0 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .m-q.center { text-align: center; font-size: 1.7rem; margin: 18px 10px 10px; }
+  .m-opt { font-weight: 600; font-size: 0.95rem; color: var(--plum-mist); font-style: italic; }
+  .m-orb-wrap { padding: 18px 0 8px; }
+
+  .m-level {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.8rem;
+    color: var(--ink);
+    margin: 10px 0 18px;
+  }
+
+  .mood-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 38px;
+    background: transparent;
+    margin: 0;
+    touch-action: pan-x;
+  }
+
+  .mood-slider::-webkit-slider-runnable-track {
+    height: 14px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #3f3175, #4a5fa8, #7894c6, #b9c4c9, #eeaa7c, #f29445, #efb11a);
+  }
+
+  .mood-slider::-moz-range-track {
+    height: 14px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #3f3175, #4a5fa8, #7894c6, #b9c4c9, #eeaa7c, #f29445, #efb11a);
+  }
+
+  .mood-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 34px;
+    height: 34px;
+    margin-top: -10px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--m-a);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+  }
+
+  .mood-slider::-moz-range-thumb {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--m-a);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+  }
+
+  .m-ticks { display: flex; justify-content: space-between; padding: 6px 13px 0; }
+  .m-ticks span { width: 6px; height: 6px; border-radius: 50%; background: rgba(74,37,64,0.2); transition: all 0.2s; }
+  .m-ticks span.on { background: var(--plum); transform: scale(1.4); }
+
+  .m-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-weight: 800;
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    color: rgba(74,37,64,0.55);
+    line-height: 1.25;
+  }
+
+  .m-scale span:last-child { text-align: right; }
+
+  .m-mini {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0 6px;
+  }
+
+  .m-mini-orb {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 45% 38%, #fff 0%, var(--m-b) 40%, var(--m-a) 100%);
+    box-shadow: 0 0 18px var(--m-b);
+  }
+
+  .m-mini-label { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.1rem; color: var(--ink); }
+  .m-mini-sub { font-size: 0.82rem; color: var(--plum-soft); line-height: 1.4; }
+
+  .m-sort {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: -4px 0 12px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--plum-mist);
+  }
+
+  .m-sort button {
+    border: none;
+    background: rgba(255,255,255,0.7);
+    color: var(--plum-soft);
+    font-family: 'Nunito', sans-serif;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 5px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .m-sort button.on { background: var(--plum); color: var(--cream); }
+
+  .m-group {
+    background: rgba(255,255,255,0.6);
+    border-radius: 18px;
+    margin-bottom: 10px;
+    box-shadow: inset 0 0 0 1px rgba(74,37,64,0.08);
+    overflow: hidden;
+  }
+
+  .m-group-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border: none;
+    background: none;
+    padding: 13px 16px;
+    font-size: 1.15rem;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .m-group-name { flex: 1; font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.05rem; color: var(--plum); }
+  .m-group-count { font-size: 0.78rem; font-weight: 700; color: var(--plum-mist); }
+  .m-caret { font-size: 0.8rem; color: var(--plum-soft); width: 12px; }
+  .m-group .m-chips { padding: 0 12px 14px; }
+  .m-group .m-addform { margin: -4px 12px 14px; }
+
+  .m-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+
+  .m-chip {
+    border: 1.5px solid rgba(74,37,64,0.14);
+    background: rgba(255,255,255,0.85);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s;
+  }
+
+  .m-chip:active { transform: scale(0.94); }
+
+  .m-chip.on {
+    background: var(--plum);
+    border-color: var(--plum);
+    color: var(--cream);
+    font-weight: 800;
+  }
+
+  .m-chip.add { border-style: dashed; color: var(--plum-soft); background: transparent; }
+
+  .m-addform {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    align-items: center;
+  }
+
+  .m-addform input {
+    border: 1.5px solid rgba(74,37,64,0.18);
+    border-radius: 12px;
+    padding: 9px 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    background: #fff;
+    outline: none;
+    min-width: 0;
+  }
+
+  .m-add-emoji { width: 52px; text-align: center; }
+  .m-add-name { flex: 1; }
+
+  .m-add-ok {
+    border: none;
+    background: var(--plum);
+    color: var(--cream);
+    font-weight: 800;
+    border-radius: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+  }
+
+  .m-add-x { border: none; background: none; font-size: 1.2rem; color: var(--plum-mist); cursor: pointer; padding: 4px 6px; }
+
+  .m-note {
+    display: block;
+    width: 100%;
+    min-height: 130px;
+    border: 1.5px solid rgba(74,37,64,0.14);
+    border-radius: 16px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.85);
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+  }
+
+  .m-note:focus { border-color: var(--m-a); }
+  .m-count { text-align: right; font-size: 0.78rem; font-weight: 700; color: var(--plum-mist); margin: 6px 4px 14px; }
+
+  .m-time {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.75);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--plum-soft);
+    cursor: pointer;
+  }
+
+  .m-done { display: block; width: 100%; margin-top: 22px; padding: 15px; font-size: 1.05rem; }
+
+  .m-del {
+    display: block;
+    margin: 16px auto 0;
+    border: none;
+    background: none;
+    color: var(--rose);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  /* ===== MOOD TAB ===== */
+  .mood-hero {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    border: none;
+    border-radius: 24px;
+    padding: 14px 18px 14px 10px;
+    margin-bottom: 16px;
+    background: linear-gradient(120deg, var(--m-bg, #eef2f3), rgba(255,255,255,0.85));
+    box-shadow: 0 6px 20px var(--shadow-soft), inset 0 0 0 1px rgba(74,37,64,0.06);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .mood-hero .mood-orb { --size: 84px; flex-shrink: 0; margin: 0; }
+  .hero-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .hero-title { font-family: 'Fraunces', serif; font-style: italic; font-weight: 800; font-size: 1.45rem; color: var(--plum); }
+  .hero-sub { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.85rem; color: var(--plum-soft); }
+
+  .hero-plus {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--plum);
+    color: var(--cream);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(74,37,64,0.35);
+  }
+
+  .mood-period { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 12px; }
+
+  .seg {
+    display: inline-flex;
+    background: rgba(74,37,64,0.08);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 2px;
+  }
+
+  .seg button {
+    border: none;
+    background: transparent;
+    padding: 7px 18px;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: var(--plum-soft);
+    cursor: pointer;
+  }
+
+  .seg button.on { background: var(--plum); color: var(--cream); box-shadow: 0 3px 10px rgba(74,37,64,0.25); }
+  .seg.small { margin-bottom: 12px; }
+  .seg.small button { padding: 5px 14px; font-size: 0.8rem; }
+
+  .mood-nav { display: flex; align-items: center; gap: 10px; }
+
+  .mood-nav button {
+    border: none;
+    background: rgba(255,255,255,0.75);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    color: var(--plum);
+    cursor: pointer;
+  }
+
+  .mood-nav button:disabled { opacity: 0.3; cursor: default; }
+  #moodRangeLabel { font-family: 'Fraunces', serif; font-style: italic; font-weight: 700; color: var(--plum); min-width: 150px; text-align: center; }
+
+  .mood-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+    font-size: 0.88rem;
+    color: var(--plum-soft);
+    line-height: 1.45;
+  }
+
+  .mood-summary:empty { display: none; }
+  .ms-dot { flex-shrink: 0; width: 12px; height: 12px; border-radius: 50%; }
+
+  .mood-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    background: rgba(255,255,255,0.78);
+    border-radius: 18px;
+    padding: 12px 14px 12px 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 3px 12px var(--shadow-soft), inset 0 0 0 1px rgba(74,37,64,0.05);
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .mc-orb {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 45% 38%, #fff 0%, var(--m-b) 40%, var(--m-a) 100%);
+    box-shadow: 0 0 12px var(--m-b);
+  }
+
+  .mc-orb.small { width: 24px; height: 24px; box-shadow: none; }
+  .mc-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .mc-top { display: flex; justify-content: space-between; gap: 8px; }
+  .mc-level { font-family: 'Fraunces', serif; font-weight: 800; color: var(--ink); font-size: 1rem; }
+  .mc-time { font-weight: 700; font-size: 0.78rem; color: var(--plum-mist); white-space: nowrap; }
+  .mc-emos { font-size: 0.88rem; color: var(--ink); }
+  .mc-areas { font-size: 0.8rem; color: var(--plum-soft); }
+  .mc-note { font-family: 'Times New Roman', Times, serif; font-size: 16px; font-style: italic; color: #6f5a68; }
+  .mc-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; align-items: center; }
+  .mc-tag { font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: rgba(74,37,64,0.07); color: var(--plum-soft); }
+  .mc-tag.unfinished { background: rgba(245,201,107,0.4); color: #7a4d10; }
+
+  /* ===== MOOD DATA (Stats) ===== */
+  .mpat-overall { font-size: 0.88rem; color: var(--plum-soft); margin-bottom: 12px; line-height: 1.5; }
+  .mpat-insights { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+  .mpat-insight {
+    background: rgba(245,201,107,0.16);
+    border-radius: 14px;
+    padding: 10px 12px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .mpat-sub-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 800;
+    color: var(--plum);
+    font-size: 1rem;
+    margin: 18px 0 8px;
+  }
+
+  .mpat-axis {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    color: var(--plum-mist);
+    margin-bottom: 4px;
+  }
+
+  .mpat-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 10px;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(74,37,64,0.06);
+  }
+
+  .mpat-name { font-weight: 700; font-size: 0.9rem; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mpat-val { font-weight: 800; font-size: 0.8rem; color: var(--plum-soft); font-variant-numeric: tabular-nums; }
+
+  .mpat-track {
+    grid-column: 1 / -1;
+    position: relative;
+    height: 10px;
+    border-radius: 4px;
+    background: rgba(74,37,64,0.06);
+  }
+
+  .mpat-mid { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: rgba(74,37,64,0.3); border-radius: 1px; }
+  .mpat-bar { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+  .mpat-note { grid-column: 1 / -1; font-size: 0.78rem; color: var(--plum-soft); }
+  .mpat-thin { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.8rem; color: var(--plum-mist); margin-top: 8px; line-height: 1.5; }
+
+  .mpat-emo {
+    display: grid;
+    grid-template-columns: minmax(0, auto) auto;
+    gap: 2px 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(74,37,64,0.06);
+  }
+
+  .mpat-emo-name { font-weight: 700; font-size: 0.9rem; color: var(--ink); }
+  .mpat-emo-n { font-weight: 800; font-size: 0.8rem; color: var(--plum-soft); text-align: right; }
+  .mpat-emo-areas { grid-column: 1 / -1; font-size: 0.78rem; color: var(--plum-soft); }
+  .stats-empty.small { padding: 10px; font-size: 0.85rem; }
+
+
+  /* ===== SETTINGS ===== */
+  .settings-card {
+    background: rgba(255,255,255,0.7);
+    border-radius: 22px;
+    padding: 18px 18px 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 16px var(--shadow-soft), inset 0 0 0 1px rgba(74,37,64,0.06);
+  }
+
+  .settings-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: var(--plum);
+    margin-bottom: 6px;
+  }
+
+  .settings-sub, .settings-meta {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.86rem;
+    color: var(--plum-mist);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .settings-meta { margin: 10px 0 0; }
+  .settings-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .settings-ghost { background: rgba(74,37,64,0.08); }
+
+  .switch-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 0;
+    cursor: pointer;
+  }
+
+  .switch-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .switch-label { font-weight: 800; color: var(--plum); font-size: 0.98rem; }
+  .switch-sub { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.82rem; color: var(--plum-mist); line-height: 1.45; }
+
+  .switch {
+    appearance: none;
+    -webkit-appearance: none;
+    flex-shrink: 0;
+    width: 52px;
+    height: 31px;
+    border-radius: 999px;
+    background: rgba(74,37,64,0.18);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .switch:checked { background: #7fa873; }
+  .switch:checked::after { transform: translateX(21px); }
+
+  .mlm-group { margin-top: 12px; }
+  .mlm-head { font-weight: 800; font-size: 0.85rem; color: var(--plum-soft); margin-bottom: 6px; }
+  .mlm-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+
+  .mlm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fff;
+    border: 1.5px solid rgba(74,37,64,0.12);
+    border-radius: 999px;
+    padding: 3px 4px 3px 10px;
+    font-size: 0.82rem;
+    color: var(--plum);
+  }
+
+  .mlm-chip button {
+    border: none;
+    background: none;
+    color: var(--plum-mist);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  .mlm-chip button:hover { background: rgba(228,122,122,0.18); color: var(--rose); }
+  .mlm-hidden { margin-top: 8px; font-size: 0.8rem; color: var(--plum-mist); font-family: 'Fraunces', serif; font-style: italic; }
+  .mlm-hidden button { border: none; background: none; color: var(--plum-soft); text-decoration: underline; cursor: pointer; font: inherit; }
+
+  .settings-foot {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--plum-mist);
+    margin: 18px 0 8px;
   }
 
   /* ===== MILESTONE TOAST ===== */
@@ -2656,7 +3895,10 @@
 
   <div class="tabs">
     <button class="tab active" data-tab="planner">Planner</button>
+    <button class="tab" data-tab="journal">Journal</button>
+    <button class="tab" data-tab="mood">Mood</button>
     <button class="tab" data-tab="stats">Stats</button>
+    <button class="tab tab-icon" data-tab="settings" aria-label="Settings">⚙️</button>
     <!-- ARCHIVED tabs: still here (and their sections below) so they can come back.
          To restore one, take its id out of ARCHIVED_TABS in the script. -->
     <button class="tab" data-tab="log" data-archived>Tasks</button>
@@ -2688,6 +3930,20 @@
       <div class="stats-title">routines finished · last 30 days</div>
       <div class="stats-rlist" id="statsRoutines"></div>
     </div>
+    <div class="stats-section">
+      <div class="stats-title">💭 mood over time</div>
+      <div class="seg small" role="tablist" aria-label="mood graph range">
+        <button type="button" data-mgraph="day">today</button>
+        <button type="button" data-mgraph="week">week</button>
+        <button type="button" data-mgraph="month">month</button>
+      </div>
+      <div class="chart-wrap" id="moodChartWrap"><canvas id="chartMood"></canvas></div>
+      <div class="stats-empty" id="moodChartEmpty" style="display:none;"></div>
+    </div>
+    <div class="stats-section">
+      <div class="stats-title">💭 mood patterns</div>
+      <div id="moodPatterns"></div>
+    </div>
     <div class="stats-section" id="versusChartSection">
       <div class="stats-title">user comparison — all time</div>
       <div class="chart-wrap"><canvas id="chartVersus"></canvas></div>
@@ -2704,6 +3960,82 @@
       <div class="stats-title">recent logs</div>
       <div class="history-list" id="historyList"></div>
     </div>
+  </section>
+
+  <section id="tab-journal" style="display:none;">
+    <div class="j-head">
+      <div class="j-title">journal<span class="j-count" id="journalCount"></span></div>
+    </div>
+    <label class="j-search">
+      <span class="j-search-icon">🔍</span>
+      <input type="search" id="journalSearch" placeholder="search all entries" autocomplete="off" enterkeyhint="search" />
+      <button type="button" id="journalSearchClear" aria-label="clear search" style="display:none;">×</button>
+    </label>
+    <div id="journalList"></div>
+  </section>
+
+  <section id="tab-mood" style="display:none;">
+    <button type="button" class="mood-hero" id="moodCheckinBtn">
+      <span class="mood-orb"><span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span><span class="petals"><span class="petal" style="--i:0"></span><span class="petal" style="--i:1"></span><span class="petal" style="--i:2"></span><span class="petal" style="--i:3"></span><span class="petal" style="--i:4"></span><span class="petal" style="--i:5"></span></span><span class="core"></span></span>
+      <span class="hero-text"><span class="hero-title">check in</span><span class="hero-sub" id="moodHeroSub">how are you feeling right now?</span></span>
+      <span class="hero-plus">＋</span>
+    </button>
+    <div class="mood-period">
+      <div class="seg" role="tablist" aria-label="time range">
+        <button type="button" data-mrange="day">day</button>
+        <button type="button" data-mrange="week">week</button>
+        <button type="button" data-mrange="month">month</button>
+      </div>
+      <div class="mood-nav">
+        <button type="button" data-mnav="-1" aria-label="earlier">‹</button>
+        <span id="moodRangeLabel"></span>
+        <button type="button" data-mnav="1" id="moodNextRange" aria-label="later">›</button>
+      </div>
+    </div>
+    <div class="mood-summary" id="moodSummary"></div>
+    <div id="moodList"></div>
+  </section>
+
+  <section id="tab-settings" style="display:none;">
+    <div class="settings-card">
+      <div class="settings-title">💾 your data</div>
+      <div class="settings-sub">everything lives on this phone. a backup file keeps it safe if you ever delete the app.</div>
+      <div class="settings-btns">
+        <button class="btn btn-primary" id="exportBtn">⬇ export backup</button>
+        <button class="btn btn-ghost settings-ghost" id="importBtn">⬆ import backup</button>
+      </div>
+      <div class="settings-meta" id="lastBackupText"></div>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-title">🔁 routines</div>
+      <label class="switch-row">
+        <span class="switch-text">
+          <span class="switch-label">Check All includes optional tasks</span>
+          <span class="switch-sub">the ☐ at the top of a routine checks off everything in it — turn this off and it skips the optional ones</span>
+        </span>
+        <input type="checkbox" class="switch" data-setting="checkAllOptional" />
+      </label>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-title">📓 journal</div>
+      <label class="switch-row">
+        <span class="switch-text">
+          <span class="switch-label">Title on entries</span>
+          <span class="switch-sub">off (or left blank) = the entry is titled with its date + time</span>
+        </span>
+        <input type="checkbox" class="switch" data-setting="journalTitles" />
+      </label>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-title">💭 mood lists</div>
+      <div class="settings-sub">tap × to remove a feeling or life area from the check-in. add new ones right inside a check-in.</div>
+      <div id="moodListManager"></div>
+    </div>
+
+    <div class="settings-foot">Task Planner · made with 💜</div>
   </section>
 
   <section id="tab-planner">
@@ -2883,12 +4215,8 @@
   </div>
 </div>
 
-<!-- Export/Import Bar -->
-<div class="data-bar">
-  <button class="data-btn" id="exportBtn">⬇ export data</button>
-  <button class="data-btn" id="importBtn">⬆ import data</button>
-  <input type="file" id="importFileInput" accept=".json" style="display:none;" />
-</div>
+<!-- Export/Import live in the ⚙️ Settings tab now -->
+<input type="file" id="importFileInput" accept=".json,application/json" style="display:none;" />
 
 <!-- Import Confirmation Modal -->
 <div class="modal-backdrop" id="importModal">
@@ -3112,6 +4440,56 @@
   <button type="button" id="undoBtn">undo</button>
 </div>
 
+<!-- Journal entry (full-screen sheet) -->
+<div class="sheet" id="entrySheet">
+  <div class="sheet-panel entry-panel">
+    <div class="sheet-grabber"></div>
+    <div class="entry-bar">
+      <button type="button" class="eb-btn" id="entryCloseBtn" aria-label="close">✕</button>
+      <div style="flex:1;"></div>
+      <button type="button" class="eb-btn" id="entryFindBtn" aria-label="find in entry">🔍</button>
+      <button type="button" class="eb-btn edit-only" id="entryPhotoBtn" aria-label="add photos">📷<span class="eb-count" id="entryPhotoCount"></span></button>
+      <button type="button" class="eb-btn edit-only" data-entry-mood aria-label="add a mood check-in">💭</button>
+      <button type="button" class="eb-btn" id="entryDeleteBtn" aria-label="delete entry">🗑</button>
+      <button type="button" class="eb-done" id="entryEditBtn">edit</button>
+    </div>
+    <div class="find-bar" id="findBar">
+      <input type="search" id="findInput" placeholder="find in entry" autocomplete="off" enterkeyhint="search" />
+      <span class="find-count" id="findCount"></span>
+      <button type="button" id="findPrev" aria-label="previous match">▲</button>
+      <button type="button" id="findNext" aria-label="next match">▼</button>
+      <button type="button" id="findClose" aria-label="close find">×</button>
+    </div>
+    <div class="sheet-body entry-body" id="entryBody"></div>
+  </div>
+  <input type="file" id="entryPhotoInput" accept="image/*" multiple style="display:none;" />
+</div>
+
+<!-- Mood check-in (full-screen sheet) -->
+<div class="sheet" id="moodSheet">
+  <div class="sheet-panel mood-panel" id="moodPanel">
+    <div class="sheet-grabber"></div>
+    <button type="button" class="mb-close" id="moodCloseBtn" aria-label="close">✕</button>
+    <div class="mood-bar">
+      <button type="button" class="mb-btn" id="moodBackBtn" aria-label="back">‹</button>
+      <div class="mood-dots" id="moodDots"></div>
+      <button type="button" class="mb-btn" id="moodNextBtn" aria-label="next">›</button>
+    </div>
+    <div class="sheet-body mood-body" id="moodBody"></div>
+  </div>
+</div>
+
+<!-- Full-screen photo viewer -->
+<div class="img-viewer" id="imgViewer">
+  <img id="viewerImg" alt="" />
+  <div class="viewer-count" id="viewerCount"></div>
+  <button type="button" class="viewer-btn viewer-close" id="viewerClose" aria-label="close">✕</button>
+  <button type="button" class="viewer-btn viewer-prev" id="viewerPrev" aria-label="previous photo">‹</button>
+  <button type="button" class="viewer-btn viewer-next" id="viewerNext" aria-label="next photo">›</button>
+</div>
+
+<button type="button" class="fab" id="newEntryBtn" aria-label="new journal entry">+</button>
+
 <canvas id="confettiCanvas"></canvas>
 
 <script>
@@ -3147,6 +4525,11 @@ let state = {
   routineSort: 'recent', // 'recent' (last tapped/opened first) | 'alpha'
   masterRoutines: [], // { id, owner, name, routineIds: [routineId…], days: [0-6], lastUsed }
   pointMemory: {},  // 'task:taxes' / 'group:shower' / 'master:full morning' -> { pts, name, kind, updated }
+  settings: {},     // see SETTINGS_DEFAULT
+  journal: [],      // { id, profile, created, updated, title, blocks: [{type:'text',text}|{type:'images',ids}], moodIds }
+  moods: [],        // { id, profile, t, affect (-3..3), emotions: [], areas: [], note, entryId, partial }
+  moodCustom: { emotions: [], areas: [] },   // feelings / life areas you added
+  moodHidden: { emotions: [], areas: [] },   // built-in ones you removed
   showPoints: false, // show point pills on every task (custom/saved ones always show)
   routinesTab: 'routines', // which tab the routines page opens on: 'routines' | 'master'
 
@@ -3245,6 +4628,15 @@ function migrateState() {
   if (!Array.isArray(state.masterRoutines)) state.masterRoutines = [];
   if (!state.pointMemory || typeof state.pointMemory !== 'object') state.pointMemory = {};
   if (!state.history || typeof state.history !== 'object') state.history = {};
+  if (!state.settings || typeof state.settings !== 'object') state.settings = {};
+  if (!Array.isArray(state.journal)) state.journal = [];
+  if (!Array.isArray(state.moods)) state.moods = [];
+  ['moodCustom', 'moodHidden'].forEach(k => {
+    if (!state[k] || typeof state[k] !== 'object') state[k] = {};
+    if (!Array.isArray(state[k].emotions)) state[k].emotions = [];
+    if (!Array.isArray(state[k].areas)) state[k].areas = [];
+  });
+  Object.keys(SETTINGS_DEFAULT).forEach(k => { if (!(k in state.settings)) state.settings[k] = SETTINGS_DEFAULT[k]; });
   if (state.routinesTab !== 'master') state.routinesTab = 'routines';
   if (!state.routineLog || typeof state.routineLog !== 'object') state.routineLog = {};
   if (!state.maybe || typeof state.maybe !== 'object') state.maybe = {};
@@ -4223,9 +5615,9 @@ let chartDaily, chartTasks, chartVersus;
 
 function renderCharts() {
   // each piece renders on its own, so one failure (e.g. charts library offline) can't blank the page
-  [renderStatsTiles, renderDailyChart, renderTasksChart, renderRoutineStats, renderVersusChart, renderSavedPoints]
+  [renderStatsTiles, renderDailyChart, renderTasksChart, renderRoutineStats, renderMoodChart, renderMoodPatterns, renderVersusChart, renderSavedPoints]
     .forEach(fn => {
-      if (typeof Chart === 'undefined' && [renderDailyChart, renderTasksChart, renderVersusChart].includes(fn)) return;
+      if (typeof Chart === 'undefined' && [renderDailyChart, renderTasksChart, renderVersusChart, renderMoodChart].includes(fn)) return;
       try { fn(); } catch (err) { console.warn('stats:', err); }
     });
 }
@@ -4869,6 +6261,40 @@ function parseTaskLine(raw, i) {
   return { type: 'task', checked, optional, raw, level, taskText: t.text || '(empty)', time: t.time, dur: t.dur, pts: pp.pts, index: i };
 }
 
+// ==================== SETTINGS ====================
+const SETTINGS_DEFAULT = {
+  checkAllOptional: true,   // routine "check all" also checks optional tasks
+  journalTitles: true,      // show a title field on journal entries
+  emotionSort: 'alpha',     // 'alpha' | 'recent'
+  categorySort: 'alpha'     // 'alpha' | 'recent'
+};
+
+function setting(k) {
+  return (state.settings && k in state.settings) ? state.settings[k] : SETTINGS_DEFAULT[k];
+}
+
+function renderSettings() {
+  document.querySelectorAll('.switch[data-setting]').forEach(sw => { sw.checked = !!setting(sw.dataset.setting); });
+  const lb = document.getElementById('lastBackupText');
+  lb.textContent = state.lastExport
+    ? `last backup: ${new Date(state.lastExport).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+    : 'no backup yet — worth making one ✨';
+  if (typeof renderMoodListManager === 'function') renderMoodListManager();
+}
+
+document.addEventListener('change', (e) => {
+  const sw = e.target.closest && e.target.closest('.switch[data-setting]');
+  if (!sw) return;
+  state.settings[sw.dataset.setting] = sw.checked;
+  save();
+  SFX.click();
+  const msgs = {
+    checkAllOptional: sw.checked ? 'Check All now includes optional tasks' : 'Check All now skips optional tasks',
+    journalTitles: sw.checked ? 'journal titles on' : 'journal titles off — entries use their date'
+  };
+  if (msgs[sw.dataset.setting]) showToast(msgs[sw.dataset.setting]);
+});
+
 // ==================== POINTS (to-do list) ====================
 const POINTS_DEFAULT = { task: 10, sub: 5, routine: 15, master: 30, allDone: 50 };
 // "+100pts" on a task or heading sets its points
@@ -5162,7 +6588,8 @@ function renderLinesInto(container, lines, interactive, list = 'must', compact =
           ? pointPillHtml(headerPointInfo(line, 'master'), interactive,
               `data-pts-index="${line.index}" data-pts-kind="master" data-list="${list}"`)
           : '';
-        t.innerHTML = `<span class="group-title-text">${escapeHtml(line.text || '')}</span>` +
+        t.innerHTML = (interactive && master && master.groups.length ? checkAllBoxHtml(lines, line, 'master', list) : '') +
+          `<span class="group-title-text">${escapeHtml(line.text || '')}</span>` +
           (master && master.complete ? '<span class="group-title-done">✓</span>' : '') + pill +
           (interactive ? `<button type="button" class="row-del" style="order:4" data-del-index="${line.index}" data-del-kind="master" data-list="${list}" aria-label="delete master routine">🗑</button>` : '');
         container.appendChild(t);
@@ -5179,7 +6606,8 @@ function renderLinesInto(container, lines, interactive, list = 'must', compact =
       head.className = 'routine-group-head';
       const gPill = pointPillHtml(headerPointInfo(line, 'group'), interactive,
         `data-pts-index="${line.index}" data-pts-kind="group" data-list="${list}"`);
-      head.innerHTML = `<span class="routine-group-name">${escapeHtml(line.text || 'routine')}</span>` +
+      head.innerHTML = (interactive ? checkAllBoxHtml(lines, line, 'group', list) : '') +
+        `<span class="routine-group-name">${escapeHtml(line.text || 'routine')}</span>` +
         `<span class="routine-group-right">` +
         (groupTasks.length ? `<span class="routine-group-count">${done === groupTasks.length ? '✓ done' : `${done}/${groupTasks.length}`}</span>` : '') +
         gPill + (interactive ? `<button type="button" class="row-del" data-del-index="${line.index}" data-del-kind="group" data-list="${list}" aria-label="delete routine">🗑</button>` : '') + `</span>`;
@@ -5441,21 +6869,24 @@ function handleChecklistClick(itemEl) {
   if (isNaN(lineIndex)) return;
   const list = itemEl.dataset.list === 'maybe' ? 'maybe' : 'must';
   const isBonus = itemEl.classList.contains('bonus');
+  const wasChecked = itemEl.classList.contains('checked');
+  const currentText = getListEntry(list, state.profile, plannerSelectedDate);
+  const newText = setTaskTreeChecked(currentText, lineIndex, !wasChecked);
+  commitCheckChange(list, newText, itemEl.querySelector('.check-box') || itemEl, { checking: !wasChecked, isBonus });
+}
+
+// Save a checked/unchecked list and run the points + celebrations
+function commitCheckChange(list, newText, anchorEl, { checking, isBonus = false }) {
   const profile = state.profile;
   const date = plannerSelectedDate;
   const isToday = date === todayKey();
-
-  const currentText = getListEntry(list, profile, date);
-  const wasChecked = itemEl.classList.contains('checked');
   // remember where the checkbox was — the row gets re-drawn below
-  const box = itemEl.querySelector('.check-box') || itemEl;
-  const rect = box.getBoundingClientRect();
+  const rect = anchorEl.getBoundingClientRect();
   const anchor = { getBoundingClientRect: () => rect };
 
   const before = computeDayPoints(profile, date);
   const todayBefore = isToday ? totalPoints(profile, true) : 0;
 
-  const newText = setTaskTreeChecked(currentText, lineIndex, !wasChecked);
   setListEntry(list, profile, date, newText);
   const after = computeDayPoints(profile, date);
   const delta = after.total - before.total;
@@ -5464,7 +6895,7 @@ function handleChecklistClick(itemEl) {
   renderCalendar(); // update content dots
   setTimeout(() => renderPoints(delta !== 0 && isToday), delta > 0 && isToday ? 350 : 0);
 
-  if (wasChecked) {
+  if (!checking) {
     SFX.uncheck();
     return;
   }
@@ -5484,7 +6915,9 @@ function handleChecklistClick(itemEl) {
     msg = `⭐ ${newMasters[0].name} complete! +${newMasters[0].pts}`;
     big = true;
   } else if (newRoutines.length) {
-    msg = `🔁 ${newRoutines[0].name} done! +${newRoutines[0].pts}`;
+    msg = newRoutines.length > 1
+      ? `🔁 ${newRoutines.length} routines done!`
+      : `🔁 ${newRoutines[0].name} done! +${newRoutines[0].pts}`;
   } else if (isBonus) {
     msg = '✦ bonus win!';
   }
@@ -5502,6 +6935,50 @@ function handleChecklistClick(itemEl) {
       setTimeout(() => { SFX.milestone(); burstSparkles(); showQuote(todayAfter); }, 450);
     }
   }
+}
+
+// ---------- check all (routine block or master routine) ----------
+// tasks Check All touches: everything in the block, minus optional ones if that setting is off
+function checkAllTargets(lines, headerIndex, kind) {
+  const a = analyzeList(lines);
+  let tasks = [];
+  if (kind === 'master' && a.masterByHeader[headerIndex]) {
+    a.masterByHeader[headerIndex].groups.forEach(g => { tasks = tasks.concat(g.tasks); });
+  } else if (a.groupByHeader[headerIndex]) {
+    tasks = a.groupByHeader[headerIndex].tasks;
+  }
+  if (!setting('checkAllOptional')) {
+    const req = tasks.filter(t => !t.optional);
+    if (req.length) tasks = req;
+  }
+  return tasks;
+}
+
+function checkAllState(lines, headerIndex, kind) {
+  const tasks = checkAllTargets(lines, headerIndex, kind);
+  const done = tasks.filter(t => t.checked).length;
+  return !tasks.length ? 'none' : done === tasks.length ? 'all' : done ? 'some' : 'none';
+}
+
+function checkAllBoxHtml(lines, line, kind, list) {
+  const st = checkAllState(lines, line.index, kind);
+  const label = st === 'all' ? 'uncheck all' : 'check all';
+  return `<button type="button" class="check-all ${st}" data-checkall-index="${line.index}" data-checkall-kind="${kind}" data-list="${list}" aria-label="${label}" title="${label}"></button>`;
+}
+
+function handleCheckAll(btn) {
+  if (state.profile === 'combined') return;
+  const list = btn.dataset.list === 'maybe' ? 'maybe' : 'must';
+  const idx = parseInt(btn.dataset.checkallIndex, 10);
+  const kind = btn.dataset.checkallKind === 'master' ? 'master' : 'group';
+  const text = getListEntry(list, state.profile, plannerSelectedDate);
+  const parsed = parsePlannerLines(text);
+  const targets = checkAllTargets(parsed, idx, kind);
+  if (!targets.length) return;
+  const checking = !targets.every(t => t.checked);
+  const lines = text.split('\n');
+  targets.forEach(t => { lines[t.index] = setLineChecked(lines[t.index], checking); });
+  commitCheckChange(list, lines.join('\n'), btn, { checking });
 }
 
 // Save anything still waiting on the typing debounce (planner list + notes).
@@ -6756,16 +8233,23 @@ function renderStreak(bump = false) {
 // Tabs that are tucked away (code kept, hidden from the app). Remove an id to bring it back.
 const ARCHIVED_TABS = ['log', 'history'];
 
+const ALL_TABS = ['planner', 'journal', 'mood', 'stats', 'settings', 'log', 'history'];
+
 function switchTab(tab) {
-  if (ARCHIVED_TABS.includes(tab)) tab = 'planner';
+  if (ARCHIVED_TABS.includes(tab) || !ALL_TABS.includes(tab)) tab = 'planner';
   state.tab = tab;
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.getElementById('tab-log').style.display = tab === 'log' ? 'block' : 'none';
-  document.getElementById('tab-stats').style.display = tab === 'stats' ? 'block' : 'none';
-  document.getElementById('tab-history').style.display = tab === 'history' ? 'block' : 'none';
-  document.getElementById('tab-planner').style.display = tab === 'planner' ? 'block' : 'none';
+  ALL_TABS.forEach(t => {
+    const sec = document.getElementById('tab-' + t);
+    if (sec) sec.style.display = t === tab ? 'block' : 'none';
+  });
+  // the journal's big + only shows on the journal tab
+  document.body.classList.toggle('on-journal', tab === 'journal');
 
   if (tab === 'stats') renderCharts();
+  if (tab === 'settings') renderSettings();
+  if (tab === 'journal' && typeof renderJournal === 'function') renderJournal();
+  if (tab === 'mood' && typeof renderMoodTab === 'function') renderMoodTab();
   if (tab === 'history') renderHistory();
   if (tab === 'planner') renderPlanner();
 }
@@ -6820,6 +8304,8 @@ function switchProfile(profile) {
   if (state.tab === 'stats') renderCharts();
   if (state.tab === 'history') renderHistory();
   if (state.tab === 'planner') renderPlannerEditor();
+  if (state.tab === 'journal') renderJournal();
+  if (state.tab === 'mood') renderMoodTab();
 }
 
 // ==================== USER MANAGEMENT ====================
@@ -6965,6 +8451,9 @@ function deleteUser(alsoDeleteData) {
     });
     state.routines = (state.routines || []).filter(r => r.owner !== userId);
     state.masterRoutines = (state.masterRoutines || []).filter(m => m.owner !== userId);
+    (state.journal || []).filter(e => e.profile === userId).forEach(e => entryPhotoIds(e).forEach(deleteImage));
+    state.journal = (state.journal || []).filter(e => e.profile !== userId);
+    state.moods = (state.moods || []).filter(m => m.profile !== userId);
   }
   // Otherwise, logs and planner entries stay in storage as "orphaned" data
 
@@ -7024,6 +8513,9 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#pointsBtn')) { toggleShowPoints(); return; }
 
   // ---- point pills + point editor ----
+  const checkAll = e.target.closest('.check-all[data-checkall-index]');
+  if (checkAll) { handleCheckAll(checkAll); return; }
+
   const rowDel = e.target.closest('.row-del[data-del-index]');
   if (rowDel) { deleteFromList(rowDel.dataset.list, parseInt(rowDel.dataset.delIndex, 10), rowDel.dataset.delKind); return; }
 
@@ -7389,7 +8881,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ==================== EXPORT / IMPORT ====================
-function exportData() {
+async function exportData() {
   const exportObj = {
     exportedAt: new Date().toISOString(),
     appVersion: 'task-planner-v4',
@@ -7413,6 +8905,12 @@ function exportData() {
       routineSort: state.routineSort,
       showTimes: state.showTimes,
       daysUsed: state.daysUsed,
+      settings: state.settings,
+      journal: state.journal,
+      moods: state.moods,
+      moodCustom: state.moodCustom,
+      moodHidden: state.moodHidden,
+      images: await exportImagesData(),
       taskSortMode: state.taskSortMode
     }
   };
@@ -7423,6 +8921,9 @@ function exportData() {
   const dateStr = new Date().toISOString().slice(0, 10); // e.g. 2026-04-30
   a.href = url;
   a.download = `task-planner-backup-${dateStr}.json`;
+  state.lastExport = Date.now();
+  save();
+  if (state.tab === 'settings') renderSettings();
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -7481,6 +8982,12 @@ function confirmImport() {
   state.routineSort = imported.routineSort === 'alpha' ? 'alpha' : 'recent';
   state.showTimes = !!imported.showTimes;
   state.daysUsed = Array.isArray(imported.daysUsed) ? imported.daysUsed : [];
+  state.settings = Object.assign({}, SETTINGS_DEFAULT, imported.settings || {});
+  state.journal = Array.isArray(imported.journal) ? imported.journal : [];
+  state.moods = Array.isArray(imported.moods) ? imported.moods : [];
+  state.moodCustom = Object.assign({ emotions: [], areas: [] }, imported.moodCustom || {});
+  state.moodHidden = Object.assign({ emotions: [], areas: [] }, imported.moodHidden || {});
+  if (imported.images) importImagesData(imported.images).then(() => { if (openEntryId) renderEntry(); });
   backfillDaysUsed();
   recordDayUsed();
   renderStreak();
@@ -7498,6 +9005,9 @@ function confirmImport() {
   if (state.tab === 'stats') renderCharts();
   if (state.tab === 'history') renderHistory();
   if (state.tab === 'planner') renderPlanner();
+  if (state.tab === 'settings') renderSettings();
+  if (state.tab === 'journal') renderJournal();
+  if (state.tab === 'mood') renderMoodTab();
   showToast('data imported ✓ welcome back');
   SFX.milestone();
 }
@@ -7507,6 +9017,1668 @@ document.querySelectorAll('.tab').forEach(b => {
   if (ARCHIVED_TABS.includes(b.dataset.tab)) b.setAttribute('data-archived', '');
   else b.removeAttribute('data-archived');
 });
+
+// ==================== SHEETS + SWIPE DOWN TO CLOSE ====================
+// Every pop-up and full-screen sheet closes with a downward swipe (unless you're scrolled
+// down inside it, or dragging inside a text box / slider).
+const SHEET_CLOSERS = {
+  routinesModal: () => closeRoutinesModal(),
+  moveModal: () => closeMoveModal(),
+  timingModal: () => closeTimingModal(),
+  pointsModal: () => closePointsModal(),
+  historyModal: () => closeHistoryModal(),
+  confirmModal: () => closeConfirm(false),
+  importModal: () => { pendingImportData = null; document.getElementById('importModal').classList.remove('open'); },
+  entrySheet: () => closeEntry(),
+  moodSheet: () => closeMoodSheet()
+};
+
+function closeSheetById(id) {
+  const fn = SHEET_CLOSERS[id];
+  if (fn) fn();
+  else document.getElementById(id).classList.remove('open');
+}
+
+function openSheet(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.classList.add('sheet-open');
+}
+
+function closeSheetEl(id) {
+  document.getElementById(id).classList.remove('open');
+  if (!document.querySelector('.sheet.open')) document.body.classList.remove('sheet-open');
+}
+
+(() => {
+  let drag = null;
+  // is the touch inside something that's scrolled down (so a down-drag should scroll it instead)?
+  const scrolledInside = (el, stop) => {
+    for (let n = el; n && n !== stop; n = n.parentElement) {
+      if (n.scrollHeight > n.clientHeight + 2) {
+        const oy = getComputedStyle(n).overflowY;
+        if ((oy === 'auto' || oy === 'scroll') && n.scrollTop > 0) return true;
+      }
+    }
+    return false;
+  };
+  document.addEventListener('touchstart', (e) => {
+    drag = null;
+    if (e.touches.length !== 1) return;
+    const t = e.target;
+    const backdrop = t.closest('.modal-backdrop.open, .sheet.open');
+    if (!backdrop || backdrop.classList.contains('no-swipe')) return;
+    if (t.closest('input[type=range], .no-swipe')) return;
+    const field = t.closest('textarea, input, select');
+    if (field && field === document.activeElement) return;
+    const panel = backdrop.querySelector('.modal, .sheet-panel') || backdrop;
+    if (scrolledInside(t, backdrop)) return;
+    drag = { backdrop, panel, y0: e.touches[0].clientY, x0: e.touches[0].clientX, t0: Date.now(), dy: 0, on: false };
+  }, { passive: true });
+  document.addEventListener('touchmove', (e) => {
+    if (!drag) return;
+    const dy = e.touches[0].clientY - drag.y0;
+    const dx = e.touches[0].clientX - drag.x0;
+    if (!drag.on) {
+      if (Math.abs(dy) < 8 && Math.abs(dx) < 8) return;
+      if (dy <= 0 || Math.abs(dx) > Math.abs(dy)) { drag = null; return; }
+      drag.on = true;
+      drag.panel.style.transition = 'none';
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    }
+    e.preventDefault();
+    drag.dy = dy;
+    drag.panel.style.transform = `translateY(${dy}px)`;
+    drag.backdrop.style.opacity = String(Math.max(0.4, 1 - dy / 700));
+  }, { passive: false });
+  const end = () => {
+    if (!drag || !drag.on) { drag = null; return; }
+    const { panel, backdrop, dy, t0 } = drag;
+    const v = dy / Math.max(1, Date.now() - t0);
+    drag = null;
+    panel.style.transition = 'transform 0.22s ease';
+    if (dy > 110 || (dy > 45 && v > 0.6)) {
+      panel.style.transform = `translateY(${window.innerHeight}px)`;
+      setTimeout(() => {
+        panel.style.transform = '';
+        panel.style.transition = '';
+        backdrop.style.opacity = '';
+        closeSheetById(backdrop.id);
+      }, 200);
+    } else {
+      panel.style.transform = '';
+      backdrop.style.opacity = '';
+      setTimeout(() => { panel.style.transition = ''; }, 240);
+    }
+  };
+  document.addEventListener('touchend', end);
+  document.addEventListener('touchcancel', end);
+})();
+
+// ==================== PHOTO STORAGE (IndexedDB) ====================
+// Photos are too big for normal app storage, so they live in the phone's IndexedDB.
+let mediaDbPromise = null;
+function mediaDb() {
+  if (!mediaDbPromise) {
+    mediaDbPromise = new Promise((res, rej) => {
+      const req = indexedDB.open('task-planner-media', 1);
+      req.onupgradeneeded = () => req.result.createObjectStore('images');
+      req.onsuccess = () => res(req.result);
+      req.onerror = () => rej(req.error);
+    });
+  }
+  return mediaDbPromise;
+}
+
+function mediaReq(mode, fn) {
+  return mediaDb().then(db => new Promise((res, rej) => {
+    const tx = db.transaction('images', mode);
+    const r = fn(tx.objectStore('images'));
+    tx.oncomplete = () => res(r ? r.result : undefined);
+    tx.onerror = () => rej(tx.error);
+    tx.onabort = () => rej(tx.error);
+  }));
+}
+
+const putImage = (id, blob) => mediaReq('readwrite', st => st.put(blob, id));
+const getImageBlob = (id) => mediaReq('readonly', st => st.get(id));
+const mediaKeys = () => mediaReq('readonly', st => st.getAllKeys());
+
+const imgUrlCache = new Map();
+function deleteImage(id) {
+  if (imgUrlCache.has(id)) { URL.revokeObjectURL(imgUrlCache.get(id)); imgUrlCache.delete(id); }
+  return mediaReq('readwrite', st => st.delete(id)).catch(() => {});
+}
+
+async function imageUrl(id) {
+  if (imgUrlCache.has(id)) return imgUrlCache.get(id);
+  try {
+    const blob = await getImageBlob(id);
+    if (!blob) return null;
+    const u = URL.createObjectURL(blob);
+    imgUrlCache.set(id, u);
+    return u;
+  } catch (e) { return null; }
+}
+
+function hydrateImages(root) {
+  root.querySelectorAll('img[data-img-id]').forEach(async img => {
+    const u = await imageUrl(img.dataset.imgId);
+    if (u) img.src = u;
+    else if (img.closest('.img-tile')) img.closest('.img-tile').classList.add('missing');
+  });
+}
+
+// shrink a photo so 10 of them don't fill the phone (max 1600px, JPEG)
+async function compressImage(file, maxDim = 1600, quality = 0.82) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = url;
+    });
+    const w = img.naturalWidth, h = img.naturalHeight;
+    const scale = Math.min(1, maxDim / Math.max(w, h));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * scale));
+    c.height = Math.max(1, Math.round(h * scale));
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', quality));
+    return blob || file;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function blobToDataURL(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+async function exportImagesData() {
+  const out = {};
+  try {
+    const keys = await mediaKeys();
+    for (const k of keys) {
+      const blob = await getImageBlob(k);
+      if (blob) out[k] = await blobToDataURL(blob);
+    }
+  } catch (e) { console.warn('photo export', e); }
+  return out;
+}
+
+async function importImagesData(images) {
+  if (!images || typeof images !== 'object') return;
+  for (const [id, data] of Object.entries(images)) {
+    try {
+      const blob = await (await fetch(data)).blob();
+      await putImage(id, blob);
+    } catch (e) { console.warn('photo import', e); }
+  }
+  imgUrlCache.clear();
+}
+
+let persistAsked = false;
+function requestPersist() {
+  if (persistAsked) return;
+  persistAsked = true;
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+}
+
+// ==================== TEXT HELPERS ====================
+function highlight(text, q) {
+  text = text || '';
+  if (!q) return escapeHtml(text);
+  const lower = text.toLowerCase(), ql = q.toLowerCase();
+  let out = '', i = 0, j;
+  while ((j = lower.indexOf(ql, i)) !== -1) {
+    out += escapeHtml(text.slice(i, j)) + '<mark>' + escapeHtml(text.slice(j, j + q.length)) + '</mark>';
+    i = j + q.length;
+  }
+  return out + escapeHtml(text.slice(i));
+}
+
+function shortPreview(text, max = 30) {
+  const t = (text || '').replace(/\s+/g, ' ').trim();
+  if (!t) return '';
+  const sent = t.match(/^(.+?[.!?])(\s|$)/);
+  if (sent && sent[1].length <= max + 2) return sent[1];
+  if (t.length <= max) return t;
+  let cut = t.slice(0, max);
+  const sp = cut.lastIndexOf(' ');
+  if (sp > max * 0.6) cut = cut.slice(0, sp);
+  return cut.replace(/[\s,;:]+$/, '') + '…';
+}
+
+function toLocalInput(ts) {
+  const d = new Date(ts);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+
+function fromLocalInput(v) {
+  const t = new Date(v).getTime();
+  return Number.isFinite(t) ? t : null;
+}
+
+function fmtStamp(ts, long = false) {
+  const d = new Date(ts);
+  const date = d.toLocaleDateString('en-US', long
+    ? { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }
+    : { weekday: 'short', month: 'short', day: 'numeric' });
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return `${date} · ${time}`;
+}
+
+function fmtTime(ts) {
+  return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+function userTag(profileId) {
+  const u = getUser(profileId);
+  if (!u) return '';
+  return `<span class="who-tag" style="color:${u.color}">${escapeHtml(u.name)}</span>`;
+}
+
+function autoGrow(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+}
+
+// ==================== JOURNAL ====================
+const JOURNAL_MAX_PHOTOS = 10;
+let openEntryId = null;
+let entryEditing = false;
+let entryCaret = null;      // { block, pos } — where photos get inserted
+let entrySaveTimer = null;
+let journalQuery = '';
+let findQuery = '';
+let findIdx = 0;
+
+function getEntry(id) { return (state.journal || []).find(e => e.id === id); }
+
+function journalEntries(profile = state.profile) {
+  return (state.journal || [])
+    .filter(e => profile === 'combined' || e.profile === profile)
+    .sort((a, b) => b.created - a.created);
+}
+
+function entryText(e) {
+  return (e.blocks || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
+}
+
+function entryPhotoIds(e) {
+  return (e.blocks || []).filter(b => b.type === 'images').reduce((a, b) => a.concat(b.ids), []);
+}
+
+function entryMoods(e) {
+  return (e.moodIds || []).map(getMood).filter(Boolean);
+}
+
+function entryHasTitle(e) {
+  return setting('journalTitles') && (e.title || '').trim();
+}
+
+function entryDisplayTitle(e) {
+  return entryHasTitle(e) ? e.title.trim() : fmtStamp(e.created);
+}
+
+function entryPreview(e) {
+  const p = shortPreview(entryText(e), 30);
+  if (p) return p;
+  const n = entryPhotoIds(e).length;
+  if (n) return `📷 ${n} photo${n === 1 ? '' : 's'}`;
+  const m = entryMoods(e)[0];
+  if (m) return `💭 ${moodLevel(m.affect).label}${(m.emotions || []).length ? ' · ' + m.emotions.slice(0, 2).join(', ') : ''}`;
+  return 'empty entry';
+}
+
+function entrySearchText(e) {
+  const moods = entryMoods(e).map(m => [(m.emotions || []).join(' '), (m.areas || []).join(' '), m.note || ''].join(' ')).join(' ');
+  return [setting('journalTitles') ? e.title || '' : '', entryText(e), moods].join(' \n ');
+}
+
+function entryIsEmpty(e) {
+  return !(e.title || '').trim() && !entryText(e).trim() && !entryPhotoIds(e).length && !(e.moodIds || []).length;
+}
+
+function renderJournal() {
+  const list = document.getElementById('journalList');
+  if (!list) return;
+  const q = journalQuery.trim();
+  let entries = journalEntries();
+  if (q) entries = entries.filter(e => entrySearchText(e).toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('journalSearchClear').style.display = q ? '' : 'none';
+  document.getElementById('newEntryBtn').style.display = state.profile === 'combined' ? 'none' : '';
+  const count = journalEntries().length;
+  document.getElementById('journalCount').textContent = count ? `${count} entr${count === 1 ? 'y' : 'ies'}` : '';
+
+  if (!entries.length) {
+    list.innerHTML = q
+      ? `<div class="j-empty">nothing matches “${escapeHtml(q)}”</div>`
+      : `<div class="j-empty"><div class="j-empty-big">📓</div>${state.profile === 'combined'
+          ? 'no entries yet'
+          : 'no entries yet — tap the big <strong>+</strong> to write your first one'}</div>`;
+    return;
+  }
+  let html = '';
+  let month = '';
+  entries.forEach(e => {
+    const m = new Date(e.created).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    if (m !== month) {
+      if (month) html += '</div>';
+      month = m;
+      html += `<div class="j-month">${m}</div><div class="j-group">`;
+    }
+    let prev;
+    if (q) {
+      const flat = entrySearchText(e).replace(/\s+/g, ' ');
+      const i = flat.toLowerCase().indexOf(q.toLowerCase());
+      if (i >= 0 && !(entryDisplayTitle(e).toLowerCase().includes(q.toLowerCase()) && i < (e.title || '').length)) {
+        let s0 = Math.max(0, i - 14), s1 = Math.min(flat.length, i + q.length + 22);
+        if (s0 > 0) { const sp = flat.indexOf(' ', s0); if (sp > -1 && sp < i) s0 = sp + 1; }
+        if (s1 < flat.length) { const sp = flat.lastIndexOf(' ', s1); if (sp > i + q.length) s1 = sp; }
+        prev = (s0 > 0 ? '…' : '') + highlight(flat.slice(s0, s1), q) + (s1 < flat.length ? '…' : '');
+      } else {
+        prev = escapeHtml(entryPreview(e));
+      }
+    } else {
+      prev = escapeHtml(entryPreview(e));
+    }
+    html += `<button type="button" class="j-card" data-entry-open="${e.id}">
+      <span class="j-card-title">${highlight(entryDisplayTitle(e), q)}${state.profile === 'combined' ? userTag(e.profile) : ''}</span>
+      <span class="j-card-prev">${prev}</span>
+    </button>`;
+  });
+  html += '</div>';
+  list.innerHTML = html;
+}
+
+function newEntry() {
+  if (state.profile === 'combined') { showToast('pick a person to write'); return; }
+  const e = {
+    id: 'j_' + uid() + uid(),
+    profile: state.profile,
+    created: Date.now(),
+    updated: Date.now(),
+    title: '',
+    blocks: [{ type: 'text', text: '' }],
+    moodIds: []
+  };
+  state.journal.push(e);
+  openEntry(e.id, true);
+}
+
+function openEntry(id, editing = false) {
+  if (!getEntry(id)) return;
+  openEntryId = id;
+  entryEditing = editing && state.profile !== 'combined';
+  entryCaret = null;
+  closeFind(false);
+  renderEntry();
+  document.getElementById('entryBody').scrollTop = 0;
+  openSheet('entrySheet');
+  SFX.click();
+  if (entryEditing) {
+    setTimeout(() => {
+      const el = document.getElementById('entryTitleInput') || document.querySelector('#entryBody textarea.entry-text');
+      if (el) el.focus();
+    }, 320);
+  }
+}
+
+function scheduleEntrySave() {
+  const e = getEntry(openEntryId);
+  if (e) e.updated = Date.now();
+  clearTimeout(entrySaveTimer);
+  entrySaveTimer = setTimeout(() => { entrySaveTimer = null; save(); }, 400);
+}
+
+function flushEntrySave() {
+  if (entrySaveTimer) {
+    clearTimeout(entrySaveTimer);
+    entrySaveTimer = null;
+    save();
+  }
+}
+
+function closeEntry() {
+  flushEntrySave();
+  const e = getEntry(openEntryId);
+  if (e && entryIsEmpty(e)) {
+    state.journal = state.journal.filter(x => x.id !== e.id);
+    save();
+  }
+  openEntryId = null;
+  closeFind(false);
+  closeSheetEl('entrySheet');
+  if (state.tab === 'journal') renderJournal();
+}
+
+function setEntryEditing(on) {
+  if (state.profile === 'combined' && on) { showToast('pick a person to edit'); return; }
+  flushEntrySave();
+  entryEditing = on;
+  if (on) closeFind(false);
+  renderEntry();
+  SFX.click();
+}
+
+function moodChipHtml(m, attrs = '') {
+  const lvl = moodLevel(m.affect);
+  const emos = (m.emotions || []).slice(0, 3).join(', ');
+  return `<button type="button" class="mood-chip" ${attrs} data-mood-open="${m.id}" style="--m-a:${lvl.a};--m-b:${lvl.b}">
+    <span class="mc-orb small"></span><span>${escapeHtml(lvl.label)}${emos ? ' · ' + escapeHtml(emos) : ''}${m.partial ? ' · <em>unfinished</em>' : ''}</span>
+  </button>`;
+}
+
+function renderEntry() {
+  const e = getEntry(openEntryId);
+  if (!e) return;
+  const sheet = document.getElementById('entrySheet');
+  const body = document.getElementById('entryBody');
+  sheet.classList.toggle('editing', entryEditing);
+  document.getElementById('entryEditBtn').textContent = entryEditing ? 'done' : 'edit';
+  document.getElementById('entryEditBtn').style.display = state.profile === 'combined' ? 'none' : '';
+  const n = entryPhotoIds(e).length;
+  document.getElementById('entryPhotoCount').textContent = n ? `${n}/${JOURNAL_MAX_PHOTOS}` : '';
+  const hl = (t) => (!entryEditing && findQuery) ? highlight(t, findQuery) : escapeHtml(t);
+
+  let html = '';
+  if (entryEditing) {
+    html += `<label class="entry-date edit">🗓 <span>${escapeHtml(fmtStamp(e.created, true))}</span> <span class="ed-pen">✎</span>
+      <input type="datetime-local" id="entryDateInput" value="${toLocalInput(e.created)}" aria-label="entry date and time" /></label>`;
+  } else {
+    html += `<div class="entry-date">${escapeHtml(fmtStamp(e.created, true))}${state.profile === 'combined' ? ' · ' + userTag(e.profile) : ''}</div>`;
+  }
+  if (setting('journalTitles')) {
+    if (entryEditing) {
+      html += `<input type="text" id="entryTitleInput" class="entry-title-input" placeholder="title (optional)" maxlength="120" value="${escapeHtml(e.title || '')}" />`;
+    } else if ((e.title || '').trim()) {
+      html += `<h2 class="entry-title">${hl(e.title)}</h2>`;
+    }
+  }
+  const moods = entryMoods(e);
+  if (moods.length || entryEditing) {
+    html += `<div class="entry-moods">${moods.map(m => moodChipHtml(m)).join('')}${entryEditing
+      ? `<button type="button" class="mood-chip add" data-entry-mood>＋ mood</button>` : ''}</div>`;
+  }
+  e.blocks.forEach((b, bi) => {
+    if (b.type === 'text') {
+      if (entryEditing) {
+        const ph = bi === 0 ? 'start writing…' : (bi === e.blocks.length - 1 ? 'keep writing…' : '');
+        html += `<textarea class="entry-text" data-block="${bi}" rows="1" placeholder="${ph}">${escapeHtml(b.text)}</textarea>`;
+      } else if (b.text.trim()) {
+        html += `<div class="entry-p">${hl(b.text.replace(/^\n+|\n+$/g, ''))}</div>`;
+      }
+    } else {
+      const cls = b.ids.length === 1 ? 'one' : b.ids.length === 2 ? 'two' : 'many';
+      html += `<div class="img-block ${cls}">` + b.ids.map((id, ii) =>
+        `<div class="img-tile" data-view-img="${id}"><img data-img-id="${id}" alt="photo ${ii + 1}" />${entryEditing
+          ? `<button type="button" class="img-x" data-img-del="${bi}|${ii}" aria-label="remove photo">×</button>` : ''}</div>`
+      ).join('') + `</div>`;
+    }
+  });
+  if (!entryEditing && !entryText(e).trim() && !n && !moods.length) {
+    html += `<div class="entry-p muted">nothing here yet — tap edit to write</div>`;
+  }
+  body.innerHTML = html;
+  hydrateImages(body);
+  body.querySelectorAll('textarea.entry-text').forEach(autoGrow);
+  if (findQuery && !entryEditing) markFindCurrent(false);
+}
+
+async function addEntryPhotos(files) {
+  const e = getEntry(openEntryId);
+  if (!e || !files || !files.length) return;
+  const room = JOURNAL_MAX_PHOTOS - entryPhotoIds(e).length;
+  if (room <= 0) { showToast(`max ${JOURNAL_MAX_PHOTOS} photos per entry`); return; }
+  const picked = [...files].slice(0, room);
+  if (files.length > room) showToast(`only ${room} more photo${room === 1 ? '' : 's'} fit — max ${JOURNAL_MAX_PHOTOS} per entry`);
+  else showToast(`adding ${picked.length} photo${picked.length === 1 ? '' : 's'}…`);
+  const ids = [];
+  for (const f of picked) {
+    try {
+      const blob = await compressImage(f);
+      const id = 'img_' + uid() + uid();
+      await putImage(id, blob);
+      ids.push(id);
+    } catch (err) {
+      console.warn('photo', err);
+    }
+  }
+  if (!ids.length) { showToast("couldn't add that photo 😕"); return; }
+  requestPersist();
+  insertPhotos(e, ids);
+  scheduleEntrySave();
+  renderEntry();
+  SFX.add();
+}
+
+// Put photos where the cursor was: split that text box and drop a photo strip in between
+function insertPhotos(e, ids) {
+  let c = entryCaret;
+  if (!c || !e.blocks[c.block] || e.blocks[c.block].type !== 'text') {
+    let li = e.blocks.length - 1;
+    if (e.blocks[li].type !== 'text') { e.blocks.push({ type: 'text', text: '' }); li++; }
+    c = { block: li, pos: e.blocks[li].text.length };
+  }
+  const b = e.blocks[c.block];
+  const pos = Math.max(0, Math.min(c.pos, b.text.length));
+  let before = b.text.slice(0, pos);
+  let after = b.text.slice(pos);
+  const prev = e.blocks[c.block - 1];
+  const next = e.blocks[c.block + 1];
+  if (!before.trim() && prev && prev.type === 'images') { prev.ids.push(...ids); return; }
+  if (!after.trim() && next && next.type === 'images') { next.ids.unshift(...ids); return; }
+  before = before.replace(/[ \t]+$/, '').replace(/\n$/, '');
+  after = after.replace(/^[ \t]*\n?/, '');
+  e.blocks.splice(c.block, 1, { type: 'text', text: before }, { type: 'images', ids }, { type: 'text', text: after });
+  entryCaret = { block: c.block + 2, pos: 0 };
+}
+
+function removeEntryPhoto(bi, ii) {
+  const e = getEntry(openEntryId);
+  const b = e && e.blocks[bi];
+  if (!b || b.type !== 'images') return;
+  const [id] = b.ids.splice(ii, 1);
+  if (id) deleteImage(id);
+  if (!b.ids.length) {
+    const prev = e.blocks[bi - 1], next = e.blocks[bi + 1];
+    if (prev && next && prev.type === 'text' && next.type === 'text') {
+      prev.text = [prev.text, next.text].filter(t => t !== '').join('\n');
+      e.blocks.splice(bi, 2);
+    } else {
+      e.blocks.splice(bi, 1);
+    }
+    if (!e.blocks.length) e.blocks.push({ type: 'text', text: '' });
+  }
+  entryCaret = null;
+  scheduleEntrySave();
+  renderEntry();
+  SFX.delete();
+}
+
+function deleteEntry() {
+  const e = getEntry(openEntryId);
+  if (!e) return;
+  if (entryIsEmpty(e)) { closeEntry(); return; }
+  askConfirm('delete entry? 📓',
+    `delete “${entryDisplayTitle(e)}”? this can't be undone.${(e.moodIds || []).length ? ' (its mood check-ins stay in your Mood tab)' : ''}`,
+    'delete', () => {
+      entryPhotoIds(e).forEach(deleteImage);
+      entryMoods(e).forEach(m => { delete m.entryId; });
+      state.journal = state.journal.filter(x => x.id !== e.id);
+      save();
+      openEntryId = null;
+      closeFind(false);
+      closeSheetEl('entrySheet');
+      renderJournal();
+      SFX.delete();
+      showToast('entry deleted');
+    });
+}
+
+// ---------- find in entry ----------
+function openFind() {
+  if (entryEditing) { flushEntrySave(); entryEditing = false; renderEntry(); }
+  document.getElementById('findBar').classList.add('open');
+  const inp = document.getElementById('findInput');
+  inp.value = findQuery;
+  setTimeout(() => inp.focus(), 50);
+}
+
+function closeFind(rerender = true) {
+  const bar = document.getElementById('findBar');
+  if (!bar) return;
+  const had = !!findQuery;
+  bar.classList.remove('open');
+  document.getElementById('findInput').value = '';
+  document.getElementById('findCount').textContent = '';
+  findQuery = '';
+  findIdx = 0;
+  if (rerender && had && openEntryId) renderEntry();
+}
+
+function markFindCurrent(scroll = true) {
+  const marks = document.querySelectorAll('#entryBody mark');
+  document.getElementById('findCount').textContent = findQuery ? `${marks.length ? findIdx + 1 : 0}/${marks.length}` : '';
+  marks.forEach((m, i) => m.classList.toggle('cur', i === findIdx));
+  if (scroll && marks[findIdx]) marks[findIdx].scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+function findStep(d) {
+  const n = document.querySelectorAll('#entryBody mark').length;
+  if (!n) return;
+  findIdx = (findIdx + d + n) % n;
+  markFindCurrent();
+}
+
+// ---------- full-screen photo viewer (pinch to zoom, swipe down to close) ----------
+const viewer = { ids: [], i: 0, scale: 1, x: 0, y: 0 };
+
+function openViewer(id) {
+  const e = getEntry(openEntryId);
+  viewer.ids = e ? entryPhotoIds(e) : [id];
+  viewer.i = Math.max(0, viewer.ids.indexOf(id));
+  document.getElementById('imgViewer').classList.add('open');
+  showViewerImage();
+}
+
+async function showViewerImage() {
+  viewer.scale = 1; viewer.x = 0; viewer.y = 0;
+  const img = document.getElementById('viewerImg');
+  img.style.transition = 'none';
+  img.style.transform = '';
+  img.src = (await imageUrl(viewer.ids[viewer.i])) || '';
+  document.getElementById('viewerCount').textContent = viewer.ids.length > 1 ? `${viewer.i + 1} / ${viewer.ids.length}` : '';
+}
+
+function clampViewer() {
+  const el = document.getElementById('imgViewer');
+  const mx = (viewer.scale - 1) * el.clientWidth / 2;
+  const my = (viewer.scale - 1) * el.clientHeight / 2;
+  viewer.x = Math.max(-mx, Math.min(mx, viewer.x));
+  viewer.y = Math.max(-my, Math.min(my, viewer.y));
+}
+
+function applyViewer(anim = false) {
+  const img = document.getElementById('viewerImg');
+  img.style.transition = anim ? 'transform 0.25s ease' : 'none';
+  img.style.transform = `translate(${viewer.x}px, ${viewer.y}px) scale(${viewer.scale})`;
+}
+
+function closeViewer() {
+  const el = document.getElementById('imgViewer');
+  el.classList.remove('open');
+  el.style.background = '';
+  document.getElementById('viewerImg').style.transform = '';
+}
+
+function viewerStep(d) {
+  const ni = viewer.i + d;
+  if (ni < 0 || ni >= viewer.ids.length) { applyViewer(true); return; }
+  viewer.i = ni;
+  showViewerImage();
+}
+
+(() => {
+  const el = document.getElementById('imgViewer');
+  const img = document.getElementById('viewerImg');
+  let g = null;
+  let lastTap = 0;
+  const dist = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  el.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.viewer-btn')) return;
+    if (e.touches.length === 2) {
+      const [a, b] = e.touches;
+      g = { mode: 'pinch', d0: dist(a, b), s0: viewer.scale, x0: viewer.x, y0: viewer.y,
+        mx: (a.clientX + b.clientX) / 2, my: (a.clientY + b.clientY) / 2 };
+      return;
+    }
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const now = Date.now();
+    if (now - lastTap < 280) {           // double-tap = zoom in / out
+      lastTap = 0;
+      g = null;
+      if (viewer.scale > 1.02) {
+        viewer.scale = 1; viewer.x = 0; viewer.y = 0;
+      } else {
+        viewer.scale = 2.5;
+        viewer.x = -(t.clientX - el.clientWidth / 2) * 1.5;
+        viewer.y = -(t.clientY - el.clientHeight / 2) * 1.5;
+        clampViewer();
+      }
+      applyViewer(true);
+      return;
+    }
+    lastTap = now;
+    g = { mode: 'one', sx: t.clientX, sy: t.clientY, x0: viewer.x, y0: viewer.y, dir: null, dx: 0, dy: 0 };
+  }, { passive: true });
+  el.addEventListener('touchmove', (e) => {
+    if (!g) return;
+    e.preventDefault();
+    if (g.mode === 'pinch' && e.touches.length === 2) {
+      const [a, b] = e.touches;
+      viewer.scale = Math.min(5, Math.max(1, g.s0 * dist(a, b) / g.d0));
+      viewer.x = g.x0 + ((a.clientX + b.clientX) / 2 - g.mx);
+      viewer.y = g.y0 + ((a.clientY + b.clientY) / 2 - g.my);
+      clampViewer();
+      applyViewer();
+      return;
+    }
+    if (g.mode !== 'one' || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = t.clientX - g.sx, dy = t.clientY - g.sy;
+    if (viewer.scale > 1.02) {
+      viewer.x = g.x0 + dx;
+      viewer.y = g.y0 + dy;
+      clampViewer();
+      applyViewer();
+      return;
+    }
+    if (!g.dir) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      g.dir = Math.abs(dy) > Math.abs(dx) ? 'v' : 'h';
+    }
+    img.style.transition = 'none';
+    if (g.dir === 'v') {
+      g.dy = dy;
+      img.style.transform = `translateY(${dy}px) scale(${1 - Math.min(0.25, Math.abs(dy) / 1600)})`;
+      el.style.background = `rgba(10,5,8,${Math.max(0.25, 0.96 - Math.abs(dy) / 500)})`;
+    } else {
+      g.dx = dx;
+      img.style.transform = `translateX(${dx}px)`;
+    }
+  }, { passive: false });
+  el.addEventListener('touchend', (e) => {
+    if (!g) return;
+    if (g.mode === 'pinch') {
+      if (e.touches.length === 0) {
+        if (viewer.scale < 1.05) { viewer.scale = 1; viewer.x = 0; viewer.y = 0; applyViewer(true); }
+        g = null;
+      } else {
+        g = null;
+      }
+      return;
+    }
+    if (g.dir === 'v') {
+      if (g.dy > 110) closeViewer();
+      else { el.style.background = ''; applyViewer(true); }
+    } else if (g.dir === 'h') {
+      if (g.dx < -60) viewerStep(1);
+      else if (g.dx > 60) viewerStep(-1);
+      else applyViewer(true);
+    }
+    g = null;
+  });
+  // desktop: scroll to zoom
+  el.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    viewer.scale = Math.min(5, Math.max(1, viewer.scale * (e.deltaY < 0 ? 1.12 : 0.89)));
+    if (viewer.scale === 1) { viewer.x = 0; viewer.y = 0; }
+    clampViewer();
+    applyViewer();
+  }, { passive: false });
+})();
+
+// ==================== MOOD ====================
+// 7 levels, cool (negative) → gray (neutral) → warm (positive)
+const MOOD_LEVELS = [
+  { v: -3, label: 'Very Negative',     mark: '#4b3a8c', a: '#3f3175', b: '#8b7cc8', bg: '#e4dff1' },
+  { v: -2, label: 'Negative',          mark: '#4f63b3', a: '#4a5fa8', b: '#9cb0e3', bg: '#e2e8f6' },
+  { v: -1, label: 'Slightly Negative', mark: '#6f8cc4', a: '#7894c6', b: '#c6d6ef', bg: '#e9eff7' },
+  { v: 0,  label: 'Neutral',           mark: '#87959c', a: '#9aabb3', b: '#e1e9ec', bg: '#eef2f3' },
+  { v: 1,  label: 'Slightly Positive', mark: '#d08850', a: '#eeaa7c', b: '#fbe0c8', bg: '#fbefe4' },
+  { v: 2,  label: 'Positive',          mark: '#d9731f', a: '#f29445', b: '#fcd0a0', bg: '#fdebd7' },
+  { v: 3,  label: 'Very Positive',     mark: '#b8860b', a: '#efb11a', b: '#fde39a', bg: '#fdf2d2' }
+];
+
+function moodLevel(v) {
+  return MOOD_LEVELS[Math.max(0, Math.min(6, Math.round(v || 0) + 3))];
+}
+
+function affectGroup(v) { return v < 0 ? 'negative' : v > 0 ? 'positive' : 'neutral'; }
+
+const EMOTION_GROUPS = [['positive', '😊', 'Positive'], ['neutral', '😐', 'Neutral'], ['negative', '😔', 'Negative']];
+
+// Feelings by affect (from Crowe's Nest)
+const EMOTIONS_BASE = {
+  positive: [
+    ['😈', 'Shit stirring'], ['🎉', 'Excited'], ['😊', 'Solidarity'], ['😄', 'Amused'], ['😊', 'Smiling'],
+    ['🧐', 'Curious'], ['😊', 'Confused'], ['🙄', 'Playfully exasperated'], ['🏆', 'Accomplished'], ['🤩', 'Amazed'],
+    ['👀', 'Attracted'], ['🫧', 'Bubbly'], ['😌', 'Calm'], ['💡', 'Clarity'], ['😎', 'Confident'],
+    ['☺️', 'Content'], ['⚡', 'Energized'], ['🍿', 'Entertained'], ['🎯', 'Focused'], ['🙏', 'Grateful'],
+    ['🌿', 'Grounded'], ['😊', 'Happy'], ['👄', 'Horny'], ['😯', 'Impressed'], ['😁', 'Joy'],
+    ['🥰', 'Loved'], ['💪', 'Motivated'], ['🥳', 'Playful'], ['✅', 'Productive'], ['🛋️', 'Relaxed'],
+    ['☀️', 'Rested'], ['😋', 'Satisfied'], ['😮', 'Surprised'], ['🤔', 'Thoughtful/reflective']
+  ],
+  neutral: [
+    ['😐', 'Annoyed'], ['🧐', 'Skeptical'], ['😐', 'Vulnerable'], ['👌', 'Alright'], ['🥱', 'Bored'],
+    ['😌', 'Calm'], ['🙂', 'Fine'], ['😶', 'Indifferent'], ['🦥', 'Lazy'], ['😑', 'Meh'],
+    ['😐', 'Neutral'], ['🙂', 'Okay'], ['🤔', 'Pensive'], ['🪞', 'Reflective'], ['🛋️', 'Relaxed'],
+    ['💅', 'Sassy'], ['😪', 'Sleepy'], ['🗣️', 'Social'], ['😮', 'Surprised'], ['🤷', 'Unsure']
+  ],
+  negative: [
+    ['😔', 'Hurt'], ['😒', 'Irritated'], ['😔', 'Annoyed'], ['😠', 'Angry'], ['😰', 'Anxious'],
+    ['😶', 'Apathetic'], ['😟', 'Concerned'], ['😕', 'Conflicted'], ['😞', 'Depressed'], ['🫥', 'Detached'],
+    ['😔', 'Disappointed'], ['🤢', 'Disgusted'], ['🪫', 'Drained'], ['😨', 'Dread'], ['🕳️', 'Empty'],
+    ['😩', 'Exhausted'], ['😤', 'Frustrated'], ['😣', 'Guilty'], ['😞', 'Hopeless'], ['😶', 'Indifferent'],
+    ['🌀', 'Intrusive thoughts'], ['🥺', 'Lonely'], ['😶', 'Numb'], ['😒', 'Offended'], ['🤯', 'Overwhelmed'],
+    ['😢', 'Sad'], ['🫠', 'Stagnant'], ['😫', 'Stressed'], ['😮‍💨', 'Unmotivated'], ['😣', 'Upset']
+  ]
+};
+
+const LIFE_AREAS_BASE = [
+  ['⏳', 'Time pressure'], ['🛁', 'Hygiene'], ['🍽️', 'Hunger'], ['😌', 'Satiety'], ['🤕', 'Physical pain'],
+  ['🏃', 'Physical activity'], ['🧹', 'Cleaning'], ['💼', 'Work'], ['☕', 'Caffeine'], ['🍳', 'Cooking'],
+  ['👨‍👩‍👧', 'Family'], ['💊', 'Medication changes'], ['🌀', 'Intrusive thoughts'], ['🍬', 'Sugar crash'], ['✅', 'Productivity'],
+  ['🎓', 'School'], ['🛒', 'Errands'], ['🚗', 'Driving'], ['📚', 'Books'], ['💵', 'Money'], ['💜', 'Talaya']
+];
+
+function getMood(id) { return (state.moods || []).find(m => m.id === id); }
+
+function moodLogs(profile = state.profile) {
+  return (state.moods || []).filter(m => profile === 'combined' || m.profile === profile);
+}
+
+function moodEmotions(group) {
+  const hidden = state.moodHidden.emotions || [];
+  const base = EMOTIONS_BASE[group].map(([emoji, name]) => ({ emoji, name, group, custom: false }));
+  const custom = (state.moodCustom.emotions || []).filter(e => e.group === group).map(e => ({ ...e, custom: true }));
+  return [...base, ...custom].filter(e => !hidden.includes(group + '|' + e.name.toLowerCase()));
+}
+
+function moodAreas() {
+  const hidden = state.moodHidden.areas || [];
+  const base = LIFE_AREAS_BASE.map(([emoji, name]) => ({ emoji, name, custom: false }));
+  const custom = (state.moodCustom.areas || []).map(a => ({ ...a, custom: true }));
+  return [...base, ...custom].filter(a => !hidden.includes(a.name.toLowerCase()));
+}
+
+function lastUsedMap(field) {
+  const m = {};
+  moodLogs().forEach(l => (l[field] || []).forEach(n => {
+    const k = n.toLowerCase();
+    if (!m[k] || l.t > m[k]) m[k] = l.t;
+  }));
+  return m;
+}
+
+function sortMoodItems(items, field, mode) {
+  const alpha = (a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+  const arr = items.slice();
+  if (mode === 'recent') {
+    const m = lastUsedMap(field);
+    arr.sort((a, b) => (m[b.name.toLowerCase()] || 0) - (m[a.name.toLowerCase()] || 0) || alpha(a, b));
+  } else {
+    arr.sort(alpha);
+  }
+  return arr;
+}
+
+function emojiForEmotion(name, affect = 0) {
+  const k = (name || '').toLowerCase();
+  const order = [affectGroup(affect), 'neutral', 'positive', 'negative'];
+  for (const g of order) {
+    const hit = EMOTIONS_BASE[g].find(([, n]) => n.toLowerCase() === k);
+    if (hit) return hit[0];
+  }
+  const c = (state.moodCustom.emotions || []).find(e => e.name.toLowerCase() === k);
+  return c ? c.emoji : '•';
+}
+
+function emojiForArea(name) {
+  const k = (name || '').toLowerCase();
+  const hit = LIFE_AREAS_BASE.find(([, n]) => n.toLowerCase() === k);
+  if (hit) return hit[0];
+  const c = (state.moodCustom.areas || []).find(a => a.name.toLowerCase() === k);
+  return c ? c.emoji : '🏷️';
+}
+
+// ---------- check-in sheet ----------
+let moodDraft = null;
+let moodIsNew = true;
+let moodTouched = false;
+let moodStep = 0;
+let moodExpanded = {};
+let moodAdding = null; // 'positive' | 'neutral' | 'negative' | 'area'
+
+function orbHtml(cls = '') {
+  return `<div class="mood-orb ${cls}">
+    <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+    <span class="petals">${[0, 1, 2, 3, 4, 5].map(i => `<span class="petal" style="--i:${i}"></span>`).join('')}</span>
+    <span class="core"></span>
+  </div>`;
+}
+
+function setMoodVars(el, v) {
+  const lvl = moodLevel(v);
+  el.style.setProperty('--m-a', lvl.a);
+  el.style.setProperty('--m-b', lvl.b);
+  el.style.setProperty('--m-bg', lvl.bg);
+  el.style.setProperty('--petal', v > 0 ? (0.28 + v * 0.22).toFixed(2) : '0');
+  el.style.setProperty('--orb-scale', (1 + v * 0.035).toFixed(3));
+  el.style.setProperty('--orb-blur', v < 0 ? `${-v * 1.2}px` : '0px');
+}
+
+function openMoodCheckin(opts = {}) {
+  if (opts.id) {
+    const m = getMood(opts.id);
+    if (!m) return;
+    moodDraft = JSON.parse(JSON.stringify(m));
+    moodIsNew = false;
+    moodTouched = false;
+    moodStep = m.partial ? (!(m.emotions || []).length ? 1 : !(m.areas || []).length ? 2 : 3) : 0;
+  } else {
+    if (state.profile === 'combined') { showToast('pick a person to check in'); return; }
+    moodDraft = { id: 'm_' + uid() + uid(), profile: state.profile, t: Date.now(), affect: 0,
+      emotions: [], areas: [], note: '', entryId: opts.entryId || null };
+    moodIsNew = true;
+    moodTouched = false;
+    moodStep = 0;
+  }
+  moodExpanded = { [affectGroup(moodDraft.affect)]: true };
+  moodAdding = null;
+  renderMoodSheet();
+  openSheet('moodSheet');
+  SFX.click();
+}
+
+function moodSummaryLine(d) {
+  const bits = [];
+  if ((d.emotions || []).length) bits.push(d.emotions.map(n => `${emojiForEmotion(n, d.affect)} ${n}`).join(', '));
+  if ((d.areas || []).length) bits.push(d.areas.map(n => `${emojiForArea(n)} ${n}`).join(', '));
+  return bits.join(' · ');
+}
+
+function sortToggleHtml(field) {
+  const cur = setting(field === 'emotions' ? 'emotionSort' : 'categorySort');
+  return `<div class="m-sort"><span>sort</span>
+    <button type="button" class="${cur === 'alpha' ? 'on' : ''}" data-msort="${field}|alpha">A–Z</button>
+    <button type="button" class="${cur === 'recent' ? 'on' : ''}" data-msort="${field}|recent">recent</button></div>`;
+}
+
+function addFormHtml(kind) {
+  return `<div class="m-addform">
+    <input type="text" id="moodAddEmoji" class="m-add-emoji" maxlength="4" placeholder="🙂" aria-label="emoji (optional)" />
+    <input type="text" id="moodAddName" class="m-add-name" maxlength="30" placeholder="${kind === 'area' ? 'new life area' : 'new feeling'}" />
+    <button type="button" class="m-add-ok" id="moodAddSave">add</button>
+    <button type="button" class="m-add-x" id="moodAddCancel" aria-label="cancel">×</button>
+  </div>`;
+}
+
+function renderMoodSheet() {
+  const d = moodDraft;
+  if (!d) return;
+  const panel = document.getElementById('moodPanel');
+  const body = document.getElementById('moodBody');
+  setMoodVars(panel, d.affect);
+  const lvl = moodLevel(d.affect);
+  document.getElementById('moodBackBtn').style.visibility = moodStep > 0 ? 'visible' : 'hidden';
+  document.getElementById('moodDots').innerHTML = [0, 1, 2, 3].map(i => `<span class="${i === moodStep ? 'on' : i < moodStep ? 'done' : ''}"></span>`).join('');
+  const nextBtn = document.getElementById('moodNextBtn');
+  const nothingPicked = (moodStep === 1 && !d.emotions.length) || (moodStep === 2 && !d.areas.length);
+  nextBtn.textContent = moodStep === 3 ? '✓' : nothingPicked ? 'skip ›' : '›';
+  nextBtn.classList.toggle('wide', nothingPicked);
+  nextBtn.classList.toggle('final', moodStep === 3);
+  const mini = `<div class="m-mini"><div class="m-mini-orb"></div><div><div class="m-mini-label">${escapeHtml(lvl.label)}</div>
+    <div class="m-mini-sub">${escapeHtml(moodSummaryLine(d)) || (moodStep === 1 ? 'pick any that fit' : moodStep === 2 ? 'what\'s behind it?' : '')}</div></div></div>`;
+
+  let html = '';
+  if (moodStep === 0) {
+    html = `<div class="m-q center">how are you feeling right now?</div>
+      <div class="m-orb-wrap">${orbHtml()}</div>
+      <div class="m-level" id="moodLevelLabel">${escapeHtml(lvl.label)}</div>
+      <input type="range" class="mood-slider" id="moodSlider" min="-3" max="3" step="1" value="${d.affect}" aria-label="how you feel" />
+      <div class="m-ticks">${MOOD_LEVELS.map(l => `<span class="${l.v === d.affect ? 'on' : ''}"></span>`).join('')}</div>
+      <div class="m-scale"><span>VERY<br>NEGATIVE</span><span>VERY<br>POSITIVE</span></div>`;
+  } else if (moodStep === 1) {
+    const primary = affectGroup(d.affect);
+    const order = [primary, ...EMOTION_GROUPS.map(g => g[0]).filter(g => g !== primary)];
+    html = mini + `<div class="m-q">what best describes this feeling?</div>` + sortToggleHtml('emotions');
+    order.forEach(gid => {
+      const g = EMOTION_GROUPS.find(x => x[0] === gid);
+      const items = sortMoodItems(moodEmotions(gid), 'emotions', setting('emotionSort'));
+      const open = !!moodExpanded[gid];
+      const picked = items.filter(it => d.emotions.some(n => n.toLowerCase() === it.name.toLowerCase())).length;
+      html += `<div class="m-group${open ? ' open' : ''}">
+        <button type="button" class="m-group-head" data-mgroup="${gid}"><span>${g[1]}</span><span class="m-group-name">${g[2]}</span>
+          <span class="m-group-count">${picked ? `${picked} picked · ` : ''}${items.length}</span><span class="m-caret">${open ? '▾' : '▸'}</span></button>`;
+      if (open) {
+        html += `<div class="m-chips">` + items.map(it => {
+          const on = d.emotions.some(n => n.toLowerCase() === it.name.toLowerCase());
+          return `<button type="button" class="m-chip${on ? ' on' : ''}" data-emo="${escapeHtml(it.name)}">${it.emoji} ${escapeHtml(it.name)}</button>`;
+        }).join('') + (moodAdding === gid ? '' : `<button type="button" class="m-chip add" data-emo-add="${gid}">＋ new</button>`) + `</div>`;
+        if (moodAdding === gid) html += addFormHtml(gid);
+      }
+      html += `</div>`;
+    });
+  } else if (moodStep === 2) {
+    const items = sortMoodItems(moodAreas(), 'areas', setting('categorySort'));
+    html = mini + `<div class="m-q">what's having the biggest impact?</div>` + sortToggleHtml('areas') +
+      `<div class="m-chips">` + items.map(it => {
+        const on = d.areas.some(n => n.toLowerCase() === it.name.toLowerCase());
+        return `<button type="button" class="m-chip${on ? ' on' : ''}" data-area="${escapeHtml(it.name)}">${it.emoji} ${escapeHtml(it.name)}</button>`;
+      }).join('') + (moodAdding === 'area' ? '' : `<button type="button" class="m-chip add" data-area-add>＋ new</button>`) + `</div>` +
+      (moodAdding === 'area' ? addFormHtml('area') : '');
+  } else {
+    html = mini + `<div class="m-q">anything else? <span class="m-opt">(optional)</span></div>
+      <textarea id="moodNote" class="m-note" maxlength="500" placeholder="a little context, if you want…">${escapeHtml(d.note || '')}</textarea>
+      <div class="m-count"><span id="moodNoteCount">${(d.note || '').length}</span>/500</div>
+      <label class="m-time">🕘 <span>${escapeHtml(fmtStamp(d.t))}</span> <span class="ed-pen">✎</span>
+        <input type="datetime-local" id="moodTimeInput" value="${toLocalInput(d.t)}" aria-label="check-in time" /></label>
+      <button type="button" class="btn btn-primary m-done" id="moodDoneBtn">✓ ${moodIsNew || d.partial ? 'log it' : 'save'}</button>
+      ${!moodIsNew ? `<button type="button" class="m-del" id="moodDeleteBtn">delete this check-in</button>` : ''}`;
+  }
+  body.innerHTML = html;
+  if (moodStep === 3) {
+    const ta = document.getElementById('moodNote');
+    autoGrow(ta);
+  }
+  if (moodAdding) setTimeout(() => { const i = document.getElementById('moodAddName'); if (i) i.focus(); }, 30);
+}
+
+function updateMoodSlider(v) {
+  const d = moodDraft;
+  d.affect = v;
+  moodTouched = true;
+  moodExpanded = { [affectGroup(v)]: true };
+  const panel = document.getElementById('moodPanel');
+  setMoodVars(panel, v);
+  document.getElementById('moodLevelLabel').textContent = moodLevel(v).label;
+  document.querySelectorAll('.m-ticks span').forEach((s, i) => s.classList.toggle('on', i === v + 3));
+}
+
+function moodNav(dir) {
+  if (!moodDraft) return;
+  if (dir > 0 && moodStep === 3) { finishMood(); return; }
+  moodTouched = true;
+  moodStep = Math.max(0, Math.min(3, moodStep + dir));
+  moodAdding = null;
+  renderMoodSheet();
+  document.getElementById('moodBody').scrollTop = 0;
+  SFX.click();
+}
+
+function toggleInList(arr, name) {
+  const i = arr.findIndex(n => n.toLowerCase() === name.toLowerCase());
+  if (i >= 0) arr.splice(i, 1); else arr.push(name);
+}
+
+function saveMoodAdd() {
+  const name = (document.getElementById('moodAddName').value || '').replace(/\s+/g, ' ').trim();
+  const emoji = (document.getElementById('moodAddEmoji').value || '').trim();
+  if (!name) { document.getElementById('moodAddName').focus(); return; }
+  const d = moodDraft;
+  if (moodAdding === 'area') {
+    const hidden = state.moodHidden.areas;
+    const hi = hidden.indexOf(name.toLowerCase());
+    if (hi >= 0) hidden.splice(hi, 1);
+    if (!moodAreas().some(a => a.name.toLowerCase() === name.toLowerCase())) {
+      state.moodCustom.areas.push({ name, emoji: emoji || '🏷️' });
+    }
+    if (!d.areas.some(n => n.toLowerCase() === name.toLowerCase())) d.areas.push(name);
+  } else {
+    const g = moodAdding;
+    const hidden = state.moodHidden.emotions;
+    const hi = hidden.indexOf(g + '|' + name.toLowerCase());
+    if (hi >= 0) hidden.splice(hi, 1);
+    if (!moodEmotions(g).some(e => e.name.toLowerCase() === name.toLowerCase())) {
+      state.moodCustom.emotions.push({ name, emoji: emoji || '✨', group: g });
+    }
+    if (!d.emotions.some(n => n.toLowerCase() === name.toLowerCase())) d.emotions.push(name);
+  }
+  moodTouched = true;
+  moodAdding = null;
+  save();
+  SFX.add();
+  renderMoodSheet();
+}
+
+function commitMood(d) {
+  d.updated = Date.now();
+  const i = state.moods.findIndex(m => m.id === d.id);
+  if (i >= 0) state.moods[i] = d; else state.moods.push(d);
+  if (d.entryId) {
+    const e = getEntry(d.entryId);
+    if (e) {
+      e.moodIds = e.moodIds || [];
+      if (!e.moodIds.includes(d.id)) e.moodIds.push(d.id);
+    }
+  }
+  save();
+}
+
+function refreshAfterMood() {
+  if (openEntryId) renderEntry();
+  if (state.tab === 'mood') renderMoodTab();
+  if (state.tab === 'stats') renderCharts();
+  if (state.tab === 'journal') renderJournal();
+}
+
+// swiping out (or ✕) keeps a half-done check-in as an "unfinished" log
+function closeMoodSheet() {
+  const d = moodDraft;
+  moodDraft = null;
+  closeSheetEl('moodSheet');
+  if (d) {
+    if (moodIsNew && moodTouched) {
+      d.partial = true;
+      commitMood(d);
+      showToast('💭 saved — finish it anytime from Mood');
+    } else if (!moodIsNew) {
+      commitMood(d);
+    }
+  }
+  refreshAfterMood();
+}
+
+function finishMood() {
+  const d = moodDraft;
+  if (!d) return;
+  d.partial = false;
+  commitMood(d);
+  const wasNew = moodIsNew;
+  moodDraft = null;
+  closeSheetEl('moodSheet');
+  SFX.milestone();
+  showToast(wasNew ? `💭 logged · ${moodLevel(d.affect).label.toLowerCase()}` : '💭 check-in saved');
+  refreshAfterMood();
+}
+
+function deleteMood() {
+  const d = moodDraft;
+  if (!d) return;
+  askConfirm('delete check-in? 💭', 'this mood check-in will be gone for good.', 'delete', () => {
+    state.moods = state.moods.filter(m => m.id !== d.id);
+    (state.journal || []).forEach(e => { if (e.moodIds) e.moodIds = e.moodIds.filter(x => x !== d.id); });
+    save();
+    moodDraft = null;
+    closeSheetEl('moodSheet');
+    SFX.delete();
+    showToast('check-in deleted');
+    refreshAfterMood();
+  });
+}
+
+// ---------- Mood tab ----------
+let moodRange = 'day';
+let moodOffset = 0;
+
+function moodRangeBounds(range = moodRange, offset = moodOffset) {
+  const now = new Date();
+  let start, end, label;
+  const md = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (range === 'day') {
+    start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
+    end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1);
+    label = prettyDate(formatDateKey(start));
+  } else if (range === 'week') {
+    start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() + offset * 7);
+    end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
+    const last = new Date(end.getTime() - 86400000);
+    label = (offset === 0 ? 'this week · ' : offset === -1 ? 'last week · ' : '') + `${md(start)} – ${md(last)}`;
+  } else {
+    start = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+    label = start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+  return { start: start.getTime(), end: end.getTime(), label };
+}
+
+function avgOf(nums) { return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0; }
+
+function moodCardHtml(m) {
+  const lvl = moodLevel(m.affect);
+  const emos = m.emotions || [];
+  const chips = emos.slice(0, 3).map(n => `${emojiForEmotion(n, m.affect)} ${escapeHtml(n)}`).join(' · ') + (emos.length > 3 ? ` +${emos.length - 3}` : '');
+  const areas = (m.areas || []).map(n => `${emojiForArea(n)} ${escapeHtml(n)}`).join(' · ');
+  const note = shortPreview(m.note, 28);
+  const inJournal = m.entryId && getEntry(m.entryId);
+  return `<button type="button" class="mood-card" data-mood-open="${m.id}" style="--m-a:${lvl.a};--m-b:${lvl.b}">
+    <span class="mc-orb"></span>
+    <span class="mc-body">
+      <span class="mc-top"><span class="mc-level">${escapeHtml(lvl.label)}</span><span class="mc-time">${fmtTime(m.t)}</span></span>
+      ${chips ? `<span class="mc-emos">${chips}</span>` : ''}
+      ${areas ? `<span class="mc-areas">${areas}</span>` : ''}
+      ${note ? `<span class="mc-note">“${escapeHtml(note)}”</span>` : ''}
+      ${m.partial || inJournal || state.profile === 'combined' ? `<span class="mc-tags">${m.partial ? '<span class="mc-tag unfinished">unfinished · tap to finish</span>' : ''}${inJournal ? '<span class="mc-tag">📓 journal</span>' : ''}${state.profile === 'combined' ? userTag(m.profile) : ''}</span>` : ''}
+    </span>
+  </button>`;
+}
+
+function renderMoodTab() {
+  const wrap = document.getElementById('moodList');
+  if (!wrap) return;
+  // hero orb shows your latest mood
+  const latest = moodLogs().slice().sort((a, b) => b.t - a.t)[0];
+  const hero = document.getElementById('moodCheckinBtn');
+  setMoodVars(hero, latest && Date.now() - latest.t < 12 * 3600000 ? latest.affect : 0);
+  document.getElementById('moodHeroSub').textContent = latest
+    ? `last: ${moodLevel(latest.affect).label.toLowerCase()} · ${prettyDate(formatDateKey(new Date(latest.t))).toLowerCase()} ${fmtTime(latest.t).toLowerCase()}`
+    : 'how are you feeling right now?';
+  hero.style.display = state.profile === 'combined' ? 'none' : '';
+
+  document.querySelectorAll('[data-mrange]').forEach(b => b.classList.toggle('on', b.dataset.mrange === moodRange));
+  const { start, end, label } = moodRangeBounds();
+  document.getElementById('moodRangeLabel').textContent = label;
+  document.getElementById('moodNextRange').disabled = moodOffset >= 0;
+
+  const logs = moodLogs().filter(m => m.t >= start && m.t < end).sort((a, b) => b.t - a.t);
+  const sum = document.getElementById('moodSummary');
+  if (!logs.length) {
+    sum.innerHTML = '';
+    wrap.innerHTML = `<div class="j-empty"><div class="j-empty-big">💭</div>no check-ins ${moodRange === 'day' ? (moodOffset === 0 ? 'yet today' : 'this day') : 'in this ' + moodRange}</div>`;
+    return;
+  }
+  const avg = avgOf(logs.map(l => l.affect));
+  const counts = {};
+  logs.forEach(l => (l.emotions || []).forEach(n => { counts[n] = (counts[n] || 0) + 1; }));
+  const topEmo = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  const lvl = moodLevel(avg);
+  sum.innerHTML = `<span class="ms-dot" style="background:${lvl.mark}"></span>
+    <span><strong>${logs.length}</strong> check-in${logs.length === 1 ? '' : 's'} · mostly <strong>${lvl.label.toLowerCase()}</strong>${topEmo ? ` · top feeling: <strong>${emojiForEmotion(topEmo[0], avg)} ${escapeHtml(topEmo[0])}</strong>` : ''}</span>`;
+
+  let html = '';
+  let day = '';
+  logs.forEach(m => {
+    const dk = formatDateKey(new Date(m.t));
+    if (moodRange !== 'day' && dk !== day) {
+      day = dk;
+      html += `<div class="j-month small">${prettyDate(dk)}</div>`;
+    }
+    html += moodCardHtml(m);
+  });
+  wrap.innerHTML = html;
+}
+
+// ---------- mood data (Stats tab) ----------
+let chartMood = null;
+let moodGraphRange = 'week';
+const AFFECT_TICKS = { '-3': 'very neg', '-2': 'neg', '-1': 'slight neg', '0': 'neutral', '1': 'slight pos', '2': 'pos', '3': 'very pos' };
+
+function renderMoodChart() {
+  const ctx = document.getElementById('chartMood');
+  if (!ctx) return;
+  document.querySelectorAll('[data-mgraph]').forEach(b => b.classList.toggle('on', b.dataset.mgraph === moodGraphRange));
+  const logs = moodLogs();
+  const empty = document.getElementById('moodChartEmpty');
+  const wrap = document.getElementById('moodChartWrap');
+  if (chartMood) { chartMood.destroy(); chartMood = null; }
+
+  let datasetData, labels = null, xScale;
+  if (moodGraphRange === 'day') {
+    const today = todayKey();
+    const pts = logs.filter(m => formatDateKey(new Date(m.t)) === today).sort((a, b) => a.t - b.t);
+    if (!pts.length) { wrap.style.display = 'none'; empty.style.display = ''; empty.textContent = 'no check-ins yet today 💭'; return; }
+    datasetData = pts.map(m => { const d = new Date(m.t); return { x: d.getHours() + d.getMinutes() / 60, y: m.affect, m }; });
+    xScale = { type: 'linear', min: 0, max: 24, ticks: { stepSize: 6, color: '#6b3a5e', font: { family: 'Nunito' },
+      callback: v => ({ 0: '12a', 6: '6a', 12: '12p', 18: '6p', 24: '12a' })[v] ?? '' }, grid: { color: 'rgba(74,37,64,0.06)' } };
+  } else {
+    const days = lastNDayKeys(moodGraphRange === 'week' ? 7 : 30);
+    const byDay = {};
+    logs.forEach(m => { const k = formatDateKey(new Date(m.t)); (byDay[k] = byDay[k] || []).push(m); });
+    if (!days.some(k => byDay[k])) { wrap.style.display = 'none'; empty.style.display = ''; empty.textContent = `no check-ins in the last ${moodGraphRange === 'week' ? '7' : '30'} days 💭`; return; }
+    labels = days.map(k => {
+      const d = parseDateKey(k);
+      return moodGraphRange === 'week' ? d.toLocaleDateString('en-US', { weekday: 'short' }) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    datasetData = days.map(k => byDay[k] ? Math.round(avgOf(byDay[k].map(m => m.affect)) * 10) / 10 : null);
+    xScale = { grid: { display: false }, ticks: { color: '#6b3a5e', font: { family: 'Nunito' }, maxTicksLimit: moodGraphRange === 'week' ? 7 : 6, maxRotation: 0 } };
+    var dayLogs = days.map(k => byDay[k] || []);
+  }
+  wrap.style.display = '';
+  empty.style.display = 'none';
+  const yOf = (c) => (c.raw && typeof c.raw === 'object') ? c.raw.y : c.raw;
+  chartMood = new Chart(ctx, {
+    type: moodGraphRange === 'day' ? 'scatter' : 'line',
+    data: {
+      labels: labels || undefined,
+      datasets: [{
+        label: 'mood',
+        data: datasetData,
+        showLine: true,
+        spanGaps: true,
+        tension: 0.3,
+        borderColor: 'rgba(122,69,112,0.55)',
+        borderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBorderColor: '#fdf6e8',
+        pointBorderWidth: 2,
+        pointBackgroundColor: (c) => moodLevel(yOf(c)).mark
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => {
+              const c = items[0];
+              if (moodGraphRange === 'day') return fmtTime(c.raw.m.t);
+              return c.label;
+            },
+            label: (c) => {
+              if (moodGraphRange === 'day') {
+                const m = c.raw.m;
+                return ` ${moodLevel(m.affect).label}${(m.emotions || []).length ? ' · ' + m.emotions.slice(0, 3).join(', ') : ''}`;
+              }
+              const n = dayLogs[c.dataIndex].length;
+              return ` avg ${moodLevel(c.raw).label.toLowerCase()} (${c.raw > 0 ? '+' : ''}${c.raw}) · ${n} check-in${n === 1 ? '' : 's'}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: xScale,
+        y: {
+          min: -3.4, max: 3.4,
+          afterBuildTicks: (axis) => { axis.ticks = [-3, -2, -1, 0, 1, 2, 3].map(v => ({ value: v })); },
+          ticks: { color: '#6b3a5e', font: { family: 'Nunito', size: 10 }, callback: v => AFFECT_TICKS[String(v)] ?? '' },
+          grid: { color: (c) => c.tick && c.tick.value === 0 ? 'rgba(74,37,64,0.28)' : 'rgba(74,37,64,0.06)' }
+        }
+      }
+    }
+  });
+}
+
+function signed(v) { const r = Math.round(v * 10) / 10; return (r > 0 ? '+' : '') + r; }
+
+function renderMoodPatterns() {
+  const wrap = document.getElementById('moodPatterns');
+  if (!wrap) return;
+  const since = Date.now() - 90 * 86400000;
+  const logs = moodLogs().filter(m => m.t >= since);
+  if (logs.length < 3) {
+    wrap.innerHTML = `<div class="stats-empty">check in a few more times and patterns show up here 💭 (${logs.length}/3)</div>`;
+    return;
+  }
+  const overall = avgOf(logs.map(l => l.affect));
+  const groupBy = (field) => {
+    const out = {};
+    logs.forEach(l => (l[field] || []).forEach(n => { (out[n] = out[n] || []).push(l); }));
+    return out;
+  };
+  const topOf = (ls, field, k, exclude) => {
+    const c = {};
+    ls.forEach(l => (l[field] || []).forEach(n => { if (n !== exclude) c[n] = (c[n] || 0) + 1; }));
+    return Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, k).map(x => x[0]);
+  };
+
+  const areaRows = Object.entries(groupBy('areas')).map(([name, ls]) => ({ name, n: ls.length, avg: avgOf(ls.map(l => l.affect)), top: topOf(ls, 'emotions', 2) }));
+  const enough = areaRows.filter(r => r.n >= 2).sort((a, b) => b.avg - a.avg);
+  const thin = areaRows.filter(r => r.n < 2);
+  const emoRows = Object.entries(groupBy('emotions')).map(([name, ls]) => ({ name, n: ls.length, avg: avgOf(ls.map(l => l.affect)), areas: topOf(ls, 'areas', 2) }))
+    .sort((a, b) => b.n - a.n).slice(0, 8);
+
+  // time of day
+  const slots = [['🌅 morning', 5, 12], ['☀️ afternoon', 12, 17], ['🌇 evening', 17, 21], ['🌙 night', 21, 29]];
+  const slotRows = slots.map(([name, a, b]) => {
+    const ls = logs.filter(l => { let h = new Date(l.t).getHours(); if (h < 5) h += 24; return h >= a && h < b; });
+    return { name, n: ls.length, avg: avgOf(ls.map(l => l.affect)) };
+  }).filter(r => r.n);
+
+  // insights
+  const ins = [];
+  const best = enough[0], worst = enough[enough.length - 1];
+  if (best && best.avg - overall >= 0.5) ins.push(`✨ you tend to feel best around <strong>${emojiForArea(best.name)} ${escapeHtml(best.name)}</strong> — ${moodLevel(best.avg).label.toLowerCase()} on average across ${best.n} check-ins.`);
+  if (worst && worst !== best && overall - worst.avg >= 0.5) ins.push(`🌧 <strong>${emojiForArea(worst.name)} ${escapeHtml(worst.name)}</strong> shows up with your lower moods — ${moodLevel(worst.avg).label.toLowerCase()} on average (${worst.n} check-ins).`);
+  const pairs = {};
+  logs.forEach(l => (l.emotions || []).forEach(e => (l.areas || []).forEach(a => { const k = e + '|' + a; pairs[k] = (pairs[k] || 0) + 1; })));
+  const topPair = Object.entries(pairs).sort((a, b) => b[1] - a[1])[0];
+  if (topPair && topPair[1] >= 2) {
+    const [e, a] = topPair[0].split('|');
+    ins.push(`🔗 <strong>${emojiForEmotion(e)} ${escapeHtml(e)}</strong> + <strong>${emojiForArea(a)} ${escapeHtml(a)}</strong> came up together ${topPair[1]} times.`);
+  }
+  const sl = slotRows.filter(r => r.n >= 2).sort((a, b) => b.avg - a.avg);
+  if (sl.length >= 2 && sl[0].avg - sl[sl.length - 1].avg >= 0.75) {
+    ins.push(`🕘 your ${sl[0].name.split(' ')[1]}s run brighter (${signed(sl[0].avg)}) than your ${sl[sl.length - 1].name.split(' ')[1]}s (${signed(sl[sl.length - 1].avg)}).`);
+  }
+
+  const bar = (v) => {
+    const w = Math.min(50, Math.abs(v) / 3 * 50);
+    const lvl = moodLevel(v);
+    return `<span class="mpat-track"><span class="mpat-mid"></span><span class="mpat-bar" style="${v >= 0 ? 'left' : 'right'}:50%;width:${Math.max(1.5, w)}%;background:${lvl.mark}"></span></span>`;
+  };
+
+  let html = `<div class="mpat-overall">based on <strong>${logs.length}</strong> check-ins in the last 90 days · overall <strong>${moodLevel(overall).label.toLowerCase()}</strong> (${signed(overall)})</div>`;
+  if (ins.length) html += `<div class="mpat-insights">${ins.map(t => `<div class="mpat-insight">${t}</div>`).join('')}</div>`;
+
+  html += `<div class="mpat-sub-title">life areas & how you felt</div>
+    <div class="mpat-axis"><span>more negative</span><span>neutral</span><span>more positive</span></div>`;
+  if (enough.length) {
+    html += enough.map(r => `<div class="mpat-row">
+      <span class="mpat-name">${emojiForArea(r.name)} ${escapeHtml(r.name)}</span>
+      <span class="mpat-val">${signed(r.avg)} · ${r.n}×</span>
+      ${bar(r.avg)}
+      ${r.top.length ? `<span class="mpat-note">usually ${r.top.map(n => `${emojiForEmotion(n, r.avg)} ${escapeHtml(n)}`).join(', ')}</span>` : ''}
+    </div>`).join('');
+  } else {
+    html += `<div class="stats-empty small">tag a life area on 2+ check-ins to see it here</div>`;
+  }
+  if (thin.length) html += `<div class="mpat-thin">only once so far: ${thin.map(r => `${emojiForArea(r.name)} ${escapeHtml(r.name)}`).join(', ')}</div>`;
+
+  if (emoRows.length) {
+    html += `<div class="mpat-sub-title">feelings & what's behind them</div>` + emoRows.map(r => `<div class="mpat-emo">
+      <span class="mpat-emo-name">${emojiForEmotion(r.name, r.avg)} ${escapeHtml(r.name)}</span>
+      <span class="mpat-emo-n">${r.n}×</span>
+      <span class="mpat-emo-areas">${r.areas.length ? 'with ' + r.areas.map(a => `${emojiForArea(a)} ${escapeHtml(a)}`).join(', ') : '—'}</span>
+    </div>`).join('');
+  }
+  if (slotRows.length) {
+    html += `<div class="mpat-sub-title">time of day</div>` + slotRows.map(r => `<div class="mpat-row">
+      <span class="mpat-name">${r.name}</span><span class="mpat-val">${signed(r.avg)} · ${r.n}×</span>${bar(r.avg)}</div>`).join('');
+  }
+  wrap.innerHTML = html;
+}
+
+// ---------- Settings: manage mood lists ----------
+function renderMoodListManager() {
+  const wrap = document.getElementById('moodListManager');
+  if (!wrap) return;
+  let html = '';
+  EMOTION_GROUPS.forEach(([gid, emoji, name]) => {
+    const items = sortMoodItems(moodEmotions(gid), 'emotions', 'alpha');
+    const hiddenN = (state.moodHidden.emotions || []).filter(k => k.startsWith(gid + '|')).length;
+    html += `<div class="mlm-group"><div class="mlm-head">${emoji} ${name} feelings · ${items.length}</div><div class="mlm-chips">` +
+      items.map(it => `<span class="mlm-chip">${it.emoji} ${escapeHtml(it.name)}<button type="button" data-mlm-del="emo|${gid}|${escapeHtml(it.name)}" aria-label="remove ${escapeHtml(it.name)}">×</button></span>`).join('') +
+      `</div>${hiddenN ? `<div class="mlm-hidden">${hiddenN} removed · <button type="button" data-mlm-restore="emo|${gid}">bring them back</button></div>` : ''}</div>`;
+  });
+  const areas = sortMoodItems(moodAreas(), 'areas', 'alpha');
+  const hiddenA = (state.moodHidden.areas || []).length;
+  html += `<div class="mlm-group"><div class="mlm-head">🏷️ life areas · ${areas.length}</div><div class="mlm-chips">` +
+    areas.map(it => `<span class="mlm-chip">${it.emoji} ${escapeHtml(it.name)}<button type="button" data-mlm-del="area||${escapeHtml(it.name)}" aria-label="remove ${escapeHtml(it.name)}">×</button></span>`).join('') +
+    `</div>${hiddenA ? `<div class="mlm-hidden">${hiddenA} removed · <button type="button" data-mlm-restore="area|">bring them back</button></div>` : ''}</div>`;
+  wrap.innerHTML = html;
+}
+
+function mlmDelete(ref) {
+  const [kind, gid, name] = ref.split('|');
+  const k = name.toLowerCase();
+  if (kind === 'area') {
+    const ci = state.moodCustom.areas.findIndex(a => a.name.toLowerCase() === k);
+    if (ci >= 0) state.moodCustom.areas.splice(ci, 1);
+    else if (!state.moodHidden.areas.includes(k)) state.moodHidden.areas.push(k);
+  } else {
+    const ci = state.moodCustom.emotions.findIndex(e => e.group === gid && e.name.toLowerCase() === k);
+    if (ci >= 0) state.moodCustom.emotions.splice(ci, 1);
+    else if (!state.moodHidden.emotions.includes(gid + '|' + k)) state.moodHidden.emotions.push(gid + '|' + k);
+  }
+  save();
+  SFX.delete();
+  renderMoodListManager();
+}
+
+function mlmRestore(ref) {
+  const [kind, gid] = ref.split('|');
+  if (kind === 'area') state.moodHidden.areas = [];
+  else state.moodHidden.emotions = state.moodHidden.emotions.filter(k => !k.startsWith(gid + '|'));
+  save();
+  SFX.add();
+  renderMoodListManager();
+}
+
+// ==================== JOURNAL + MOOD EVENTS ====================
+document.addEventListener('click', (e) => {
+  const t = e.target;
+  // journal list
+  if (t.closest('#newEntryBtn')) { newEntry(); return; }
+  const open = t.closest('[data-entry-open]');
+  if (open) { openEntry(open.dataset.entryOpen); return; }
+  if (t.closest('#journalSearchClear')) {
+    journalQuery = '';
+    document.getElementById('journalSearch').value = '';
+    renderJournal();
+    return;
+  }
+  // entry sheet
+  if (t.closest('#entryCloseBtn')) { closeEntry(); return; }
+  if (t.closest('#entryEditBtn')) { setEntryEditing(!entryEditing); return; }
+  if (t.closest('#entryDeleteBtn')) { deleteEntry(); return; }
+  if (t.closest('#entryPhotoBtn')) {
+    const ev = getEntry(openEntryId);
+    if (ev && entryPhotoIds(ev).length >= JOURNAL_MAX_PHOTOS) { showToast(`max ${JOURNAL_MAX_PHOTOS} photos per entry`); return; }
+    document.getElementById('entryPhotoInput').click();
+    return;
+  }
+  if (t.closest('#entryFindBtn')) {
+    if (document.getElementById('findBar').classList.contains('open')) closeFind(); else openFind();
+    return;
+  }
+  if (t.closest('#findClose')) { closeFind(); return; }
+  if (t.closest('#findNext')) { findStep(1); return; }
+  if (t.closest('#findPrev')) { findStep(-1); return; }
+  const imgDel = t.closest('[data-img-del]');
+  if (imgDel) {
+    const [bi, ii] = imgDel.dataset.imgDel.split('|').map(Number);
+    removeEntryPhoto(bi, ii);
+    return;
+  }
+  const viewImg = t.closest('[data-view-img]');
+  if (viewImg && !entryEditing) { openViewer(viewImg.dataset.viewImg); return; }
+  if (t.closest('[data-entry-mood]')) {
+    flushEntrySave();
+    openMoodCheckin({ entryId: openEntryId });
+    return;
+  }
+  // photo viewer
+  if (t.closest('#viewerClose')) { closeViewer(); return; }
+  if (t.closest('#viewerPrev')) { viewerStep(-1); return; }
+  if (t.closest('#viewerNext')) { viewerStep(1); return; }
+
+  // mood: open / check in
+  if (t.closest('#moodCheckinBtn')) { openMoodCheckin(); return; }
+  const mo = t.closest('[data-mood-open]');
+  if (mo) { openMoodCheckin({ id: mo.dataset.moodOpen }); return; }
+  const mr = t.closest('[data-mrange]');
+  if (mr) { moodRange = mr.dataset.mrange; moodOffset = 0; SFX.click(); renderMoodTab(); return; }
+  const mn = t.closest('[data-mnav]');
+  if (mn) { moodOffset = Math.min(0, moodOffset + parseInt(mn.dataset.mnav, 10)); SFX.click(); renderMoodTab(); return; }
+  const mg = t.closest('[data-mgraph]');
+  if (mg) { moodGraphRange = mg.dataset.mgraph; SFX.click(); if (typeof Chart !== 'undefined') renderMoodChart(); return; }
+
+  // mood sheet
+  if (!moodDraft) {
+    // settings list manager
+    const del = t.closest('[data-mlm-del]');
+    if (del) { mlmDelete(del.dataset.mlmDel); return; }
+    const rs = t.closest('[data-mlm-restore]');
+    if (rs) { mlmRestore(rs.dataset.mlmRestore); return; }
+    return;
+  }
+  if (t.closest('#moodCloseBtn')) { closeMoodSheet(); return; }
+  if (t.closest('#moodBackBtn')) { moodNav(-1); return; }
+  if (t.closest('#moodNextBtn')) { moodNav(1); return; }
+  if (t.closest('#moodDoneBtn')) { finishMood(); return; }
+  if (t.closest('#moodDeleteBtn')) { deleteMood(); return; }
+  const grp = t.closest('[data-mgroup]');
+  if (grp) { const g = grp.dataset.mgroup; moodExpanded[g] = !moodExpanded[g]; if (moodAdding === g) moodAdding = null; SFX.click(); renderMoodSheet(); return; }
+  const emo = t.closest('[data-emo]');
+  if (emo) { toggleInList(moodDraft.emotions, emo.dataset.emo); moodTouched = true; SFX.click(); renderMoodSheet(); return; }
+  const area = t.closest('[data-area]');
+  if (area) { toggleInList(moodDraft.areas, area.dataset.area); moodTouched = true; SFX.click(); renderMoodSheet(); return; }
+  const ea = t.closest('[data-emo-add]');
+  if (ea) { moodAdding = ea.dataset.emoAdd; renderMoodSheet(); return; }
+  if (t.closest('[data-area-add]')) { moodAdding = 'area'; renderMoodSheet(); return; }
+  if (t.closest('#moodAddSave')) { saveMoodAdd(); return; }
+  if (t.closest('#moodAddCancel')) { moodAdding = null; renderMoodSheet(); return; }
+  const ms = t.closest('[data-msort]');
+  if (ms) {
+    const [field, mode] = ms.dataset.msort.split('|');
+    state.settings[field === 'emotions' ? 'emotionSort' : 'categorySort'] = mode;
+    save();
+    SFX.click();
+    renderMoodSheet();
+  }
+});
+
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.id === 'journalSearch') { journalQuery = t.value; renderJournal(); return; }
+  if (t.id === 'findInput') { findQuery = t.value.trim(); findIdx = 0; renderEntry(); return; }
+  if (t.id === 'entryTitleInput') {
+    const ev = getEntry(openEntryId);
+    if (ev) { ev.title = t.value; scheduleEntrySave(); }
+    return;
+  }
+  if (t.classList && t.classList.contains('entry-text')) {
+    const ev = getEntry(openEntryId);
+    const bi = parseInt(t.dataset.block, 10);
+    if (ev && ev.blocks[bi]) {
+      ev.blocks[bi].text = t.value;
+      entryCaret = { block: bi, pos: t.selectionStart };
+      autoGrow(t);
+      scheduleEntrySave();
+    }
+    return;
+  }
+  if (t.id === 'moodSlider') { updateMoodSlider(parseInt(t.value, 10)); return; }
+  if (t.id === 'moodNote' && moodDraft) {
+    moodDraft.note = t.value.slice(0, 500);
+    moodTouched = true;
+    document.getElementById('moodNoteCount').textContent = moodDraft.note.length;
+    autoGrow(t);
+    return;
+  }
+  if (t.id === 'moodAddName') return;
+});
+
+// remember the cursor so photos land where you were typing
+document.addEventListener('focusout', (e) => {
+  const t = e.target;
+  if (t.classList && t.classList.contains('entry-text')) {
+    entryCaret = { block: parseInt(t.dataset.block, 10), pos: t.selectionStart };
+  }
+});
+['keyup', 'click'].forEach(ev => document.addEventListener(ev, (e) => {
+  const t = e.target;
+  if (t.classList && t.classList.contains('entry-text')) {
+    entryCaret = { block: parseInt(t.dataset.block, 10), pos: t.selectionStart };
+  }
+}));
+
+document.addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.id === 'entryPhotoInput') {
+    addEntryPhotos(t.files);
+    t.value = '';
+    return;
+  }
+  if (t.id === 'entryDateInput') {
+    const ev = getEntry(openEntryId);
+    const ts = fromLocalInput(t.value);
+    if (ev && ts) { ev.created = ts; scheduleEntrySave(); renderEntry(); }
+    return;
+  }
+  if (t.id === 'moodTimeInput' && moodDraft) {
+    const ts = fromLocalInput(t.value);
+    if (ts) { moodDraft.t = ts; renderMoodSheet(); }
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'moodAddName') { e.preventDefault(); saveMoodAdd(); return; }
+  if (e.key === 'Enter' && e.target.id === 'findInput') { e.preventDefault(); findStep(e.shiftKey ? -1 : 1); return; }
+  if (e.key === 'Escape') {
+    if (document.getElementById('confirmModal').classList.contains('open')) return;
+    if (document.getElementById('imgViewer').classList.contains('open')) { closeViewer(); e.stopImmediatePropagation(); return; }
+    if (document.getElementById('moodSheet').classList.contains('open')) { closeMoodSheet(); e.stopImmediatePropagation(); return; }
+    if (document.getElementById('entrySheet').classList.contains('open')) { closeEntry(); e.stopImmediatePropagation(); return; }
+  }
+  if (document.getElementById('imgViewer').classList.contains('open')) {
+    if (e.key === 'ArrowRight') viewerStep(1);
+    if (e.key === 'ArrowLeft') viewerStep(-1);
+  }
+}, true);
 
 // ==================== INIT ====================
 const isFreshInstall = load();
