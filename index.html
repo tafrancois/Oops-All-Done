@@ -3411,6 +3411,9 @@
   .m-chips { display: flex; flex-wrap: wrap; gap: 7px; }
 
   .m-chip {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
     border: 1.5px solid rgba(74,37,64,0.14);
     background: rgba(255,255,255,0.85);
     color: var(--ink);
@@ -3803,7 +3806,19 @@
     color: var(--plum);
   }
 
-  .mlm-chip button {
+  .mlm-chip .mlm-edit {
+    border: none;
+    background: none;
+    padding: 2px 2px;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 999px;
+  }
+
+  .mlm-chip .mlm-edit:active { background: rgba(245,201,107,0.3); }
+
+  .mlm-chip .mlm-x {
     border: none;
     background: none;
     color: var(--plum-mist);
@@ -3815,7 +3830,74 @@
     line-height: 1;
   }
 
-  .mlm-chip button:hover { background: rgba(228,122,122,0.18); color: var(--rose); }
+  .mlm-chip .mlm-x:hover { background: rgba(228,122,122,0.18); color: var(--rose); }
+
+  .emoji-backdrop { z-index: 175; }
+
+  .emoji-preview {
+    width: 92px;
+    height: 92px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 45% 38%, #fff, rgba(245,201,107,0.45));
+    box-shadow: 0 6px 20px rgba(232,168,56,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  .emoji-input {
+    display: block;
+    width: 120px;
+    margin: 0 auto;
+    padding: 10px;
+    text-align: center;
+    font-size: 26px;
+    border: 2px solid rgba(74,37,64,0.15);
+    border-radius: 16px;
+    background: #fff;
+    outline: none;
+  }
+
+  .emoji-input:focus { border-color: var(--butter-deep); }
+
+  .emoji-hint {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--plum-mist);
+    margin: 8px 6px 12px;
+    line-height: 1.45;
+  }
+
+  .emoji-quick {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+
+  .emoji-quick button {
+    border: none;
+    background: rgba(255,255,255,0.75);
+    border-radius: 10px;
+    font-size: 1.3rem;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+
+  .emoji-quick button:active { transform: scale(0.9); background: var(--butter); }
+
+  .m-hint {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    color: var(--plum-mist);
+    margin: -6px 2px 10px;
+  }
   .mlm-hidden { margin-top: 8px; font-size: 0.8rem; color: var(--plum-mist); font-family: 'Fraunces', serif; font-style: italic; }
   .mlm-hidden button { border: none; background: none; color: var(--plum-soft); text-decoration: underline; cursor: pointer; font: inherit; }
 
@@ -4031,7 +4113,7 @@
 
     <div class="settings-card">
       <div class="settings-title">💭 mood lists</div>
-      <div class="settings-sub">tap × to remove a feeling or life area from the check-in. add new ones right inside a check-in.</div>
+      <div class="settings-sub">tap a feeling or life area to change its emoji · tap × to remove it. add new ones right inside a check-in.</div>
       <div id="moodListManager"></div>
     </div>
 
@@ -4434,6 +4516,24 @@
   </div>
 </div>
 
+<!-- Change an emoji (feelings / life areas) -->
+<div class="modal-backdrop emoji-backdrop" id="emojiModal">
+  <div class="modal">
+    <div class="modal-title" style="margin-bottom:4px;">change emoji</div>
+    <p class="routines-sub" id="emojiFor" style="margin:0 0 12px;"></p>
+    <div class="emoji-preview" id="emojiPreview"></div>
+    <input type="text" id="emojiInput" class="emoji-input" maxlength="16" autocomplete="off" aria-label="new emoji" />
+    <div class="emoji-hint">tap the box, then 🌐 / 😀 on your keyboard to pick any emoji — or grab one below</div>
+    <div class="emoji-quick"><button type="button" data-quick-emoji="😊">😊</button><button type="button" data-quick-emoji="😌">😌</button><button type="button" data-quick-emoji="🥰">🥰</button><button type="button" data-quick-emoji="😁">😁</button><button type="button" data-quick-emoji="🤩">🤩</button><button type="button" data-quick-emoji="🥳">🥳</button><button type="button" data-quick-emoji="😎">😎</button><button type="button" data-quick-emoji="🙏">🙏</button><button type="button" data-quick-emoji="💪">💪</button><button type="button" data-quick-emoji="✨">✨</button><button type="button" data-quick-emoji="🌱">🌱</button><button type="button" data-quick-emoji="🔥">🔥</button><button type="button" data-quick-emoji="😐">😐</button><button type="button" data-quick-emoji="🙂">🙂</button><button type="button" data-quick-emoji="🤔">🤔</button><button type="button" data-quick-emoji="😑">😑</button><button type="button" data-quick-emoji="🥱">🥱</button><button type="button" data-quick-emoji="😪">😪</button><button type="button" data-quick-emoji="😔">😔</button><button type="button" data-quick-emoji="😢">😢</button><button type="button" data-quick-emoji="😤">😤</button><button type="button" data-quick-emoji="😰">😰</button><button type="button" data-quick-emoji="😩">😩</button><button type="button" data-quick-emoji="🫠">🫠</button><button type="button" data-quick-emoji="💜">💜</button><button type="button" data-quick-emoji="☕">☕</button><button type="button" data-quick-emoji="🧵">🧵</button><button type="button" data-quick-emoji="📚">📚</button><button type="button" data-quick-emoji="🎨">🎨</button><button type="button" data-quick-emoji="🧹">🧹</button></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="emojiResetBtn" style="display:none;">reset</button>
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost" id="emojiCancelBtn">cancel</button>
+      <button class="btn btn-primary" id="emojiSaveBtn">save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Undo bar (after deleting a task) -->
 <div class="undo-bar" id="undoBar">
   <span id="undoMsg"></span>
@@ -4530,6 +4630,7 @@ let state = {
   moods: [],        // { id, profile, t, affect (-3..3), emotions: [], areas: [], note, entryId, partial }
   moodCustom: { emotions: [], areas: [] },   // feelings / life areas you added
   moodHidden: { emotions: [], areas: [] },   // built-in ones you removed
+  moodEmoji: {},    // your emoji for built-in feelings/areas: 'emo|positive|happy' / 'area|work' -> '🥳'
   showPoints: false, // show point pills on every task (custom/saved ones always show)
   routinesTab: 'routines', // which tab the routines page opens on: 'routines' | 'master'
 
@@ -4631,6 +4732,7 @@ function migrateState() {
   if (!state.settings || typeof state.settings !== 'object') state.settings = {};
   if (!Array.isArray(state.journal)) state.journal = [];
   if (!Array.isArray(state.moods)) state.moods = [];
+  if (!state.moodEmoji || typeof state.moodEmoji !== 'object') state.moodEmoji = {};
   ['moodCustom', 'moodHidden'].forEach(k => {
     if (!state[k] || typeof state[k] !== 'object') state[k] = {};
     if (!Array.isArray(state[k].emotions)) state[k].emotions = [];
@@ -8910,6 +9012,7 @@ async function exportData() {
       moods: state.moods,
       moodCustom: state.moodCustom,
       moodHidden: state.moodHidden,
+      moodEmoji: state.moodEmoji,
       images: await exportImagesData(),
       taskSortMode: state.taskSortMode
     }
@@ -8987,6 +9090,7 @@ function confirmImport() {
   state.moods = Array.isArray(imported.moods) ? imported.moods : [];
   state.moodCustom = Object.assign({ emotions: [], areas: [] }, imported.moodCustom || {});
   state.moodHidden = Object.assign({ emotions: [], areas: [] }, imported.moodHidden || {});
+  state.moodEmoji = imported.moodEmoji && typeof imported.moodEmoji === 'object' ? imported.moodEmoji : {};
   if (imported.images) importImagesData(imported.images).then(() => { if (openEntryId) renderEntry(); });
   backfillDaysUsed();
   recordDayUsed();
@@ -9030,7 +9134,8 @@ const SHEET_CLOSERS = {
   confirmModal: () => closeConfirm(false),
   importModal: () => { pendingImportData = null; document.getElementById('importModal').classList.remove('open'); },
   entrySheet: () => closeEntry(),
-  moodSheet: () => closeMoodSheet()
+  moodSheet: () => closeMoodSheet(),
+  emojiModal: () => closeEmojiEditor()
 };
 
 function closeSheetById(id) {
@@ -9867,16 +9972,19 @@ function moodLogs(profile = state.profile) {
   return (state.moods || []).filter(m => profile === 'combined' || m.profile === profile);
 }
 
+function emoKey(group, name) { return `emo|${group}|${(name || '').toLowerCase()}`; }
+function areaKey(name) { return `area|${(name || '').toLowerCase()}`; }
+
 function moodEmotions(group) {
   const hidden = state.moodHidden.emotions || [];
-  const base = EMOTIONS_BASE[group].map(([emoji, name]) => ({ emoji, name, group, custom: false }));
+  const base = EMOTIONS_BASE[group].map(([emoji, name]) => ({ emoji: state.moodEmoji[emoKey(group, name)] || emoji, original: emoji, name, group, custom: false }));
   const custom = (state.moodCustom.emotions || []).filter(e => e.group === group).map(e => ({ ...e, custom: true }));
   return [...base, ...custom].filter(e => !hidden.includes(group + '|' + e.name.toLowerCase()));
 }
 
 function moodAreas() {
   const hidden = state.moodHidden.areas || [];
-  const base = LIFE_AREAS_BASE.map(([emoji, name]) => ({ emoji, name, custom: false }));
+  const base = LIFE_AREAS_BASE.map(([emoji, name]) => ({ emoji: state.moodEmoji[areaKey(name)] || emoji, original: emoji, name, custom: false }));
   const custom = (state.moodCustom.areas || []).map(a => ({ ...a, custom: true }));
   return [...base, ...custom].filter(a => !hidden.includes(a.name.toLowerCase()));
 }
@@ -9906,19 +10014,133 @@ function emojiForEmotion(name, affect = 0) {
   const k = (name || '').toLowerCase();
   const order = [affectGroup(affect), 'neutral', 'positive', 'negative'];
   for (const g of order) {
+    const c = (state.moodCustom.emotions || []).find(e => e.group === g && e.name.toLowerCase() === k);
+    if (c) return c.emoji;
     const hit = EMOTIONS_BASE[g].find(([, n]) => n.toLowerCase() === k);
-    if (hit) return hit[0];
+    if (hit) return state.moodEmoji[emoKey(g, hit[1])] || hit[0];
   }
-  const c = (state.moodCustom.emotions || []).find(e => e.name.toLowerCase() === k);
-  return c ? c.emoji : '•';
+  return '•';
 }
 
 function emojiForArea(name) {
   const k = (name || '').toLowerCase();
-  const hit = LIFE_AREAS_BASE.find(([, n]) => n.toLowerCase() === k);
-  if (hit) return hit[0];
   const c = (state.moodCustom.areas || []).find(a => a.name.toLowerCase() === k);
-  return c ? c.emoji : '🏷️';
+  if (c) return c.emoji;
+  const hit = LIFE_AREAS_BASE.find(([, n]) => n.toLowerCase() === k);
+  if (hit) return state.moodEmoji[areaKey(hit[1])] || hit[0];
+  return '🏷️';
+}
+
+function firstGrapheme(str) {
+  str = (str || '').trim();
+  if (!str) return '';
+  try {
+    if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+      for (const part of new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(str)) return part.segment;
+    }
+  } catch (e) {}
+  return Array.from(str).slice(0, 2).join('');
+}
+
+// ---------- change an emoji (Settings tap, or long-press in a check-in) ----------
+let emojiTarget = null; // { kind: 'emo'|'area', group, name }
+
+function findMoodItem(kind, group, name) {
+  const k = (name || '').toLowerCase();
+  return kind === 'area'
+    ? moodAreas().find(a => a.name.toLowerCase() === k)
+    : moodEmotions(group).find(e => e.name.toLowerCase() === k);
+}
+
+function openEmojiEditor(kind, group, name) {
+  const it = findMoodItem(kind, group, name);
+  if (!it) return;
+  emojiTarget = { kind, group, name: it.name };
+  document.getElementById('emojiFor').textContent = it.name + (kind === 'area' ? ' · life area' : ` · ${group} feeling`);
+  document.getElementById('emojiPreview').textContent = it.emoji;
+  const inp = document.getElementById('emojiInput');
+  inp.value = '';
+  inp.placeholder = it.emoji;
+  const reset = document.getElementById('emojiResetBtn');
+  reset.style.display = !it.custom && it.original && it.original !== it.emoji ? '' : 'none';
+  reset.textContent = `reset to ${it.original || ''}`;
+  document.getElementById('emojiModal').classList.add('open');
+  SFX.click();
+  setTimeout(() => inp.focus(), 80);
+}
+
+function closeEmojiEditor() {
+  document.getElementById('emojiModal').classList.remove('open');
+  emojiTarget = null;
+}
+
+function saveEmoji(reset = false) {
+  if (!emojiTarget) return;
+  const { kind, group, name } = emojiTarget;
+  const emoji = reset ? '' : firstGrapheme(document.getElementById('emojiInput').value);
+  if (!reset && !emoji) { document.getElementById('emojiInput').focus(); return; }
+  const k = name.toLowerCase();
+  const custom = kind === 'area'
+    ? (state.moodCustom.areas || []).find(a => a.name.toLowerCase() === k)
+    : (state.moodCustom.emotions || []).find(e => e.group === group && e.name.toLowerCase() === k);
+  if (custom) {
+    if (emoji) custom.emoji = emoji;
+  } else {
+    const key = kind === 'area' ? areaKey(name) : emoKey(group, name);
+    if (reset) delete state.moodEmoji[key]; else state.moodEmoji[key] = emoji;
+  }
+  save();
+  closeEmojiEditor();
+  SFX.add();
+  showToast(reset ? `${name}: back to the original emoji` : `${emoji} ${name}`);
+  if (moodDraft) renderMoodSheet();
+  renderMoodListManager();
+  if (state.tab === 'mood') renderMoodTab();
+  if (state.tab === 'stats') renderMoodPatterns();
+}
+
+// long-press a feeling / life area chip in a check-in to change its emoji
+let chipPress = null;
+let suppressChipClick = false;
+document.addEventListener('touchstart', (e) => {
+  const chip = e.target.closest && e.target.closest('#moodBody [data-emo], #moodBody [data-area]');
+  if (!chip || e.touches.length !== 1) return;
+  const t = e.touches[0];
+  chipPress = { chip, x: t.clientX, y: t.clientY, timer: setTimeout(() => {
+    suppressChipClick = true;
+    chipPress = null;
+    if (navigator.vibrate) navigator.vibrate(12);
+    openChipEmojiEditor(chip);
+  }, 480) };
+}, { passive: true });
+document.addEventListener('touchmove', (e) => {
+  if (!chipPress) return;
+  const t = e.touches[0];
+  if (Math.abs(t.clientX - chipPress.x) > 8 || Math.abs(t.clientY - chipPress.y) > 8) { clearTimeout(chipPress.timer); chipPress = null; }
+}, { passive: true });
+['touchend', 'touchcancel'].forEach(ev => document.addEventListener(ev, () => {
+  if (chipPress) { clearTimeout(chipPress.timer); chipPress = null; }
+}));
+document.addEventListener('contextmenu', (e) => {
+  const chip = e.target.closest && e.target.closest('#moodBody [data-emo], #moodBody [data-area]');
+  if (!chip) return;
+  e.preventDefault();
+  if (!suppressChipClick) openChipEmojiEditor(chip);
+});
+// swallow the tap that ends a long-press, so it doesn't also select the chip
+document.addEventListener('click', (e) => {
+  if (!suppressChipClick) return;
+  suppressChipClick = false;
+  if (e.target.closest && e.target.closest('#moodBody [data-emo], #moodBody [data-area]')) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  }
+}, true);
+
+function openChipEmojiEditor(chip) {
+  if (chip.dataset.area) { openEmojiEditor('area', '', chip.dataset.area); return; }
+  const group = chip.closest('.m-group') && chip.closest('.m-group').querySelector('[data-mgroup]');
+  openEmojiEditor('emo', group ? group.dataset.mgroup : affectGroup(moodDraft ? moodDraft.affect : 0), chip.dataset.emo);
 }
 
 // ---------- check-in sheet ----------
@@ -9986,7 +10208,7 @@ function sortToggleHtml(field) {
 
 function addFormHtml(kind) {
   return `<div class="m-addform">
-    <input type="text" id="moodAddEmoji" class="m-add-emoji" maxlength="4" placeholder="🙂" aria-label="emoji (optional)" />
+    <input type="text" id="moodAddEmoji" class="m-add-emoji" maxlength="16" placeholder="🙂" aria-label="emoji (optional)" />
     <input type="text" id="moodAddName" class="m-add-name" maxlength="30" placeholder="${kind === 'area' ? 'new life area' : 'new feeling'}" />
     <button type="button" class="m-add-ok" id="moodAddSave">add</button>
     <button type="button" class="m-add-x" id="moodAddCancel" aria-label="cancel">×</button>
@@ -10021,7 +10243,8 @@ function renderMoodSheet() {
   } else if (moodStep === 1) {
     const primary = affectGroup(d.affect);
     const order = [primary, ...EMOTION_GROUPS.map(g => g[0]).filter(g => g !== primary)];
-    html = mini + `<div class="m-q">what best describes this feeling?</div>` + sortToggleHtml('emotions');
+    html = mini + `<div class="m-q">what best describes this feeling?</div>` + sortToggleHtml('emotions') +
+      `<div class="m-hint">hold a feeling to change its emoji</div>`;
     order.forEach(gid => {
       const g = EMOTION_GROUPS.find(x => x[0] === gid);
       const items = sortMoodItems(moodEmotions(gid), 'emotions', setting('emotionSort'));
@@ -10042,6 +10265,7 @@ function renderMoodSheet() {
   } else if (moodStep === 2) {
     const items = sortMoodItems(moodAreas(), 'areas', setting('categorySort'));
     html = mini + `<div class="m-q">what's having the biggest impact?</div>` + sortToggleHtml('areas') +
+      `<div class="m-hint">hold a life area to change its emoji</div>` +
       `<div class="m-chips">` + items.map(it => {
         const on = d.areas.some(n => n.toLowerCase() === it.name.toLowerCase());
         return `<button type="button" class="m-chip${on ? ' on' : ''}" data-area="${escapeHtml(it.name)}">${it.emoji} ${escapeHtml(it.name)}</button>`;
@@ -10093,7 +10317,7 @@ function toggleInList(arr, name) {
 
 function saveMoodAdd() {
   const name = (document.getElementById('moodAddName').value || '').replace(/\s+/g, ' ').trim();
-  const emoji = (document.getElementById('moodAddEmoji').value || '').trim();
+  const emoji = firstGrapheme(document.getElementById('moodAddEmoji').value);
   if (!name) { document.getElementById('moodAddName').focus(); return; }
   const d = moodDraft;
   if (moodAdding === 'area') {
@@ -10470,13 +10694,13 @@ function renderMoodListManager() {
     const items = sortMoodItems(moodEmotions(gid), 'emotions', 'alpha');
     const hiddenN = (state.moodHidden.emotions || []).filter(k => k.startsWith(gid + '|')).length;
     html += `<div class="mlm-group"><div class="mlm-head">${emoji} ${name} feelings · ${items.length}</div><div class="mlm-chips">` +
-      items.map(it => `<span class="mlm-chip">${it.emoji} ${escapeHtml(it.name)}<button type="button" data-mlm-del="emo|${gid}|${escapeHtml(it.name)}" aria-label="remove ${escapeHtml(it.name)}">×</button></span>`).join('') +
+      items.map(it => `<span class="mlm-chip"><button type="button" class="mlm-edit" data-mlm-emoji="emo|${gid}|${escapeHtml(it.name)}" aria-label="change emoji for ${escapeHtml(it.name)}"><span class="mlm-emo">${it.emoji}</span> ${escapeHtml(it.name)}</button><button type="button" class="mlm-x" data-mlm-del="emo|${gid}|${escapeHtml(it.name)}" aria-label="remove ${escapeHtml(it.name)}">×</button></span>`).join('') +
       `</div>${hiddenN ? `<div class="mlm-hidden">${hiddenN} removed · <button type="button" data-mlm-restore="emo|${gid}">bring them back</button></div>` : ''}</div>`;
   });
   const areas = sortMoodItems(moodAreas(), 'areas', 'alpha');
   const hiddenA = (state.moodHidden.areas || []).length;
   html += `<div class="mlm-group"><div class="mlm-head">🏷️ life areas · ${areas.length}</div><div class="mlm-chips">` +
-    areas.map(it => `<span class="mlm-chip">${it.emoji} ${escapeHtml(it.name)}<button type="button" data-mlm-del="area||${escapeHtml(it.name)}" aria-label="remove ${escapeHtml(it.name)}">×</button></span>`).join('') +
+    areas.map(it => `<span class="mlm-chip"><button type="button" class="mlm-edit" data-mlm-emoji="area||${escapeHtml(it.name)}" aria-label="change emoji for ${escapeHtml(it.name)}"><span class="mlm-emo">${it.emoji}</span> ${escapeHtml(it.name)}</button><button type="button" class="mlm-x" data-mlm-del="area||${escapeHtml(it.name)}" aria-label="remove ${escapeHtml(it.name)}">×</button></span>`).join('') +
     `</div>${hiddenA ? `<div class="mlm-hidden">${hiddenA} removed · <button type="button" data-mlm-restore="area|">bring them back</button></div>` : ''}</div>`;
   wrap.innerHTML = html;
 }
@@ -10555,6 +10779,13 @@ document.addEventListener('click', (e) => {
   if (t.closest('#viewerPrev')) { viewerStep(-1); return; }
   if (t.closest('#viewerNext')) { viewerStep(1); return; }
 
+  // emoji editor
+  if (t.closest('#emojiSaveBtn')) { saveEmoji(false); return; }
+  if (t.closest('#emojiResetBtn')) { saveEmoji(true); return; }
+  if (t.closest('#emojiCancelBtn') || t.id === 'emojiModal') { closeEmojiEditor(); return; }
+  const qe = t.closest('[data-quick-emoji]');
+  if (qe) { document.getElementById('emojiInput').value = qe.dataset.quickEmoji; document.getElementById('emojiPreview').textContent = qe.dataset.quickEmoji; SFX.click(); return; }
+
   // mood: open / check in
   if (t.closest('#moodCheckinBtn')) { openMoodCheckin(); return; }
   const mo = t.closest('[data-mood-open]');
@@ -10569,6 +10800,8 @@ document.addEventListener('click', (e) => {
   // mood sheet
   if (!moodDraft) {
     // settings list manager
+    const emo = t.closest('[data-mlm-emoji]');
+    if (emo) { const [kind, gid, name] = emo.dataset.mlmEmoji.split('|'); openEmojiEditor(kind === 'area' ? 'area' : 'emo', gid, name); return; }
     const del = t.closest('[data-mlm-del]');
     if (del) { mlmDelete(del.dataset.mlmDel); return; }
     const rs = t.closest('[data-mlm-restore]');
@@ -10630,6 +10863,11 @@ document.addEventListener('input', (e) => {
     return;
   }
   if (t.id === 'moodAddName') return;
+  if (t.id === 'emojiInput') {
+    const g = firstGrapheme(t.value);
+    document.getElementById('emojiPreview').textContent = g || (findMoodItem(emojiTarget.kind, emojiTarget.group, emojiTarget.name) || {}).emoji || '';
+    return;
+  }
 });
 
 // remember the cursor so photos land where you were typing
@@ -10667,6 +10905,8 @@ document.addEventListener('change', (e) => {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target.id === 'moodAddName') { e.preventDefault(); saveMoodAdd(); return; }
+  if (e.key === 'Enter' && e.target.id === 'emojiInput') { e.preventDefault(); saveEmoji(false); return; }
+  if (e.key === 'Escape' && document.getElementById('emojiModal').classList.contains('open')) { closeEmojiEditor(); e.stopImmediatePropagation(); return; }
   if (e.key === 'Enter' && e.target.id === 'findInput') { e.preventDefault(); findStep(e.shiftKey ? -1 : 1); return; }
   if (e.key === 'Escape') {
     if (document.getElementById('confirmModal').classList.contains('open')) return;
