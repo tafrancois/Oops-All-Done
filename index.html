@@ -2792,10 +2792,10 @@
 
   .j-card:last-child { border-bottom: none; }
   .j-card:active { background: rgba(245,201,107,0.15); }
-  .j-card-title { font-weight: 700; font-size: 17px; line-height: 1.3; }
+  .j-card-title { font-weight: 700; font-size: calc(var(--j-size, 18px) + 1px); line-height: 1.3; }
 
   .j-card-prev {
-    font-size: 16px;
+    font-size: var(--j-size, 18px);
     color: #6f5a68;
     white-space: nowrap;
     overflow: hidden;
@@ -2856,6 +2856,65 @@
     gap: 6px;
     padding: 2px 12px 10px;
     border-bottom: 1px solid rgba(74,37,64,0.08);
+  }
+
+  .size-bar {
+    flex-shrink: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(245,201,107,0.18);
+    border-bottom: 1px solid rgba(74,37,64,0.08);
+  }
+
+  .size-bar.open { display: flex; }
+
+  .jf-btn {
+    border: none;
+    background: #fff;
+    color: var(--plum);
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 700;
+    border-radius: 12px;
+    width: 46px;
+    height: 38px;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1.5px rgba(74,37,64,0.12);
+  }
+
+  .jf-btn.small { font-size: 15px; }
+  .jf-btn.big { font-size: 22px; }
+  .jf-btn:disabled { opacity: 0.35; cursor: default; }
+  .jf-val { font-weight: 800; font-size: 0.9rem; color: var(--plum); min-width: 54px; text-align: center; }
+
+  .size-bar .jf-close {
+    border: none;
+    background: rgba(74,37,64,0.08);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--plum);
+    cursor: pointer;
+    margin-left: 6px;
+  }
+
+  .jf-row { display: flex; align-items: center; gap: 10px; margin: 6px 0 8px; }
+
+  .jf-preview {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: var(--j-size, 18px);
+    line-height: 1.5;
+    color: var(--ink);
+    background: rgba(255,255,255,0.75);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+
+  @media (max-width: 400px) {
+    .eb-btn { width: 37px !important; height: 37px !important; font-size: 0.98rem !important; }
+    .entry-bar { gap: 5px !important; }
   }
 
   .eb-btn {
@@ -2940,7 +2999,7 @@
   .entry-body {
     padding: 16px 20px calc(100px + env(safe-area-inset-bottom));
     font-family: 'Times New Roman', Times, serif;
-    font-size: 16px;
+    font-size: var(--j-size, 18px);
     color: var(--ink);
   }
 
@@ -2983,7 +3042,7 @@
     background: transparent;
     font-family: 'Times New Roman', Times, serif;
     font-weight: 700;
-    font-size: 22px;
+    font-size: calc(var(--j-size, 18px) + 6px);
     color: var(--ink);
     padding: 4px 0 10px;
     outline: none;
@@ -2994,7 +3053,7 @@
   .entry-title {
     font-family: 'Times New Roman', Times, serif;
     font-weight: 700;
-    font-size: 22px;
+    font-size: calc(var(--j-size, 18px) + 6px);
     line-height: 1.25;
     margin: 0 0 12px;
   }
@@ -3009,7 +3068,7 @@
     padding: 0;
     margin: 0;
     font-family: 'Times New Roman', Times, serif;
-    font-size: 16px;
+    font-size: var(--j-size, 18px);
     line-height: 1.55;
     color: var(--ink);
     outline: none;
@@ -3052,7 +3111,6 @@
   }
 
   .img-block.one .img-tile { aspect-ratio: 4 / 3; max-height: 260px; }
-  #entrySheet.editing .img-tile { cursor: default; }
   .img-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .img-tile.missing::after { content: '📷'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.4; }
 
@@ -3088,6 +3146,42 @@
     color: var(--plum);
     cursor: pointer;
     text-align: left;
+  }
+
+  .mood-chip-wrap { display: inline-flex; align-items: center; position: relative; }
+  .mood-chip-wrap .mood-chip { padding-right: 30px; }
+
+  .mood-chip-x {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(74,37,64,0.14);
+    color: var(--plum);
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .mood-chip-x:hover { background: rgba(228,122,122,0.25); color: var(--rose); }
+
+  .confirm-alt-row { display: flex; justify-content: center; margin-top: 12px; }
+
+  .confirm-alt {
+    border: none;
+    background: none;
+    color: var(--rose);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    padding: 4px 8px;
   }
 
   .mood-chip.add { padding: 7px 14px; background: rgba(74,37,64,0.07); color: var(--plum-soft); }
@@ -3610,6 +3704,52 @@
   .mood-summary:empty { display: none; }
   .ms-dot { flex-shrink: 0; width: 12px; height: 12px; border-radius: 50%; }
 
+  .mc-del {
+    flex-shrink: 0;
+    align-self: center;
+    border: none;
+    background: none;
+    width: 34px;
+    height: 34px;
+    margin: -4px -6px -4px 0;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    cursor: pointer;
+    opacity: 0.4;
+    filter: grayscale(1);
+  }
+
+  .mc-del:hover, .mc-del:active { opacity: 1; filter: none; background: rgba(228,122,122,0.15); }
+
+  .m-draft {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: rgba(245,201,107,0.28);
+    border-radius: 14px;
+    padding: 9px 12px;
+    margin: 0 0 12px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: #6b4410;
+  }
+
+  .m-draft button {
+    flex-shrink: 0;
+    border: none;
+    background: rgba(255,255,255,0.8);
+    color: var(--plum);
+    font-family: 'Nunito', sans-serif;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
   .mood-card {
     display: flex;
     align-items: flex-start;
@@ -4109,6 +4249,13 @@
         </span>
         <input type="checkbox" class="switch" data-setting="journalTitles" />
       </label>
+      <div class="switch-label" style="margin-top:10px;">Text size</div>
+      <div class="jf-row">
+        <button type="button" class="jf-btn small" data-jfont="-1" aria-label="smaller text">A−</button>
+        <span class="jf-val" data-jfont-val></span>
+        <button type="button" class="jf-btn big" data-jfont="1" aria-label="bigger text">A+</button>
+      </div>
+      <div class="jf-preview">Dear journal — this is how big your entries will look.</div>
     </div>
 
     <div class="settings-card">
@@ -4513,6 +4660,9 @@
       <button class="btn btn-ghost" id="confirmNoBtn">cancel</button>
       <button class="btn btn-primary" id="confirmYesBtn">yes</button>
     </div>
+    <div class="confirm-alt-row" id="confirmAltRow" style="display:none;">
+      <button type="button" class="confirm-alt" id="confirmAltBtn"></button>
+    </div>
   </div>
 </div>
 
@@ -4547,11 +4697,18 @@
     <div class="entry-bar">
       <button type="button" class="eb-btn" id="entryCloseBtn" aria-label="close">✕</button>
       <div style="flex:1;"></div>
+      <button type="button" class="eb-btn" id="entrySizeBtn" aria-label="text size" style="font-family:'Times New Roman',Times,serif;font-weight:700;">Aa</button>
       <button type="button" class="eb-btn" id="entryFindBtn" aria-label="find in entry">🔍</button>
       <button type="button" class="eb-btn edit-only" id="entryPhotoBtn" aria-label="add photos">📷<span class="eb-count" id="entryPhotoCount"></span></button>
       <button type="button" class="eb-btn edit-only" data-entry-mood aria-label="add a mood check-in">💭</button>
       <button type="button" class="eb-btn" id="entryDeleteBtn" aria-label="delete entry">🗑</button>
       <button type="button" class="eb-done" id="entryEditBtn">edit</button>
+    </div>
+    <div class="size-bar" id="sizeBar">
+      <button type="button" class="jf-btn small" data-jfont="-1" aria-label="smaller text">A−</button>
+      <span class="jf-val" data-jfont-val></span>
+      <button type="button" class="jf-btn big" data-jfont="1" aria-label="bigger text">A+</button>
+      <button type="button" class="jf-close" id="sizeClose" aria-label="close">×</button>
     </div>
     <div class="find-bar" id="findBar">
       <input type="search" id="findInput" placeholder="find in entry" autocomplete="off" enterkeyhint="search" />
@@ -4631,6 +4788,7 @@ let state = {
   moodCustom: { emotions: [], areas: [] },   // feelings / life areas you added
   moodHidden: { emotions: [], areas: [] },   // built-in ones you removed
   moodEmoji: {},    // your emoji for built-in feelings/areas: 'emo|positive|happy' / 'area|work' -> '🥳'
+  moodDrafts: {},   // profile -> half-done check-in (not a log until you finish it)
   showPoints: false, // show point pills on every task (custom/saved ones always show)
   routinesTab: 'routines', // which tab the routines page opens on: 'routines' | 'master'
 
@@ -4733,6 +4891,21 @@ function migrateState() {
   if (!Array.isArray(state.journal)) state.journal = [];
   if (!Array.isArray(state.moods)) state.moods = [];
   if (!state.moodEmoji || typeof state.moodEmoji !== 'object') state.moodEmoji = {};
+  if (!state.moodDrafts || typeof state.moodDrafts !== 'object') state.moodDrafts = {};
+  // half-done check-ins used to save as "unfinished" logs — the newest one per person becomes their draft
+  if (Array.isArray(state.moods) && state.moods.some(m => m.partial)) {
+    const byProfile = {};
+    state.moods.filter(m => m.partial).forEach(m => { if (!byProfile[m.profile] || m.t > byProfile[m.profile].t) byProfile[m.profile] = m; });
+    Object.values(byProfile).forEach(m => {
+      if (state.moodDrafts[m.profile]) return;
+      const step = !(m.emotions || []).length ? 1 : !(m.areas || []).length ? 2 : 3;
+      const d = Object.assign({}, m, { step, savedAt: m.updated || m.t });
+      delete d.partial;
+      state.moodDrafts[m.profile] = d;
+      state.moods = state.moods.filter(x => x.id !== m.id);
+      (state.journal || []).forEach(e => { if (e.moodIds) e.moodIds = e.moodIds.filter(x => x !== m.id); });
+    });
+  }
   ['moodCustom', 'moodHidden'].forEach(k => {
     if (!state[k] || typeof state[k] !== 'object') state[k] = {};
     if (!Array.isArray(state[k].emotions)) state[k].emotions = [];
@@ -6367,6 +6540,7 @@ function parseTaskLine(raw, i) {
 const SETTINGS_DEFAULT = {
   checkAllOptional: true,   // routine "check all" also checks optional tasks
   journalTitles: true,      // show a title field on journal entries
+  journalFontSize: 18,      // journal text size in px (16–30)
   emotionSort: 'alpha',     // 'alpha' | 'recent'
   categorySort: 'alpha'     // 'alpha' | 'recent'
 };
@@ -6375,7 +6549,30 @@ function setting(k) {
   return (state.settings && k in state.settings) ? state.settings[k] : SETTINGS_DEFAULT[k];
 }
 
+const JOURNAL_FONT_MIN = 16;   // under 16 makes iPhones zoom in when you tap to type
+const JOURNAL_FONT_MAX = 30;
+
+function applyJournalFont() {
+  const px = Math.max(JOURNAL_FONT_MIN, Math.min(JOURNAL_FONT_MAX, setting('journalFontSize') || 18));
+  document.documentElement.style.setProperty('--j-size', px + 'px');
+  document.querySelectorAll('[data-jfont-val]').forEach(el => { el.textContent = px + 'pt'; });
+  document.querySelectorAll('[data-jfont="-1"]').forEach(b => { b.disabled = px <= JOURNAL_FONT_MIN; });
+  document.querySelectorAll('[data-jfont="1"]').forEach(b => { b.disabled = px >= JOURNAL_FONT_MAX; });
+  document.querySelectorAll('#entryBody textarea.entry-text').forEach(autoGrow);
+}
+
+function stepJournalFont(dir) {
+  const cur = setting('journalFontSize') || 18;
+  const next = Math.max(JOURNAL_FONT_MIN, Math.min(JOURNAL_FONT_MAX, cur + dir * 2));
+  if (next === cur) return;
+  state.settings.journalFontSize = next;
+  save();
+  SFX.click();
+  applyJournalFont();
+}
+
 function renderSettings() {
+  applyJournalFont();
   document.querySelectorAll('.switch[data-setting]').forEach(sw => { sw.checked = !!setting(sw.dataset.setting); });
   const lb = document.getElementById('lastBackupText');
   lb.textContent = state.lastExport
@@ -8210,19 +8407,24 @@ function deleteRoutine() {
 }
 
 let confirmYes = null;
-function askConfirm(title, msg, yesLabel, onYes) {
+let confirmAlt = null;
+function askConfirm(title, msg, yesLabel, onYes, altLabel = null, onAlt = null) {
   document.getElementById('confirmTitle').textContent = title;
   document.getElementById('confirmMsg').textContent = msg;
   document.getElementById('confirmYesBtn').textContent = yesLabel;
   confirmYes = onYes;
+  confirmAlt = altLabel ? onAlt : null;
+  document.getElementById('confirmAltRow').style.display = altLabel ? '' : 'none';
+  document.getElementById('confirmAltBtn').textContent = altLabel || '';
   SFX.click();
   document.getElementById('confirmModal').classList.add('open');
 }
 
 function closeConfirm(run) {
   document.getElementById('confirmModal').classList.remove('open');
-  const fn = confirmYes;
+  const fn = run === 'alt' ? confirmAlt : confirmYes;
   confirmYes = null;
+  confirmAlt = null;
   if (run && fn) fn();
 }
 
@@ -8556,6 +8758,7 @@ function deleteUser(alsoDeleteData) {
     (state.journal || []).filter(e => e.profile === userId).forEach(e => entryPhotoIds(e).forEach(deleteImage));
     state.journal = (state.journal || []).filter(e => e.profile !== userId);
     state.moods = (state.moods || []).filter(m => m.profile !== userId);
+    if (state.moodDrafts) delete state.moodDrafts[userId];
   }
   // Otherwise, logs and planner entries stay in storage as "orphaned" data
 
@@ -8683,6 +8886,7 @@ document.addEventListener('click', (e) => {
 
   // ---- confirm pop-up, earlier versions, delete + undo ----
   if (e.target.closest('#confirmYesBtn')) { closeConfirm(true); return; }
+  if (e.target.closest('#confirmAltBtn')) { closeConfirm('alt'); return; }
   if (e.target.closest('#confirmNoBtn') || e.target.id === 'confirmModal') { closeConfirm(false); return; }
   if (e.target.closest('#restoreBtn')) { openHistoryModal(); return; }
   const restoreBtn = e.target.closest('[data-restore]');
@@ -9013,6 +9217,7 @@ async function exportData() {
       moodCustom: state.moodCustom,
       moodHidden: state.moodHidden,
       moodEmoji: state.moodEmoji,
+      moodDrafts: state.moodDrafts,
       images: await exportImagesData(),
       taskSortMode: state.taskSortMode
     }
@@ -9086,11 +9291,13 @@ function confirmImport() {
   state.showTimes = !!imported.showTimes;
   state.daysUsed = Array.isArray(imported.daysUsed) ? imported.daysUsed : [];
   state.settings = Object.assign({}, SETTINGS_DEFAULT, imported.settings || {});
+  applyJournalFont();
   state.journal = Array.isArray(imported.journal) ? imported.journal : [];
   state.moods = Array.isArray(imported.moods) ? imported.moods : [];
   state.moodCustom = Object.assign({ emotions: [], areas: [] }, imported.moodCustom || {});
   state.moodHidden = Object.assign({ emotions: [], areas: [] }, imported.moodHidden || {});
   state.moodEmoji = imported.moodEmoji && typeof imported.moodEmoji === 'object' ? imported.moodEmoji : {};
+  state.moodDrafts = imported.moodDrafts && typeof imported.moodDrafts === 'object' ? imported.moodDrafts : {};
   if (imported.images) importImagesData(imported.images).then(() => { if (openEntryId) renderEntry(); });
   backfillDaysUsed();
   recordDayUsed();
@@ -9518,7 +9725,7 @@ function newEntry() {
   openEntry(e.id, true);
 }
 
-function openEntry(id, editing = false) {
+function openEntry(id, editing = false, focus = editing) {
   if (!getEntry(id)) return;
   openEntryId = id;
   entryEditing = editing && state.profile !== 'combined';
@@ -9528,7 +9735,7 @@ function openEntry(id, editing = false) {
   document.getElementById('entryBody').scrollTop = 0;
   openSheet('entrySheet');
   SFX.click();
-  if (entryEditing) {
+  if (entryEditing && focus) {
     setTimeout(() => {
       const el = document.getElementById('entryTitleInput') || document.querySelector('#entryBody textarea.entry-text');
       if (el) el.focus();
@@ -9609,7 +9816,9 @@ function renderEntry() {
   }
   const moods = entryMoods(e);
   if (moods.length || entryEditing) {
-    html += `<div class="entry-moods">${moods.map(m => moodChipHtml(m)).join('')}${entryEditing
+    html += `<div class="entry-moods">${moods.map(m => entryEditing
+      ? `<span class="mood-chip-wrap">${moodChipHtml(m)}<button type="button" class="mood-chip-x" data-entry-mood-x="${m.id}" aria-label="remove this mood">×</button></span>`
+      : moodChipHtml(m)).join('')}${entryEditing
       ? `<button type="button" class="mood-chip add" data-entry-mood>＋ mood</button>` : ''}</div>`;
   }
   e.blocks.forEach((b, bi) => {
@@ -9706,6 +9915,32 @@ function removeEntryPhoto(bi, ii) {
   scheduleEntrySave();
   renderEntry();
   SFX.delete();
+}
+
+// take a mood off this entry (it stays in Mood), or delete the check-in everywhere
+function removeEntryMood(id) {
+  const e = getEntry(openEntryId);
+  const m = getMood(id);
+  if (!e) return;
+  const unlink = () => {
+    e.moodIds = (e.moodIds || []).filter(x => x !== id);
+    if (m && m.entryId === e.id) delete m.entryId;
+    save();
+    renderEntry();
+    SFX.delete();
+    showToast('mood taken off this entry — it\'s still in Mood');
+  };
+  if (!m) { unlink(); return; }
+  askConfirm('remove this mood? 💭',
+    `${moodLevel(m.affect).label}${(m.emotions || []).length ? ' · ' + m.emotions.slice(0, 3).join(', ') : ''} — take it off this entry, or delete the check-in completely?`,
+    'take it off this entry', unlink,
+    '🗑 delete the check-in everywhere', () => {
+      removeMoodLog(id);
+      renderEntry();
+      SFX.delete();
+      showToast('check-in deleted');
+      if (state.tab === 'mood') renderMoodTab();
+    });
 }
 
 function deleteEntry() {
@@ -10146,6 +10381,7 @@ function openChipEmojiEditor(chip) {
 // ---------- check-in sheet ----------
 let moodDraft = null;
 let moodIsNew = true;
+let moodFromDraft = false;   // this new check-in picked up a saved draft
 let moodTouched = false;
 let moodStep = 0;
 let moodExpanded = {};
@@ -10169,21 +10405,61 @@ function setMoodVars(el, v) {
   el.style.setProperty('--orb-blur', v < 0 ? `${-v * 1.2}px` : '0px');
 }
 
+function freshMoodDraft(entryId = null) {
+  return { id: 'm_' + uid() + uid(), profile: state.profile, t: Date.now(), affect: 0,
+    emotions: [], areas: [], note: '', entryId: entryId || null };
+}
+
+function saveMoodDraftFor(d) {
+  const copy = JSON.parse(JSON.stringify(d));
+  copy.step = moodStep;
+  copy.savedAt = Date.now();
+  delete copy.partial;
+  state.moodDrafts[d.profile] = copy;
+  save();
+}
+
+function discardMoodDraft() {
+  if (!moodDraft) return;
+  delete state.moodDrafts[moodDraft.profile];
+  save();
+  const entryId = moodDraft.entryId;
+  moodDraft = freshMoodDraft(entryId);
+  moodFromDraft = false;
+  moodTouched = false;
+  moodStep = 0;
+  moodExpanded = { neutral: true };
+  moodAdding = null;
+  SFX.delete();
+  renderMoodSheet();
+}
+
 function openMoodCheckin(opts = {}) {
   if (opts.id) {
     const m = getMood(opts.id);
     if (!m) return;
     moodDraft = JSON.parse(JSON.stringify(m));
     moodIsNew = false;
+    moodFromDraft = false;
     moodTouched = false;
     moodStep = m.partial ? (!(m.emotions || []).length ? 1 : !(m.areas || []).length ? 2 : 3) : 0;
   } else {
     if (state.profile === 'combined') { showToast('pick a person to check in'); return; }
-    moodDraft = { id: 'm_' + uid() + uid(), profile: state.profile, t: Date.now(), affect: 0,
-      emotions: [], areas: [], note: '', entryId: opts.entryId || null };
+    const saved = state.moodDrafts[state.profile];
     moodIsNew = true;
     moodTouched = false;
-    moodStep = 0;
+    if (saved) {
+      // pick up where you left off
+      moodDraft = JSON.parse(JSON.stringify(saved));
+      moodStep = Math.max(0, Math.min(3, saved.step || 0));
+      delete moodDraft.step;
+      moodDraft.entryId = opts.entryId || null;
+      moodFromDraft = true;
+    } else {
+      moodDraft = freshMoodDraft(opts.entryId);
+      moodStep = 0;
+      moodFromDraft = false;
+    }
   }
   moodExpanded = { [affectGroup(moodDraft.affect)]: true };
   moodAdding = null;
@@ -10278,7 +10554,15 @@ function renderMoodSheet() {
       <label class="m-time">🕘 <span>${escapeHtml(fmtStamp(d.t))}</span> <span class="ed-pen">✎</span>
         <input type="datetime-local" id="moodTimeInput" value="${toLocalInput(d.t)}" aria-label="check-in time" /></label>
       <button type="button" class="btn btn-primary m-done" id="moodDoneBtn">✓ ${moodIsNew || d.partial ? 'log it' : 'save'}</button>
-      ${!moodIsNew ? `<button type="button" class="m-del" id="moodDeleteBtn">delete this check-in</button>` : ''}`;
+      ${!moodIsNew ? `<button type="button" class="m-del" id="moodDeleteBtn">🗑 delete this check-in</button>` : ''}`;
+  }
+  if (moodFromDraft) {
+    const savedAt = (state.moodDrafts[d.profile] || {}).savedAt || d.t;
+    html = `<div class="m-draft">📝 picking up your draft from ${escapeHtml(fmtStamp(savedAt).toLowerCase())}
+      <button type="button" id="moodFreshBtn">start fresh</button></div>` + html;
+  }
+  if (!moodIsNew && moodStep < 3) {
+    html += `<button type="button" class="m-del" id="moodDeleteBtn">🗑 delete this check-in</button>`;
   }
   body.innerHTML = html;
   if (moodStep === 3) {
@@ -10366,17 +10650,19 @@ function refreshAfterMood() {
   if (state.tab === 'journal') renderJournal();
 }
 
-// swiping out (or ✕) keeps a half-done check-in as an "unfinished" log
+// swiping out (or ✕) of a new check-in keeps it as a DRAFT — not a log — and the
+// next check-in picks up right where you left off
 function closeMoodSheet() {
   const d = moodDraft;
   moodDraft = null;
   closeSheetEl('moodSheet');
   if (d) {
-    if (moodIsNew && moodTouched) {
-      d.partial = true;
-      commitMood(d);
-      showToast('💭 saved — finish it anytime from Mood');
-    } else if (!moodIsNew) {
+    if (moodIsNew) {
+      if (moodTouched || moodFromDraft) {
+        saveMoodDraftFor(d);
+        if (moodTouched) showToast('📝 draft saved — it picks up next time you check in');
+      }
+    } else {
       commitMood(d);
     }
   }
@@ -10388,6 +10674,7 @@ function finishMood() {
   if (!d) return;
   d.partial = false;
   commitMood(d);
+  if (moodIsNew && state.moodDrafts[d.profile]) { delete state.moodDrafts[d.profile]; save(); }
   const wasNew = moodIsNew;
   moodDraft = null;
   closeSheetEl('moodSheet');
@@ -10396,19 +10683,36 @@ function finishMood() {
   refreshAfterMood();
 }
 
+function removeMoodLog(id) {
+  state.moods = state.moods.filter(m => m.id !== id);
+  (state.journal || []).forEach(e => { if (e.moodIds) e.moodIds = e.moodIds.filter(x => x !== id); });
+  save();
+}
+
 function deleteMood() {
   const d = moodDraft;
   if (!d) return;
   askConfirm('delete check-in? 💭', 'this mood check-in will be gone for good.', 'delete', () => {
-    state.moods = state.moods.filter(m => m.id !== d.id);
-    (state.journal || []).forEach(e => { if (e.moodIds) e.moodIds = e.moodIds.filter(x => x !== d.id); });
-    save();
+    removeMoodLog(d.id);
     moodDraft = null;
     closeSheetEl('moodSheet');
     SFX.delete();
     showToast('check-in deleted');
     refreshAfterMood();
   });
+}
+
+function deleteMoodFromCard(id) {
+  const m = getMood(id);
+  if (!m) return;
+  askConfirm('delete check-in? 💭',
+    `delete your ${moodLevel(m.affect).label.toLowerCase()} check-in from ${fmtStamp(m.t).toLowerCase()}? this can't be undone.`,
+    'delete', () => {
+      removeMoodLog(id);
+      SFX.delete();
+      showToast('check-in deleted');
+      refreshAfterMood();
+    });
 }
 
 // ---------- Mood tab ----------
@@ -10445,7 +10749,7 @@ function moodCardHtml(m) {
   const areas = (m.areas || []).map(n => `${emojiForArea(n)} ${escapeHtml(n)}`).join(' · ');
   const note = shortPreview(m.note, 28);
   const inJournal = m.entryId && getEntry(m.entryId);
-  return `<button type="button" class="mood-card" data-mood-open="${m.id}" style="--m-a:${lvl.a};--m-b:${lvl.b}">
+  return `<div class="mood-card" role="button" tabindex="0" data-mood-open="${m.id}" style="--m-a:${lvl.a};--m-b:${lvl.b}">
     <span class="mc-orb"></span>
     <span class="mc-body">
       <span class="mc-top"><span class="mc-level">${escapeHtml(lvl.label)}</span><span class="mc-time">${fmtTime(m.t)}</span></span>
@@ -10454,7 +10758,8 @@ function moodCardHtml(m) {
       ${note ? `<span class="mc-note">“${escapeHtml(note)}”</span>` : ''}
       ${m.partial || inJournal || state.profile === 'combined' ? `<span class="mc-tags">${m.partial ? '<span class="mc-tag unfinished">unfinished · tap to finish</span>' : ''}${inJournal ? '<span class="mc-tag">📓 journal</span>' : ''}${state.profile === 'combined' ? userTag(m.profile) : ''}</span>` : ''}
     </span>
-  </button>`;
+    ${state.profile === 'combined' ? '' : `<button type="button" class="mc-del" data-mood-del="${m.id}" aria-label="delete check-in">🗑</button>`}
+  </div>`;
 }
 
 function renderMoodTab() {
@@ -10464,9 +10769,12 @@ function renderMoodTab() {
   const latest = moodLogs().slice().sort((a, b) => b.t - a.t)[0];
   const hero = document.getElementById('moodCheckinBtn');
   setMoodVars(hero, latest && Date.now() - latest.t < 12 * 3600000 ? latest.affect : 0);
-  document.getElementById('moodHeroSub').textContent = latest
-    ? `last: ${moodLevel(latest.affect).label.toLowerCase()} · ${prettyDate(formatDateKey(new Date(latest.t))).toLowerCase()} ${fmtTime(latest.t).toLowerCase()}`
-    : 'how are you feeling right now?';
+  const waiting = state.moodDrafts[state.profile];
+  document.getElementById('moodHeroSub').textContent = waiting
+    ? '📝 you have a draft — tap to finish it'
+    : latest
+      ? `last: ${moodLevel(latest.affect).label.toLowerCase()} · ${prettyDate(formatDateKey(new Date(latest.t))).toLowerCase()} ${fmtTime(latest.t).toLowerCase()}`
+      : 'how are you feeling right now?';
   hero.style.display = state.profile === 'combined' ? 'none' : '';
 
   document.querySelectorAll('[data-mrange]').forEach(b => b.classList.toggle('on', b.dataset.mrange === moodRange));
@@ -10734,10 +11042,16 @@ function mlmRestore(ref) {
 // ==================== JOURNAL + MOOD EVENTS ====================
 document.addEventListener('click', (e) => {
   const t = e.target;
+  // journal text size
+  const jf = t.closest('[data-jfont]');
+  if (jf) { stepJournalFont(parseInt(jf.dataset.jfont, 10)); return; }
+  if (t.closest('#entrySizeBtn')) { document.getElementById('sizeBar').classList.toggle('open'); applyJournalFont(); SFX.click(); return; }
+  if (t.closest('#sizeClose')) { document.getElementById('sizeBar').classList.remove('open'); return; }
+
   // journal list
   if (t.closest('#newEntryBtn')) { newEntry(); return; }
   const open = t.closest('[data-entry-open]');
-  if (open) { openEntry(open.dataset.entryOpen); return; }
+  if (open) { openEntry(open.dataset.entryOpen, true, false); return; }
   if (t.closest('#journalSearchClear')) {
     journalQuery = '';
     document.getElementById('journalSearch').value = '';
@@ -10768,7 +11082,9 @@ document.addEventListener('click', (e) => {
     return;
   }
   const viewImg = t.closest('[data-view-img]');
-  if (viewImg && !entryEditing) { openViewer(viewImg.dataset.viewImg); return; }
+  if (viewImg) { openViewer(viewImg.dataset.viewImg); return; }
+  const moodX = t.closest('[data-entry-mood-x]');
+  if (moodX) { removeEntryMood(moodX.dataset.entryMoodX); return; }
   if (t.closest('[data-entry-mood]')) {
     flushEntrySave();
     openMoodCheckin({ entryId: openEntryId });
@@ -10788,6 +11104,9 @@ document.addEventListener('click', (e) => {
 
   // mood: open / check in
   if (t.closest('#moodCheckinBtn')) { openMoodCheckin(); return; }
+  const mdel = t.closest('[data-mood-del]');
+  if (mdel) { deleteMoodFromCard(mdel.dataset.moodDel); return; }
+  if (t.closest('#moodFreshBtn')) { discardMoodDraft(); return; }
   const mo = t.closest('[data-mood-open]');
   if (mo) { openMoodCheckin({ id: mo.dataset.moodOpen }); return; }
   const mr = t.closest('[data-mrange]');
@@ -10922,6 +11241,7 @@ document.addEventListener('keydown', (e) => {
 
 // ==================== INIT ====================
 const isFreshInstall = load();
+applyJournalFont();
 plannerSelectedDate = todayKey();
 lastSeenToday = todayKey();
 backfillDaysUsed();
