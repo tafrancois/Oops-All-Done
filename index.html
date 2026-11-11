@@ -6761,8 +6761,21 @@ function hasBonusHeader(text) {
 
 // Add lines to a list, keeping them ABOVE the bonus section (routines, moved maybes…)
 // block = true puts a blank line before it, so it starts its own section.
+// a few blank lines at the top, so there's room to type your own to-dos above routines
+const ROOM_AT_TOP = '\n\n\n';
+function withRoomAtTop(text) {
+  const first = (text || '').split('\n')[0];
+  const h = first ? headerInfo(first) : null;
+  return h && !h.isBonus ? ROOM_AT_TOP + text : text;
+}
+
 function appendToList(existing, addText, block = false) {
   if (!addText) return existing;
+  if (block) return withRoomAtTop(appendToListRaw(existing, addText, true));
+  return appendToListRaw(existing, addText, false);
+}
+
+function appendToListRaw(existing, addText, block) {
   if (!existing.trim()) return addText;
   const sep = block ? '\n\n' : '\n';
   const lines = existing.split('\n');
@@ -6875,7 +6888,11 @@ function renderLinesInto(container, lines, interactive, list = 'must', compact =
   let boxGroup = null;
   let colorIdx = 0;
   const analysis = analyzeList(lines);
-  lines.forEach(line => {
+  const firstReal = lines.findIndex(l => l.type !== 'empty');
+  let lastReal = lines.length - 1;
+  while (lastReal >= 0 && lines[lastReal].type === 'empty') lastReal--;
+  lines.forEach((line, li) => {
+    if (li < firstReal || li > lastReal) return; // blank room at the top / bottom
     if (line.type === 'header' && !line.isBonus) {
       const hasTasks = lines.some(l => l.type === 'task' && l.group === line.group);
       if (!hasTasks) {
@@ -7849,7 +7866,10 @@ function deleteFromList(list, lineIndex, kind, confirmed = false) {
   }
   const lines = r.text.split('\n');
   lines.splice(r.from, r.to - r.from + 1);
-  const newText = lines.join('\n').replace(/\n{3,}/g, '\n\n').replace(/^\n+|\n+$/g, '');
+  const joined = lines.join('\n');
+  const top = joined.match(/^\n*/)[0];
+  const rest = joined.slice(top.length).replace(/\n{3,}/g, '\n\n').replace(/\n+$/, '');
+  const newText = rest ? top + rest : '';
   setListEntry(list, state.profile, plannerSelectedDate, newText);
   showUndo({ list, profile: state.profile, date: plannerSelectedDate, text: r.text },
     kind === 'task'
