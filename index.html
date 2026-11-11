@@ -9376,8 +9376,13 @@ function closeSheetById(id) {
 }
 
 function openSheet(id) {
-  document.getElementById(id).classList.add('open');
+  const el = document.getElementById(id);
+  el.classList.add('open');
   document.body.classList.add('sheet-open');
+  // the text was drawn while the sheet was hidden — size the boxes now that they're visible
+  regrowSheetText(el);
+  requestAnimationFrame(() => regrowSheetText(el));
+  setTimeout(() => regrowSheetText(el), 350); // after the slide-up animation + fonts
 }
 
 function closeSheetEl(id) {
@@ -9621,9 +9626,19 @@ function userTag(profileId) {
 }
 
 function autoGrow(ta) {
+  // can't measure a box that isn't on screen yet (it would come out 0 tall and cut the text off)
+  if (!ta || !ta.isConnected || ta.getClientRects().length === 0) return;
   ta.style.height = 'auto';
   ta.style.height = ta.scrollHeight + 'px';
 }
+
+// re-measure every growing text box in the open sheets
+function regrowSheetText(root = document) {
+  root.querySelectorAll('.sheet.open textarea.entry-text, .sheet.open textarea.m-note, textarea.entry-text, textarea.m-note')
+    .forEach(autoGrow);
+}
+
+window.addEventListener('resize', () => regrowSheetText());
 
 // ==================== KEEP WHAT YOU'RE TYPING ON SCREEN ====================
 // iPhones slide the keyboard over full-screen pages instead of shrinking them, and the
