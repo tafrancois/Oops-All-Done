@@ -2659,6 +2659,10 @@
   #moodSheet { z-index: 140; }
   .confirm-backdrop { z-index: 180 !important; }
   body.sheet-open { overflow: hidden; }
+  /* keyboard open: the sheet is fitted above it (see fitSheetsToKeyboard), so less bottom padding */
+  body.kb-open .entry-body { padding-bottom: 60px; }
+  body.kb-open .mood-body { padding-bottom: 40px; }
+  body.kb-open .sheet-panel { top: 6px; border-radius: 20px 20px 0 0; }
 
   .sheet-panel {
     position: absolute;
@@ -9620,6 +9624,107 @@ function autoGrow(ta) {
   ta.style.height = 'auto';
   ta.style.height = ta.scrollHeight + 'px';
 }
+
+// ==================== KEEP WHAT YOU'RE TYPING ON SCREEN ====================
+// iPhones slide the keyboard over full-screen pages instead of shrinking them, and the
+// journal's text boxes grow instead of scrolling — so the line you're typing ends up
+// behind the keyboard. Fix: fit open sheets to the space above the keyboard, and scroll
+// the sheet so the cursor's line stays visible.
+function fitSheetsToKeyboard() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const kb = window.innerHeight - vv.height > 80;
+  document.body.classList.toggle('kb-open', kb);
+  document.querySelectorAll('.sheet').forEach(sh => {
+    if (kb) {
+      sh.style.top = vv.offsetTop + 'px';
+      sh.style.height = vv.height + 'px';
+      sh.style.bottom = 'auto';
+    } else {
+      sh.style.top = '';
+      sh.style.height = '';
+      sh.style.bottom = '';
+    }
+  });
+}
+
+const CARET_STYLE_KEYS = ['boxSizing', 'width', 'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'lineHeight',
+  'letterSpacing', 'wordSpacing', 'textIndent', 'tabSize', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+  'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth', 'borderStyle'];
+
+// where the cursor sits inside a textarea (px from its top), using an invisible copy
+function caretOffsetIn(ta) {
+  const cs = getComputedStyle(ta);
+  const m = document.createElement('div');
+  CARET_STYLE_KEYS.forEach(k => { m.style[k] = cs[k]; });
+  m.style.width = ta.offsetWidth + 'px';
+  m.style.position = 'absolute';
+  m.style.visibility = 'hidden';
+  m.style.left = '-9999px';
+  m.style.top = '0';
+  m.style.whiteSpace = 'pre-wrap';
+  m.style.overflowWrap = 'break-word';
+  m.style.wordWrap = 'break-word';
+  m.textContent = ta.value.slice(0, ta.selectionEnd == null ? ta.value.length : ta.selectionEnd);
+  const mark = document.createElement('span');
+  mark.textContent = '\u200b';
+  m.appendChild(mark);
+  document.body.appendChild(m);
+  const top = mark.offsetTop;
+  m.remove();
+  const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.5 || 24;
+  return { top, lh };
+}
+
+function keepCaretVisible(el) {
+  if (!el || el !== document.activeElement) return;
+  const scroller = el.closest('.sheet-body');
+  if (!scroller) return;
+  let top, bottom;
+  const r = el.getBoundingClientRect();
+  if (el.tagName === 'TEXTAREA') {
+    const c = caretOffsetIn(el);
+    top = r.top + c.top - el.scrollTop;
+    bottom = top + c.lh;
+  } else {
+    top = r.top;
+    bottom = r.bottom;
+  }
+  const sr = scroller.getBoundingClientRect();
+  const vv = window.visualViewport;
+  const viewTop = sr.top;
+  const viewBottom = Math.min(sr.bottom, vv ? vv.offsetTop + vv.height : sr.bottom);
+  const margin = 28;
+  if (bottom > viewBottom - margin) scroller.scrollTop += bottom - (viewBottom - margin);
+  else if (top < viewTop + margin) scroller.scrollTop -= (viewTop + margin) - top;
+}
+
+const TYPING_SEL = '.sheet textarea, .sheet input[type="text"], .sheet input[type="search"]';
+let caretRaf = null;
+function scheduleCaretCheck(delay = 0) {
+  const run = () => {
+    cancelAnimationFrame(caretRaf);
+    caretRaf = requestAnimationFrame(() => {
+      const a = document.activeElement;
+      if (a && a.matches && a.matches(TYPING_SEL)) keepCaretVisible(a);
+    });
+  };
+  if (delay) setTimeout(run, delay); else run();
+}
+
+if (window.visualViewport) {
+  const onVV = () => { fitSheetsToKeyboard(); scheduleCaretCheck(); };
+  window.visualViewport.addEventListener('resize', onVV);
+  window.visualViewport.addEventListener('scroll', onVV);
+}
+['input', 'keyup', 'click', 'selectionchange'].forEach(ev => document.addEventListener(ev, () => scheduleCaretCheck()));
+document.addEventListener('focusin', (e) => {
+  if (e.target.matches && e.target.matches(TYPING_SEL)) {
+    scheduleCaretCheck(60);
+    scheduleCaretCheck(380); // again once the keyboard has finished sliding up
+  }
+});
+document.addEventListener('focusout', () => setTimeout(fitSheetsToKeyboard, 120));
 
 // ==================== JOURNAL ====================
 const JOURNAL_MAX_PHOTOS = 10;
