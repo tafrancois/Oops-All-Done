@@ -1615,9 +1615,8 @@
     font-size: 0.78rem;
     color: var(--plum-soft);
     margin-top: 3px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
   }
 
   .master-picked {
@@ -1670,9 +1669,8 @@
     min-width: 0;
     font-weight: 700;
     color: var(--plum);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
   }
 
   .mp-btn {
@@ -1739,6 +1737,27 @@
   }
 
   .routines-sort { margin: 0 0 10px; padding: 0; }
+
+  .rl-actions { margin: -6px 0 14px; }
+  .routine-card { align-items: flex-start; }
+  .routine-card-btns { margin-top: 2px; }
+
+  .rl-more {
+    display: block;
+    width: 100%;
+    margin-top: 2px;
+    padding: 12px;
+    border: 2px dashed rgba(74,37,64,0.15);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.55);
+    color: var(--plum);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .rl-more:active { transform: scale(0.98); }
   .routines-sort .sort-btn { background: #fff; }
   .routines-sort .sort-btn.active { background: var(--plum); }
 
@@ -1775,9 +1794,8 @@
     font-weight: 800;
     color: var(--plum);
     font-size: 1rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.3;
+    overflow-wrap: anywhere;   /* full name, wrapping onto more lines if needed */
   }
 
   .routine-meta {
@@ -4540,6 +4558,11 @@
   <div class="modal routines-modal">
     <div id="routinesListView">
       <div class="modal-title">routines 🔁</div>
+      <div class="modal-actions rl-actions">
+        <button class="btn btn-ghost" id="routinesCloseBtn">done</button>
+        <button class="btn btn-primary" id="newRoutineBtn">＋ new routine</button>
+        <button class="btn btn-primary" id="newMasterBtn" style="display:none;">＋ new master</button>
+      </div>
       <div class="rtab-toggle" role="tablist" aria-label="routine type">
         <button type="button" class="rtab-btn" data-rtab="routines">🔁 routines</button>
         <button type="button" class="rtab-btn" data-rtab="master">⭐ master</button>
@@ -4551,11 +4574,6 @@
         <button class="sort-btn" data-rsort="alpha">A–Z</button>
       </div>
       <div class="routines-list" id="routinesList"></div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" id="routinesCloseBtn">done</button>
-        <button class="btn btn-primary" id="newRoutineBtn">＋ new routine</button>
-        <button class="btn btn-primary" id="newMasterBtn" style="display:none;">＋ new master</button>
-      </div>
     </div>
 
     <div id="routineEditView" style="display:none;">
@@ -7933,6 +7951,20 @@ function ownerBadge(x) {
 let routineOwner = 'all';
 let masterOwner = 'all';
 let showOtherRoutines = false;
+const ROUTINES_PREVIEW = 5;
+let routinesShowAll = false;
+
+function moreRoutinesBtn(list, total, noun) {
+  if (total <= ROUTINES_PREVIEW) return;
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'rl-more';
+  b.dataset.rlMore = '1';
+  b.innerHTML = routinesShowAll
+    ? `show fewer ▴`
+    : `full list · all ${total} ${noun} ▾`;
+  list.appendChild(b);
+}
 
 function renderOwnerChips(kind) {
   const field = document.getElementById(kind === 'master' ? 'masterOwnerField' : 'routineOwnerField');
@@ -8082,6 +8114,7 @@ function openRoutinesModal() {
   flushPlannerSaves();
   SFX.click();
   showOtherRoutines = false;
+  routinesShowAll = false;
   showRoutineListView();
   document.getElementById('routinesModal').classList.add('open');
 }
@@ -8105,6 +8138,7 @@ function setRoutinesTab(tab) {
   tab = tab === 'master' ? 'master' : 'routines';
   if (tab === state.routinesTab) return;
   state.routinesTab = tab;
+  routinesShowAll = false;
   save();
   SFX.click();
   renderRoutinesList();
@@ -8156,7 +8190,7 @@ function renderRoutinesList() {
     return;
   }
   const dayLabel = prettyDate(plannerSelectedDate).toLowerCase();
-  routines.forEach(r => {
+  (routinesShowAll ? routines : routines.slice(0, ROUTINES_PREVIEW)).forEach(r => {
     const n = routineTaskCount(r);
     const card = document.createElement('div');
     card.className = 'routine-card';
@@ -8172,6 +8206,7 @@ function renderRoutinesList() {
       </div>`;
     list.appendChild(card);
   });
+  moreRoutinesBtn(list, routines.length, 'routines');
   renderOtherRoutines(list, 'routine');
 }
 
@@ -8262,7 +8297,7 @@ function renderMasterList() {
     return;
   }
   const dayLabel = prettyDate(plannerSelectedDate).toLowerCase();
-  masters.forEach(m => {
+  (routinesShowAll ? masters : masters.slice(0, ROUTINES_PREVIEW)).forEach(m => {
     const members = masterMembers(m);
     const k = members.length;
     const card = document.createElement('div');
@@ -8280,6 +8315,7 @@ function renderMasterList() {
       </div>`;
     list.appendChild(card);
   });
+  moreRoutinesBtn(list, masters.length, 'master routines');
   renderOtherRoutines(list, 'master');
 }
 
@@ -8927,6 +8963,12 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('[data-show-others]')) { showOtherRoutines = !showOtherRoutines; SFX.click(); renderRoutinesList(); return; }
   const ownerSet = e.target.closest('[data-owner-set]');
   if (ownerSet) { setOwner(ownerSet.dataset.ownerKind, ownerSet.dataset.ownerSet, ownerSet.dataset.ownerVal); return; }
+  if (e.target.closest('[data-rl-more]')) {
+    routinesShowAll = !routinesShowAll;
+    SFX.click();
+    renderRoutinesList();
+    return;
+  }
   const rTab = e.target.closest('[data-rtab]');
   if (rTab) { setRoutinesTab(rTab.dataset.rtab); return; }
   if (e.target.closest('#newMasterBtn')) { openMasterEditor(); return; }
