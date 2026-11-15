@@ -1739,6 +1739,61 @@
   .routines-sort { margin: 0 0 10px; padding: 0; }
 
   .rl-actions { margin: -6px 0 14px; }
+
+  .routine-card.selectable { cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+  .routine-card.picked { border-color: var(--plum); background: #faf3f8; }
+
+  .rsel-box {
+    flex-shrink: 0;
+    align-self: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(74,37,64,0.25);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 0.72rem;
+    color: var(--cream);
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .routine-card.picked .rsel-box { background: var(--plum); border-color: var(--plum); transform: scale(1.08); }
+
+  .rsel-bar {
+    position: sticky;
+    top: -2px;
+    z-index: 2;
+    align-items: center;
+    gap: 10px;
+    margin: -4px -6px 12px;
+    padding: 10px 10px 10px 16px;
+    border-radius: 16px;
+    background: var(--butter);
+    box-shadow: 0 6px 18px rgba(74,37,64,0.18);
+    animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn { from { transform: scale(0.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .rsel-count { flex: 1; font-weight: 800; color: var(--plum); font-size: 0.95rem; }
+
+  .rsel-clear {
+    border: none;
+    background: none;
+    color: var(--plum-soft);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.88rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .rsel-add { padding: 10px 16px; font-size: 0.92rem; }
   .routine-card { align-items: flex-start; }
   .routine-card-btns { margin-top: 2px; }
 
@@ -4562,6 +4617,11 @@
         <button class="btn btn-ghost" id="routinesCloseBtn">done</button>
         <button class="btn btn-primary" id="newRoutineBtn">＋ new routine</button>
         <button class="btn btn-primary" id="newMasterBtn" style="display:none;">＋ new master</button>
+      </div>
+      <div class="rsel-bar" id="routineSelBar" style="display:none;">
+        <span class="rsel-count" id="routineSelCount"></span>
+        <button type="button" class="rsel-clear" id="routineSelClear">clear</button>
+        <button type="button" class="btn btn-primary rsel-add" id="routineSelAdd">＋ add all</button>
       </div>
       <div class="rtab-toggle" role="tablist" aria-label="routine type">
         <button type="button" class="rtab-btn" data-rtab="routines">🔁 routines</button>
@@ -7951,6 +8011,75 @@ function ownerBadge(x) {
 let routineOwner = 'all';
 let masterOwner = 'all';
 let showOtherRoutines = false;
+let routinePicks = [];   // 'r:id' / 'm:id' in the order you tapped them
+
+function pickNumber(key) {
+  const i = routinePicks.indexOf(key);
+  return i >= 0 ? String(i + 1) : '';
+}
+
+function pickedItem(key) {
+  const [kind, id] = key.split(':');
+  return kind === 'm'
+    ? { kind: 'master', key, x: state.masterRoutines.find(m => m.id === id) }
+    : { kind: 'routine', key, x: state.routines.find(r => r.id === id) };
+}
+
+function togglePick(key) {
+  const i = routinePicks.indexOf(key);
+  if (i >= 0) routinePicks.splice(i, 1); else routinePicks.push(key);
+  SFX.click();
+  renderRoutinesList();
+}
+
+function renderPickBar() {
+  const bar = document.getElementById('routineSelBar');
+  routinePicks = routinePicks.filter(k => pickedItem(k).x);
+  const n = routinePicks.length;
+  bar.style.display = n ? 'flex' : 'none';
+  if (!n) return;
+  const masters = routinePicks.filter(k => k.startsWith('m:')).length;
+  document.getElementById('routineSelCount').textContent =
+    `${n} picked${masters && masters < n ? ` (${masters} master)` : masters ? ' (master)' : ''}`;
+  document.getElementById('routineSelAdd').textContent = `＋ add ${n === 1 ? 'it' : 'all ' + n}`;
+}
+
+// add every picked routine / master routine, in the order you picked them
+function addPickedRoutines(mode = 'ask') {
+  if (state.profile === 'combined') return;
+  const items = routinePicks.map(pickedItem).filter(it => it.x);
+  if (!items.length) return;
+  const dupes = items.filter(it => onListCount(it.x, it.kind) > 0);
+  if (mode === 'ask' && dupes.length) {
+    const names = dupes.map(it => `"${it.x.name}"`);
+    const list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+    const rest = items.length - dupes.length;
+    askConfirm('already added 🔁',
+      `${list} ${dupes.length === 1 ? 'is' : 'are'} already on your to-do list${dayWord() === 'today' ? '' : ' for ' + dayWord()}. add ${dupes.length === 1 ? 'it' : 'them'} again?`,
+      `add all ${items.length}`, () => addPickedRoutines('all'),
+      rest ? `skip ${dupes.length === 1 ? 'that one' : 'those'}, add the other ${rest}` : null,
+      rest ? () => addPickedRoutines('skip') : null);
+    return;
+  }
+  const toAdd = mode === 'skip' ? items.filter(it => !dupes.includes(it)) : items;
+  if (!toAdd.length) return;
+  flushPlannerSaves();
+  let text = getPlannerEntry(state.profile, plannerSelectedDate);
+  toAdd.forEach(it => {
+    touchRoutine(it.x);
+    text = it.kind === 'master' ? appendMasterText(text, it.x) : appendRoutineText(text, it.x);
+  });
+  setPlannerEntry(state.profile, plannerSelectedDate, text);
+  routinePicks = [];
+  closeRoutinesModal();
+  renderCalendar();
+  renderPlannerEditor();
+  SFX.milestone();
+  showToast(toAdd.length === 1
+    ? `🔁 added "${toAdd[0].x.name}" to ${prettyDate(plannerSelectedDate).toLowerCase()}`
+    : `🔁 added ${toAdd.length} routines to ${prettyDate(plannerSelectedDate).toLowerCase()}`);
+}
+
 const ROUTINES_PREVIEW = 5;
 let routinesShowAll = false;
 
@@ -8115,6 +8244,7 @@ function openRoutinesModal() {
   SFX.click();
   showOtherRoutines = false;
   routinesShowAll = false;
+  routinePicks = [];
   showRoutineListView();
   document.getElementById('routinesModal').classList.add('open');
 }
@@ -8169,13 +8299,14 @@ function setRoutineSort(mode) {
 }
 
 function renderRoutinesList() {
+  renderPickBar();
   const isMaster = state.routinesTab === 'master';
   document.querySelectorAll('.rtab-btn').forEach(b => b.classList.toggle('active', b.dataset.rtab === state.routinesTab));
   document.getElementById('newRoutineBtn').style.display = isMaster ? 'none' : '';
   document.getElementById('newMasterBtn').style.display = isMaster ? '' : 'none';
   document.getElementById('routinesSubText').innerHTML = isMaster
-    ? 'routines made of routines. tap <strong>＋ add</strong> and they all drop into your list in order, each as its own block.'
-    : 'saved task lists. pick days and they drop into your planner on their own — or tap <strong>＋ add</strong> to drop one in right now.';
+    ? 'routines made of routines. tap <strong>＋ add</strong> for one, or tap the cards to pick several and add them all at once.'
+    : 'tap <strong>＋ add</strong> for one — or tap the cards to pick several and add them all at once. pick days and they drop in on their own.';
   if (isMaster) { renderMasterList(); return; }
 
   const list = document.getElementById('routinesList');
@@ -8190,11 +8321,13 @@ function renderRoutinesList() {
     return;
   }
   const dayLabel = prettyDate(plannerSelectedDate).toLowerCase();
-  (routinesShowAll ? routines : routines.slice(0, ROUTINES_PREVIEW)).forEach(r => {
+  (routinesShowAll ? routines : routines.filter((r, i) => i < ROUTINES_PREVIEW || routinePicks.includes('r:' + r.id))).forEach(r => {
     const n = routineTaskCount(r);
     const card = document.createElement('div');
-    card.className = 'routine-card';
+    card.className = 'routine-card selectable' + (routinePicks.includes('r:' + r.id) ? ' picked' : '');
+    card.dataset.rsel = 'r:' + r.id;
     card.innerHTML = `
+      <span class="rsel-box" aria-hidden="true">${pickNumber('r:' + r.id)}</span>
       <div class="routine-info">
         <div class="routine-name">${escapeHtml(r.name)}</div>
         <div class="routine-meta${r.days && r.days.length ? ' auto' : ''}">${n} task${n === 1 ? '' : 's'} · ${routineDaysLabel(r.days)}${ownerBadge(r)}</div>
@@ -8297,12 +8430,14 @@ function renderMasterList() {
     return;
   }
   const dayLabel = prettyDate(plannerSelectedDate).toLowerCase();
-  (routinesShowAll ? masters : masters.slice(0, ROUTINES_PREVIEW)).forEach(m => {
+  (routinesShowAll ? masters : masters.filter((m, i) => i < ROUTINES_PREVIEW || routinePicks.includes('m:' + m.id))).forEach(m => {
     const members = masterMembers(m);
     const k = members.length;
     const card = document.createElement('div');
-    card.className = 'routine-card master';
+    card.className = 'routine-card master selectable' + (routinePicks.includes('m:' + m.id) ? ' picked' : '');
+    card.dataset.rsel = 'm:' + m.id;
     card.innerHTML = `
+      <span class="rsel-box" aria-hidden="true">${pickNumber('m:' + m.id)}</span>
       <div class="routine-info">
         <div class="routine-name">⭐ ${escapeHtml(m.name)}</div>
         <div class="routine-meta${m.days && m.days.length ? ' auto' : ''}">${k} routine${k === 1 ? '' : 's'} · ${routineDaysLabel(m.days)}${ownerBadge(m)}</div>
@@ -9007,6 +9142,10 @@ document.addEventListener('click', (e) => {
   if (rAdd) { addRoutineToDay(rAdd.dataset.routineAdd); return; }
   const rEdit = e.target.closest('[data-routine-edit]');
   if (rEdit) { openRoutineEditor(rEdit.dataset.routineEdit); return; }
+  if (e.target.closest('#routineSelAdd')) { addPickedRoutines(); return; }
+  if (e.target.closest('#routineSelClear')) { routinePicks = []; SFX.click(); renderRoutinesList(); return; }
+  const pickCard = e.target.closest('.routine-card[data-rsel]');
+  if (pickCard && !e.target.closest('button')) { togglePick(pickCard.dataset.rsel); return; }
   const dayChip = e.target.closest('#routineDayChips .day-chip');
   if (dayChip) { toggleRoutineDay(parseInt(dayChip.dataset.day, 10)); return; }
   if (e.target.closest('#routineEveryDayBtn')) {
