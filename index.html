@@ -1929,6 +1929,32 @@
   .field .cat-name-row .cat-emoji-input { width: 64px; flex-shrink: 0; text-align: center; font-size: 1.4rem; padding: 8px 4px; }
   .cat-quick { margin-top: 10px; }
   .cat-new-chip { border-style: dashed; color: var(--plum-soft); background: transparent; }
+  .rpts-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .rpts-chips > span { display: contents; }
+  .field .rpts-input {
+    width: 92px;
+    padding: 6px 10px;
+    border: 2px dashed rgba(74,37,64,0.2);
+    border-radius: 999px;
+    background: transparent;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    color: var(--plum);
+  }
+  .field .rpts-input.on { border-style: solid; border-color: var(--plum); background: #fff; }
+  .rpts-input::-webkit-inner-spin-button, .rpts-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .rpts-input { -moz-appearance: textfield; appearance: textfield; }
+  .rpts-sum {
+    margin-top: 8px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.86rem;
+    color: var(--plum-soft);
+    line-height: 1.45;
+  }
+  .rpts-sum strong { font-family: 'Nunito', sans-serif; font-style: normal; font-weight: 900; color: var(--plum); }
   .pool-group {
     width: 100%;
     font-family: 'Fraunces', serif;
@@ -4789,6 +4815,11 @@
           <button type="button" class="indent-btn" data-indent="in" data-target="routineTextInput" aria-label="indent line">⇥<span class="ib-word"> indent</span></button>
         </div>
       </div>
+      <div class="field">
+        <label>🪙 bonus for finishing all of it</label>
+        <div class="rpts-chips"><span id="routinePtsChips"></span><input type="number" class="rpts-input" id="routinePtsInput" data-rpts-input="routine" inputmode="numeric" min="0" max="9999" placeholder="other" aria-label="other amount" /></div>
+        <div class="rpts-sum" id="routinePtsSum"></div>
+      </div>
       <div class="field owner-field" id="routineOwnerField">
         <label>who's it for</label>
         <div class="owner-chips" id="routineOwnerChips"></div>
@@ -4838,6 +4869,11 @@
       <div class="field">
         <label>tap a routine to add it</label>
         <div class="master-pool" id="masterPool"></div>
+      </div>
+      <div class="field">
+        <label>🪙 bonus for finishing all of it</label>
+        <div class="rpts-chips"><span id="masterPtsChips"></span><input type="number" class="rpts-input" id="masterPtsInput" data-rpts-input="master" inputmode="numeric" min="0" max="9999" placeholder="other" aria-label="other amount" /></div>
+        <div class="rpts-sum" id="masterPtsSum"></div>
       </div>
       <div class="field owner-field" id="masterOwnerField">
         <label>who's it for</label>
@@ -8350,6 +8386,88 @@ function cleanRoutineLines(text) {
   return (text || '').split('\n').filter(l => l.trim()).map(l => setLineChecked(l, false)).join('\n');
 }
 
+// ---------- points for finishing a routine (set in its editor) ----------
+// stored like the 🪙 pill's "remember", so the routine is worth it everywhere it shows up
+const RPTS_CHOICES = [10, 20, 25, 30, 50, 100];
+let routinePtsPick = null; // null = default
+let masterPtsPick = null;
+
+function finishPtsDefault(kind) { return kind === 'master' ? POINTS_DEFAULT.master : POINTS_DEFAULT.routine; }
+function finishPtsName(kind, name) { return headingName(name, kind === 'master' ? 'master routine' : 'routine'); }
+function customFinishPts(kind, name) {
+  const saved = savedPoints(kind, finishPtsName(kind, name));
+  return saved && saved.pts !== finishPtsDefault(kind) ? saved.pts : null;
+}
+function finishPts(kind, name) {
+  const c = customFinishPts(kind, name);
+  return c === null ? finishPtsDefault(kind) : c;
+}
+function setFinishPts(kind, name, pts) {
+  const n = finishPtsName(kind, name);
+  const key = pointsKey(kind, n);
+  if (pts === null || pts === finishPtsDefault(kind)) delete state.pointMemory[key];
+  else state.pointMemory[key] = { pts, name: n, kind, updated: Date.now() };
+}
+function ptsBadge(kind, name) {
+  const c = customFinishPts(kind, name);
+  return c === null ? '' : ` · 🪙 ${c} pts`;
+}
+// what the tasks themselves add up to once every required one is checked
+function routineTaskPts(text) {
+  const lines = parsePlannerLines(cleanRoutineLines(text));
+  const req = lines.filter(countsTowardDone);
+  return {
+    pts: req.reduce((sum, l) => sum + taskPointInfo(l).pts, 0),
+    n: req.length,
+    extra: lines.filter(l => l.type === 'task' && !countsTowardDone(l)).length
+  };
+}
+
+function renderPtsChips(kind) {
+  const isM = kind === 'master';
+  const pick = isM ? masterPtsPick : routinePtsPick;
+  const def = finishPtsDefault(kind);
+  const opts = [[null, `default · ${def}`], ...RPTS_CHOICES.filter(n => n !== def).map(n => [n, String(n)])];
+  const onChip = pick === null || RPTS_CHOICES.includes(pick);
+  document.getElementById(isM ? 'masterPtsChips' : 'routinePtsChips').innerHTML = opts.map(([v, label]) =>
+    `<button type="button" class="pool-chip owner-chip${v === pick ? ' on' : ''}" data-rpts-pick="${v === null ? '' : v}" data-rpts-for="${kind}">${label}</button>`
+  ).join('');
+  const input = document.getElementById(isM ? 'masterPtsInput' : 'routinePtsInput');
+  if (document.activeElement !== input) input.value = onChip ? '' : pick;
+  input.classList.toggle('on', !onChip);
+  renderPtsSum(kind);
+}
+
+function renderPtsSum(kind) {
+  const isM = kind === 'master';
+  const pick = isM ? masterPtsPick : routinePtsPick;
+  const bonus = pick === null ? finishPtsDefault(kind) : pick;
+  let from = 0, detail, extra = 0;
+  if (isM) {
+    const rs = masterPicks.map(id => state.routines.find(r => r.id === id)).filter(Boolean);
+    rs.forEach(r => {
+      const t = routineTaskPts(r.text);
+      from += t.pts + finishPts('group', r.name);
+      extra += t.extra;
+    });
+    detail = rs.length ? `${from} from its ${rs.length} routine${rs.length === 1 ? '' : 's'} (tasks + their bonuses)` : 'no routines in it yet';
+  } else {
+    const t = routineTaskPts(document.getElementById('routineTextInput').value);
+    from = t.pts;
+    extra = t.extra;
+    detail = t.n ? `${t.pts} from its ${t.n} task${t.n === 1 ? '' : 's'}` : 'no tasks yet';
+  }
+  document.getElementById(isM ? 'masterPtsSum' : 'routinePtsSum').innerHTML =
+    `all done = <strong>${from + bonus} pts</strong> · ${detail} + ${bonus} for finishing${extra ? ' · optionals are extra' : ''}`;
+}
+
+function pickFinishPts(kind, val) {
+  const v = val === '' || val === null ? null : Math.min(9999, Math.max(0, parseInt(val, 10)));
+  const pick = Number.isFinite(v) ? v : null;
+  if (kind === 'master') masterPtsPick = pick; else routinePtsPick = pick;
+  renderPtsChips(kind);
+}
+
 function headingName(name, fallback = 'routine') {
   return (name || fallback).replace(/[<>]/g, '').trim() || fallback;
 }
@@ -8536,7 +8654,7 @@ function renderRoutinesList() {
       <span class="rsel-box" aria-hidden="true">${pickNumber('r:' + r.id)}</span>
       <div class="routine-info">
         <div class="routine-name">${escapeHtml(r.name)}</div>
-        <div class="routine-meta${r.days && r.days.length ? ' auto' : ''}">${n} task${n === 1 ? '' : 's'} · ${routineDaysLabel(r.days)}${ownerBadge(r)}${c ? ` · <span class="cat-tag">${escapeHtml(catLabel(c))}</span>` : ''}</div>
+        <div class="routine-meta${r.days && r.days.length ? ' auto' : ''}">${n} task${n === 1 ? '' : 's'} · ${routineDaysLabel(r.days)}${ptsBadge('group', r.name)}${ownerBadge(r)}${c ? ` · <span class="cat-tag">${escapeHtml(catLabel(c))}</span>` : ''}</div>
         ${onListBadge(r, 'routine')}
       </div>
       <div class="routine-card-btns">
@@ -8809,6 +8927,8 @@ function openRoutineEditor(id = null) {
   routineCatPick = r ? catOf(r) : (getCat(routineCat) ? routineCat : null);
   catNewFor = null;
   renderRoutineCatChips();
+  routinePtsPick = r ? customFinishPts('group', r.name) : null;
+  renderPtsChips('routine');
   renderDayChips();
   renderOwnerChips('routine');
   document.getElementById('routinesListView').style.display = 'none';
@@ -8847,6 +8967,8 @@ function saveRoutine() {
   if (!text.trim()) { showToast('add at least one task'); return; }
   const days = [...routineDays].sort((a, b) => a - b);
   const category = getCat(routineCatPick) ? routineCatPick : null;
+  // a brand-new routine left on default doesn't touch points saved earlier for that name
+  if (routinePtsPick !== null || editingRoutineId) setFinishPts('group', name, routinePtsPick);
 
   if (editingRoutineId) {
     const r = state.routines.find(x => x.id === editingRoutineId);
@@ -8869,6 +8991,7 @@ function saveRoutine() {
   showRoutineListView();
   renderPlannerEditor(); // a routine due on the selected day drops in right away
   renderCalendar();
+  if (plannerSelectedDate === todayKey()) renderPoints(true);
 }
 
 let editingMasterId = null;
@@ -8904,7 +9027,7 @@ function renderMasterList() {
       <span class="rsel-box" aria-hidden="true">${pickNumber('m:' + m.id)}</span>
       <div class="routine-info">
         <div class="routine-name">⭐ ${escapeHtml(m.name)}</div>
-        <div class="routine-meta${m.days && m.days.length ? ' auto' : ''}">${k} routine${k === 1 ? '' : 's'} · ${routineDaysLabel(m.days)}${ownerBadge(m)}</div>
+        <div class="routine-meta${m.days && m.days.length ? ' auto' : ''}">${k} routine${k === 1 ? '' : 's'} · ${routineDaysLabel(m.days)}${ptsBadge('master', m.name)}${ownerBadge(m)}</div>
         ${onListBadge(m, 'master')}
         ${k ? `<div class="routine-members">${members.map(r => escapeHtml(r.name)).join(' · ')}</div>` : ''}
       </div>
@@ -8927,8 +9050,10 @@ function openMasterEditor(id = null) {
   masterPicks = m ? masterMembers(m).map(r => r.id) : [];
   masterDays = m && Array.isArray(m.days) ? [...m.days] : [];
   masterOwner = m ? (m.owner || 'all') : 'all';
+  masterPtsPick = m ? customFinishPts('master', m.name) : null;
   document.getElementById('masterDeleteBtn').style.display = m ? 'inline-block' : 'none';
   renderMasterEditor();
+  renderPtsChips('master');
   renderOwnerChips('master');
   document.getElementById('routinesListView').style.display = 'none';
   document.getElementById('masterEditView').style.display = 'block';
@@ -8997,6 +9122,7 @@ function renderMasterEditor() {
     chips.appendChild(b);
   });
   document.getElementById('masterEveryDayBtn').textContent = masterDays.length === 7 ? 'clear days' : 'every day';
+  renderPtsSum('master');
 }
 
 function masterPickAction(kind, val) {
@@ -9018,6 +9144,7 @@ function saveMaster() {
   if (!name) { showToast('give your master routine a name'); return; }
   if (!masterPicks.length) { showToast('add at least one routine'); return; }
   const days = [...masterDays].sort((a, b) => a - b);
+  if (masterPtsPick !== null || editingMasterId) setFinishPts('master', name, masterPtsPick);
   if (editingMasterId) {
     const m = state.masterRoutines.find(x => x.id === editingMasterId);
     if (m) Object.assign(m, { name, routineIds: [...masterPicks], days, owner: masterOwner, lastUsed: Date.now() });
@@ -9029,6 +9156,7 @@ function saveMaster() {
   showRoutineListView();
   renderPlannerEditor(); // a master due on the selected day drops in right away
   renderCalendar();
+  if (plannerSelectedDate === todayKey()) renderPoints(true);
 }
 
 function deleteMaster() {
@@ -9600,6 +9728,15 @@ document.addEventListener('click', (e) => {
   if (moveTo) { movePickedTo(moveTo.dataset.movecat); return; }
   if (e.target.closest('[data-movecat-new]')) { openNewCatForm('move'); return; }
   if (e.target.closest('#moveCatNewOk')) { submitNewCat('move'); return; }
+  const rPts = e.target.closest('[data-rpts-pick]');
+  if (rPts) {
+    const inp = document.getElementById(rPts.dataset.rptsFor === 'master' ? 'masterPtsInput' : 'routinePtsInput');
+    inp.value = '';
+    inp.blur();
+    pickFinishPts(rPts.dataset.rptsFor, rPts.dataset.rptsPick);
+    SFX.click();
+    return;
+  }
   const rcPick = e.target.closest('[data-rcat-pick]');
   if (rcPick) { routineCatPick = rcPick.dataset.rcatPick || null; SFX.click(); renderRoutineCatChips(); return; }
   if (e.target.closest('[data-rcat-pick-new]')) { openNewCatForm('routine'); return; }
@@ -10051,6 +10188,13 @@ const SHEET_CLOSERS = {
   emojiModal: () => closeEmojiEditor(),
   moveCatModal: () => closeMoveCat()
 };
+
+// custom points box + live "all done =" total
+document.querySelectorAll('[data-rpts-input]').forEach(inp => {
+  inp.addEventListener('input', () => pickFinishPts(inp.dataset.rptsInput, inp.value));
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); inp.blur(); } });
+});
+document.getElementById('routineTextInput').addEventListener('input', () => renderPtsSum('routine'));
 
 // Enter in the little category name boxes = save
 [['catNameInput', () => saveCat()], ['moveCatNewName', () => submitNewCat('move')], ['routineCatNewName', () => submitNewCat('routine')]]
