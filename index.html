@@ -1813,6 +1813,131 @@
   }
 
   .rl-more:active { transform: scale(0.98); }
+
+  /* ---- routine categories (folders) ---- */
+  .cat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 2px solid rgba(74,37,64,0.1);
+    border-radius: 16px;
+    padding: 11px 12px 11px 11px;
+    font-family: 'Nunito', sans-serif;
+    color: var(--plum);
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .cat-card:active { transform: scale(0.98); }
+  .cat-card.has-picks { border-color: var(--plum); background: #faf3f8; }
+  .cat-card.unsorted { border-style: dashed; border-color: rgba(232,168,56,0.6); background: #fffaf0; }
+  .cat-card.all { border-style: dashed; background: rgba(255,255,255,0.55); }
+  .cat-emoji {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    background: rgba(74,37,64,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  .cat-card.unsorted .cat-emoji { background: rgba(232,168,56,0.16); }
+  .cat-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .cat-name { font-weight: 800; font-size: 1.02rem; line-height: 1.3; overflow-wrap: anywhere; }
+  .cat-meta {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--plum-mist);
+    margin-top: 2px;
+  }
+  .cat-meta .cat-on { color: #5a8050; }
+  .cat-meta .cat-picked { color: var(--plum); font-family: 'Nunito', sans-serif; font-style: normal; font-weight: 800; }
+  .cat-chev { flex-shrink: 0; font-size: 1.5rem; line-height: 1; color: var(--plum-mist); padding-right: 2px; }
+  .cat-new {
+    display: block;
+    width: 100%;
+    padding: 11px;
+    border: 2px dashed rgba(74,37,64,0.18);
+    border-radius: 14px;
+    background: transparent;
+    color: var(--plum-soft);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .cat-new:active { transform: scale(0.98); }
+  .cat-head { display: flex; align-items: center; gap: 8px; margin: -2px 0 12px; }
+  .cat-back, .cat-edit {
+    flex-shrink: 0;
+    border: none;
+    background: rgba(74,37,64,0.08);
+    color: var(--plum);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.82rem;
+    padding: 7px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .cat-edit { background: transparent; color: var(--plum-soft); }
+  .cat-title { flex: 1; min-width: 0; font-weight: 900; font-size: 1.08rem; color: var(--plum); line-height: 1.25; overflow-wrap: anywhere; }
+  .cat-title small { font-weight: 700; font-size: 0.82rem; color: var(--plum-mist); }
+  .cat-tag { white-space: nowrap; }
+  .rsel-bar.with-move { flex-wrap: wrap; row-gap: 8px; }
+  .rsel-btns { display: flex; gap: 8px; }
+  .rsel-bar.with-move .rsel-btns { width: 100%; }
+  .rsel-bar.with-move .rsel-btns .btn { flex: 1; }
+  .rsel-move {
+    border: 2px solid rgba(74,37,64,0.14);
+    background: #fff;
+    color: var(--plum);
+    padding: 9px 14px;
+    font-size: 0.92rem;
+  }
+  .movecat-backdrop { z-index: 170; }
+  .movecat-list { display: flex; flex-direction: column; gap: 6px; max-height: 52vh; overflow-y: auto; margin-bottom: 4px; }
+  .movecat-opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    border: 2px solid rgba(74,37,64,0.1);
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.98rem;
+    color: var(--plum);
+    cursor: pointer;
+  }
+  .movecat-opt:active { transform: scale(0.98); border-color: var(--plum); }
+  .movecat-opt .mc-emoji { width: 28px; text-align: center; font-size: 1.3rem; flex-shrink: 0; }
+  .movecat-opt .mc-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .movecat-opt .mc-count { flex-shrink: 0; font-weight: 700; font-size: 0.8rem; color: var(--plum-mist); }
+  .movecat-opt.current { background: rgba(255,255,255,0.5); }
+  .movecat-opt.current .mc-count { font-family: 'Fraunces', serif; font-style: italic; }
+  .movecat-opt.new { border-style: dashed; background: transparent; color: var(--plum-soft); justify-content: center; }
+  .cat-name-row { display: flex; gap: 8px; }
+  .field .cat-name-row .cat-emoji-input { width: 64px; flex-shrink: 0; text-align: center; font-size: 1.4rem; padding: 8px 4px; }
+  .cat-quick { margin-top: 10px; }
+  .cat-new-chip { border-style: dashed; color: var(--plum-soft); background: transparent; }
+  .pool-group {
+    width: 100%;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--plum-soft);
+    margin: 8px 2px 0;
+  }
+  .pool-group:first-child { margin-top: 0; }
   .routines-sort .sort-btn { background: #fff; }
   .routines-sort .sort-btn.active { background: var(--plum); }
 
@@ -4621,12 +4746,16 @@
       <div class="rsel-bar" id="routineSelBar" style="display:none;">
         <span class="rsel-count" id="routineSelCount"></span>
         <button type="button" class="rsel-clear" id="routineSelClear">clear</button>
-        <button type="button" class="btn btn-primary rsel-add" id="routineSelAdd">＋ add all</button>
+        <div class="rsel-btns">
+          <button type="button" class="btn rsel-move" id="routineSelMove" style="display:none;">📁 move to…</button>
+          <button type="button" class="btn btn-primary rsel-add" id="routineSelAdd">＋ add all</button>
+        </div>
       </div>
       <div class="rtab-toggle" role="tablist" aria-label="routine type">
         <button type="button" class="rtab-btn" data-rtab="routines">🔁 routines</button>
         <button type="button" class="rtab-btn" data-rtab="master">⭐ master</button>
       </div>
+      <div class="cat-head" id="routinesCatHead" style="display:none;"></div>
       <p class="routines-sub" id="routinesSubText"></p>
       <div class="sort-bar routines-sort" id="routinesSortBar">
         <span class="sort-label">sort:</span>
@@ -4641,6 +4770,15 @@
       <div class="field">
         <label>name</label>
         <input type="text" id="routineNameInput" placeholder="e.g. morning reset" maxlength="40" />
+      </div>
+      <div class="field" id="routineCatField">
+        <label>category</label>
+        <div class="owner-chips" id="routineCatChips"></div>
+        <div class="m-addform" id="routineCatNewForm" style="display:none;">
+          <input type="text" class="m-add-emoji" id="routineCatNewEmoji" placeholder="📁" maxlength="16" autocomplete="off" aria-label="emoji" />
+          <input type="text" class="m-add-name" id="routineCatNewName" placeholder="new category" maxlength="30" autocomplete="off" />
+          <button type="button" class="m-add-ok" id="routineCatNewOk">add</button>
+        </div>
       </div>
       <div class="field">
         <label>tasks (one per line · indent for sub-tasks · ◌ marks optional)</label>
@@ -4665,6 +4803,25 @@
         <div style="flex:1;"></div>
         <button class="btn btn-ghost" id="routineCancelBtn">cancel</button>
         <button class="btn btn-primary" id="routineSaveBtn">save</button>
+      </div>
+    </div>
+
+    <div id="catEditView" style="display:none;">
+      <div class="modal-title" id="catEditTitle">new category</div>
+      <p class="routines-sub" id="catEditSub"></p>
+      <div class="field">
+        <label>emoji &amp; name</label>
+        <div class="cat-name-row">
+          <input type="text" id="catEmojiInput" class="cat-emoji-input" maxlength="16" autocomplete="off" aria-label="category emoji" />
+          <input type="text" id="catNameInput" placeholder="e.g. Meals" maxlength="30" autocomplete="off" />
+        </div>
+        <div class="emoji-quick cat-quick"><button type="button" data-cat-emoji="🍽️">🍽️</button><button type="button" data-cat-emoji="🧹">🧹</button><button type="button" data-cat-emoji="🧺">🧺</button><button type="button" data-cat-emoji="🛁">🛁</button><button type="button" data-cat-emoji="🪥">🪥</button><button type="button" data-cat-emoji="💊">💊</button><button type="button" data-cat-emoji="🐾">🐾</button><button type="button" data-cat-emoji="🌅">🌅</button><button type="button" data-cat-emoji="🌙">🌙</button><button type="button" data-cat-emoji="💼">💼</button><button type="button" data-cat-emoji="📚">📚</button><button type="button" data-cat-emoji="🏃">🏃</button><button type="button" data-cat-emoji="🛒">🛒</button><button type="button" data-cat-emoji="🧘">🧘</button><button type="button" data-cat-emoji="🪴">🪴</button><button type="button" data-cat-emoji="💰">💰</button></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="catDeleteBtn" style="display:none;">delete</button>
+        <div style="flex:1;"></div>
+        <button class="btn btn-ghost" id="catCancelBtn">cancel</button>
+        <button class="btn btn-primary" id="catSaveBtn">save</button>
       </div>
     </div>
 
@@ -4762,6 +4919,24 @@
       <div style="flex:1;"></div>
       <button class="btn btn-ghost" id="emojiCancelBtn">cancel</button>
       <button class="btn btn-primary" id="emojiSaveBtn">save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Move picked routines into a category -->
+<div class="modal-backdrop movecat-backdrop" id="moveCatModal">
+  <div class="modal">
+    <div class="modal-title" style="margin-bottom:4px;">move to… 📁</div>
+    <p class="routines-sub" id="moveCatFor" style="margin:0 0 12px;"></p>
+    <div class="movecat-list" id="moveCatList"></div>
+    <div class="m-addform" id="moveCatNewForm" style="display:none;">
+      <input type="text" class="m-add-emoji" id="moveCatNewEmoji" placeholder="📁" maxlength="16" autocomplete="off" aria-label="emoji" />
+      <input type="text" class="m-add-name" id="moveCatNewName" placeholder="category name" maxlength="30" autocomplete="off" />
+      <button type="button" class="m-add-ok" id="moveCatNewOk">make &amp; move</button>
+    </div>
+    <div class="modal-actions">
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost" id="moveCatCancel">cancel</button>
     </div>
   </div>
 </div>
@@ -4967,6 +5142,7 @@ function migrateState() {
   if (!Array.isArray(state.routines)) state.routines = [];
   if (state.routineSort !== 'alpha' && state.routineSort !== 'recent') state.routineSort = 'recent';
   if (!Array.isArray(state.masterRoutines)) state.masterRoutines = [];
+  ensureRoutineCategories();
   if (!state.pointMemory || typeof state.pointMemory !== 'object') state.pointMemory = {};
   if (!state.history || typeof state.history !== 'object') state.history = {};
   if (!state.settings || typeof state.settings !== 'object') state.settings = {};
@@ -8042,6 +8218,9 @@ function renderPickBar() {
   document.getElementById('routineSelCount').textContent =
     `${n} picked${masters && masters < n ? ` (${masters} master)` : masters ? ' (master)' : ''}`;
   document.getElementById('routineSelAdd').textContent = `＋ add ${n === 1 ? 'it' : 'all ' + n}`;
+  const canMove = state.routinesTab !== 'master' && n - masters > 0;
+  document.getElementById('routineSelMove').style.display = canMove ? '' : 'none';
+  bar.classList.toggle('with-move', canMove);
 }
 
 // add every picked routine / master routine, in the order you picked them
@@ -8245,6 +8424,7 @@ function openRoutinesModal() {
   showOtherRoutines = false;
   routinesShowAll = false;
   routinePicks = [];
+  routineCat = null;
   showRoutineListView();
   document.getElementById('routinesModal').classList.add('open');
 }
@@ -8258,10 +8438,13 @@ function closeRoutinesModal() {
 function showRoutineListView() {
   editingRoutineId = null;
   editingMasterId = null;
+  catEditId = null;
+  catNewFor = null;
   renderRoutinesList();
   document.getElementById('routinesListView').style.display = 'block';
   document.getElementById('routineEditView').style.display = 'none';
   document.getElementById('masterEditView').style.display = 'none';
+  document.getElementById('catEditView').style.display = 'none';
 }
 
 function setRoutinesTab(tab) {
@@ -8304,25 +8487,48 @@ function renderRoutinesList() {
   document.querySelectorAll('.rtab-btn').forEach(b => b.classList.toggle('active', b.dataset.rtab === state.routinesTab));
   document.getElementById('newRoutineBtn').style.display = isMaster ? 'none' : '';
   document.getElementById('newMasterBtn').style.display = isMaster ? '' : 'none';
-  document.getElementById('routinesSubText').innerHTML = isMaster
-    ? 'routines made of routines. tap <strong>＋ add</strong> for one, or tap the cards to pick several and add them all at once.'
-    : 'tap <strong>＋ add</strong> for one — or tap the cards to pick several and add them all at once. pick days and they drop in on their own.';
-  if (isMaster) { renderMasterList(); return; }
+  const sub = document.getElementById('routinesSubText');
+  const head = document.getElementById('routinesCatHead');
+  sub.style.display = '';
+  head.style.display = 'none';
+  if (isMaster) {
+    sub.innerHTML = 'routines made of routines. tap <strong>＋ add</strong> for one, or tap the cards to pick several and add them all at once.';
+    renderMasterList();
+    return;
+  }
+  if (routineCat && routineCat !== '__all' && routineCat !== '__none' && !getCat(routineCat)) routineCat = null;
+  if (routineCat === null) {
+    sub.innerHTML = 'tap a folder to open it. to sort, tap routines to pick them (from any folder), then hit <strong>📁 move to…</strong>';
+    renderCategoryList();
+    return;
+  }
+
+  renderCatHead(head);
+  if (routineCat === '__none') sub.innerHTML = 'tap the ones that belong together, then hit <strong>📁 move to…</strong> to drop them in a folder.';
+  else if (routineCat === '__all') sub.innerHTML = 'every routine in one list. tap <strong>＋ add</strong> for one — or tap the cards to pick several.';
+  else sub.style.display = 'none';
 
   const list = document.getElementById('routinesList');
-  const routines = sortedRoutines();
+  const routines = sortedRoutines(routinesInCat(routineCat));
   document.querySelectorAll('#routinesSortBar [data-rsort]').forEach(b =>
     b.classList.toggle('active', b.dataset.rsort === state.routineSort));
   document.getElementById('routinesSortBar').style.display = routines.length > 1 ? 'flex' : 'none';
   list.innerHTML = '';
   if (!routines.length) {
-    list.innerHTML = `<div class="routines-empty">no routines yet — make one and it can show up on its own ✨</div>`;
-    renderOtherRoutines(list, 'routine');
+    const c = getCat(routineCat);
+    list.innerHTML = routineCat === '__all'
+      ? `<div class="routines-empty">no routines yet — make one and it can show up on its own ✨</div>`
+      : routineCat === '__none'
+        ? `<div class="routines-empty">everything's sorted 🎉</div>`
+        : `<div class="routines-empty">nothing in ${escapeHtml(c ? c.name : 'here')} yet — tap <strong>＋ new routine</strong> to make one here, or pick routines in another folder and <strong>📁 move</strong> them in</div>`;
+    if (routineCat === '__all') renderOtherRoutines(list, 'routine');
     return;
   }
   const dayLabel = prettyDate(plannerSelectedDate).toLowerCase();
-  (routinesShowAll ? routines : routines.filter((r, i) => i < ROUTINES_PREVIEW || routinePicks.includes('r:' + r.id))).forEach(r => {
+  const limited = routineCat === '__all' && !routinesShowAll;
+  (limited ? routines.filter((r, i) => i < ROUTINES_PREVIEW || routinePicks.includes('r:' + r.id)) : routines).forEach(r => {
     const n = routineTaskCount(r);
+    const c = routineCat === '__all' ? getCat(catOf(r)) : null;
     const card = document.createElement('div');
     card.className = 'routine-card selectable' + (routinePicks.includes('r:' + r.id) ? ' picked' : '');
     card.dataset.rsel = 'r:' + r.id;
@@ -8330,7 +8536,7 @@ function renderRoutinesList() {
       <span class="rsel-box" aria-hidden="true">${pickNumber('r:' + r.id)}</span>
       <div class="routine-info">
         <div class="routine-name">${escapeHtml(r.name)}</div>
-        <div class="routine-meta${r.days && r.days.length ? ' auto' : ''}">${n} task${n === 1 ? '' : 's'} · ${routineDaysLabel(r.days)}${ownerBadge(r)}</div>
+        <div class="routine-meta${r.days && r.days.length ? ' auto' : ''}">${n} task${n === 1 ? '' : 's'} · ${routineDaysLabel(r.days)}${ownerBadge(r)}${c ? ` · <span class="cat-tag">${escapeHtml(catLabel(c))}</span>` : ''}</div>
         ${onListBadge(r, 'routine')}
       </div>
       <div class="routine-card-btns">
@@ -8339,8 +8545,255 @@ function renderRoutinesList() {
       </div>`;
     list.appendChild(card);
   });
-  moreRoutinesBtn(list, routines.length, 'routines');
+  if (routineCat === '__all') {
+    moreRoutinesBtn(list, routines.length, 'routines');
+    renderOtherRoutines(list, 'routine');
+  }
+}
+
+// ---------- routine categories (folders) ----------
+const ROUTINE_CAT_DEFAULTS = [
+  { id: 'c_cleaning', name: 'Cleaning', emoji: '🧹' },
+  { id: 'c_meals', name: 'Meals', emoji: '🍽️' }
+];
+// first-time guesses by name — cleaning words win ("dinner dishes" is cleaning)
+const ROUTINE_CAT_GUESS = [
+  ['c_cleaning', /\b(clean\w*|laundry|dish(es)?|vacuum\w*|tidy\w*|mop\w*|sweep\w*|dust\w*|trash|garbage|wipe\w*|scrub\w*|declutter\w*|chores?)\b/i],
+  ['c_meals', /\b(breakfast|brunch|lunch|dinner|supper|meals?|food|cook\w*|snacks?|eat(ing)?|recipes?|smoothies?|grocery|groceries)\b/i]
+];
+let routineCat = null;     // null = the folder list · '__none' = not sorted · '__all' = everything · or a category id
+let catEditId = null;      // category open in the editor (null = making a new one)
+let catNewFor = null;      // which inline "new category" form is open: 'move' | 'routine'
+let routineCatPick = null; // category chosen in the routine editor
+
+function ensureRoutineCategories() {
+  if (Array.isArray(state.routineCategories)) {
+    state.routineCategories = state.routineCategories.filter(c => c && c.id && c.name);
+    return;
+  }
+  state.routineCategories = ROUTINE_CAT_DEFAULTS.map(c => Object.assign({}, c));
+  (state.routines || []).forEach(r => {
+    if (r.category) return;
+    const hit = ROUTINE_CAT_GUESS.find(([, re]) => re.test(r.name || ''));
+    if (hit) r.category = hit[0];
+  });
+}
+
+function routineCats() {
+  return (state.routineCategories || []).slice()
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true }));
+}
+function getCat(id) { return id ? (state.routineCategories || []).find(c => c.id === id) || null : null; }
+function catOf(r) { return r && getCat(r.category) ? r.category : null; }
+function catLabel(c) { return `${c.emoji || '📁'} ${c.name}`; }
+function routinesInCat(key, source = myRoutines()) {
+  if (key === '__all') return source;
+  if (key === '__none') return source.filter(r => !catOf(r));
+  return source.filter(r => catOf(r) === key);
+}
+function createCategory(name, emoji) {
+  name = (name || '').trim().slice(0, 30);
+  if (!name) return null;
+  const same = (state.routineCategories || []).find(c => c.name.toLowerCase() === name.toLowerCase());
+  if (same) return same;
+  const c = { id: 'c_' + uid(), name, emoji: firstGrapheme(emoji) || '📁' };
+  state.routineCategories.push(c);
+  return c;
+}
+
+function catCard(key, emoji, name, items, cls) {
+  const picked = items.filter(r => routinePicks.includes('r:' + r.id)).length;
+  const on = items.filter(r => onListCount(r, 'routine') > 0).length;
+  const n = items.length;
+  const bits = [n ? `${n} routine${n === 1 ? '' : 's'}` : 'empty for now'];
+  if (on) bits.push(`<span class="cat-on">✓ ${on} on ${dayWord()}</span>`);
+  if (picked) bits.push(`<span class="cat-picked">${picked} picked</span>`);
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'cat-card' + (cls ? ' ' + cls : '') + (picked ? ' has-picks' : '');
+  b.dataset.rcat = key;
+  b.innerHTML = `
+    <span class="cat-emoji" aria-hidden="true">${escapeHtml(emoji)}</span>
+    <span class="cat-info"><span class="cat-name">${escapeHtml(name)}</span><span class="cat-meta">${bits.join(' · ')}</span></span>
+    <span class="cat-chev" aria-hidden="true">›</span>`;
+  return b;
+}
+
+function renderCategoryList() {
+  const list = document.getElementById('routinesList');
+  document.getElementById('routinesSortBar').style.display = 'none';
+  list.innerHTML = '';
+  const mine = myRoutines();
+  if (!mine.length) {
+    const empty = document.createElement('div');
+    empty.className = 'routines-empty';
+    empty.textContent = 'no routines yet — make one and it can show up on its own ✨';
+    list.appendChild(empty);
+  }
+  const unsorted = routinesInCat('__none', mine);
+  if (unsorted.length) list.appendChild(catCard('__none', '📦', 'not sorted yet', unsorted, 'unsorted'));
+  routineCats().forEach(c => list.appendChild(catCard(c.id, c.emoji || '📁', c.name, routinesInCat(c.id, mine), '')));
+  const add = document.createElement('button');
+  add.type = 'button';
+  add.className = 'cat-new';
+  add.dataset.rcatNew = '1';
+  add.textContent = '＋ new category';
+  list.appendChild(add);
+  if (mine.length > 1) list.appendChild(catCard('__all', '📋', 'all routines', mine, 'all'));
   renderOtherRoutines(list, 'routine');
+}
+
+function renderCatHead(head) {
+  const c = getCat(routineCat);
+  const n = routinesInCat(routineCat).length;
+  const title = routineCat === '__all' ? '📋 all routines' : routineCat === '__none' ? '📦 not sorted yet' : catLabel(c);
+  head.innerHTML = `
+    <button type="button" class="cat-back" data-rcat-back>‹ folders</button>
+    <div class="cat-title">${escapeHtml(title)} <small>· ${n}</small></div>
+    ${c ? `<button type="button" class="cat-edit" data-rcat-edit="${escapeHtml(c.id)}">✎ edit</button>` : ''}`;
+  head.style.display = 'flex';
+}
+
+function openRoutineCat(key) {
+  routineCat = key || null;
+  routinesShowAll = false;
+  SFX.click();
+  renderRoutinesList();
+  const panel = document.querySelector('#routinesModal .routines-modal');
+  if (panel) panel.scrollTop = 0;
+}
+
+function openCatEditor(id) {
+  catEditId = getCat(id) ? id : null;
+  const c = getCat(catEditId);
+  const n = c ? routinesInCat(c.id, state.routines).length : 0;
+  document.getElementById('catEditTitle').textContent = c ? 'edit category' : 'new category';
+  document.getElementById('catEditSub').textContent = c
+    ? (n ? `${n} routine${n === 1 ? '' : 's'} inside` : 'empty for now')
+    : 'a folder for routines that go together — like Meals or Cleaning';
+  document.getElementById('catNameInput').value = c ? c.name : '';
+  document.getElementById('catEmojiInput').value = c ? (c.emoji || '📁') : '📁';
+  document.getElementById('catDeleteBtn').style.display = c ? 'inline-block' : 'none';
+  document.getElementById('routinesListView').style.display = 'none';
+  document.getElementById('catEditView').style.display = 'block';
+  SFX.click();
+  if (!c) setTimeout(() => document.getElementById('catNameInput').focus(), 100);
+}
+
+function saveCat() {
+  const name = document.getElementById('catNameInput').value.trim().slice(0, 30);
+  const emoji = firstGrapheme(document.getElementById('catEmojiInput').value) || '📁';
+  if (!name) { showToast('give your category a name'); return; }
+  const clash = state.routineCategories.find(c => c.id !== catEditId && c.name.toLowerCase() === name.toLowerCase());
+  if (clash) { showToast(`there's already a "${clash.name}" category`); return; }
+  const old = getCat(catEditId);
+  if (old) Object.assign(old, { name, emoji });
+  else state.routineCategories.push({ id: 'c_' + uid(), name, emoji });
+  save();
+  SFX.add();
+  showRoutineListView();
+  showToast(old ? `📁 saved ${emoji} ${name}` : `📁 made ${emoji} ${name} — pick routines and 📁 move them in`);
+}
+
+function deleteCat() {
+  const c = getCat(catEditId);
+  if (!c) return;
+  const n = state.routines.filter(r => r.category === c.id).length;
+  askConfirm('delete category? 📁',
+    `"${c.name}" goes away.${n ? ` its ${n} routine${n === 1 ? ' isn\'t' : 's aren\'t'} deleted — ${n === 1 ? 'it moves' : 'they move'} to 📦 not sorted.` : ''}`,
+    'delete', () => {
+      state.routines.forEach(r => { if (r.category === c.id) delete r.category; });
+      state.routineCategories = state.routineCategories.filter(x => x.id !== c.id);
+      if (routineCat === c.id) routineCat = null;
+      save();
+      SFX.delete();
+      showRoutineListView();
+      showToast(`deleted ${catLabel(c)}`);
+    });
+}
+
+function pickedRegular() {
+  return routinePicks.filter(k => k.startsWith('r:'))
+    .map(k => state.routines.find(r => 'r:' + r.id === k)).filter(Boolean);
+}
+
+function openMoveCat() {
+  if (!pickedRegular().length) return;
+  catNewFor = null;
+  renderMoveCat();
+  document.getElementById('moveCatModal').classList.add('open');
+  SFX.click();
+}
+
+function closeMoveCat() {
+  catNewFor = null;
+  document.getElementById('moveCatModal').classList.remove('open');
+}
+
+function renderMoveCat() {
+  const rs = pickedRegular();
+  const names = rs.map(r => `"${r.name}"`);
+  document.getElementById('moveCatFor').textContent = rs.length === 1
+    ? names[0]
+    : `${rs.length} routines: ${names.slice(0, 3).join(', ')}${names.length > 3 ? ` + ${names.length - 3} more` : ''}`;
+  const here = new Set(rs.map(r => catOf(r) || '__none'));
+  const only = here.size === 1 ? [...here][0] : null;
+  const mine = myRoutines();
+  const opt = (key, emoji, name, count) => `
+    <button type="button" class="movecat-opt${only === key ? ' current' : ''}" data-movecat="${escapeHtml(key)}">
+      <span class="mc-emoji">${escapeHtml(emoji)}</span>
+      <span class="mc-name">${escapeHtml(name)}</span>
+      <span class="mc-count">${only === key ? 'here now' : count}</span>
+    </button>`;
+  document.getElementById('moveCatList').innerHTML =
+    routineCats().map(c => opt(c.id, c.emoji || '📁', c.name, routinesInCat(c.id, mine).length)).join('') +
+    opt('__none', '📦', 'not sorted', '') +
+    (catNewFor === 'move' ? '' : `<button type="button" class="movecat-opt new" data-movecat-new>＋ new category</button>`);
+  document.getElementById('moveCatNewForm').style.display = catNewFor === 'move' ? 'flex' : 'none';
+}
+
+function movePickedTo(key) {
+  const rs = pickedRegular();
+  if (!rs.length) { closeMoveCat(); return; }
+  const c = key === '__none' ? null : getCat(key);
+  if (key !== '__none' && !c) return;
+  rs.forEach(r => { if (c) r.category = c.id; else delete r.category; });
+  routinePicks = routinePicks.filter(k => !k.startsWith('r:'));
+  save();
+  closeMoveCat();
+  SFX.add();
+  renderRoutinesList();
+  showToast(`📁 moved ${rs.length === 1 ? `"${rs[0].name}"` : rs.length + ' routines'} to ${c ? catLabel(c) : '📦 not sorted'}`);
+}
+
+function openNewCatForm(where) {
+  catNewFor = where;
+  const pre = where === 'move' ? 'moveCatNew' : 'routineCatNew';
+  document.getElementById(pre + 'Emoji').value = '';
+  document.getElementById(pre + 'Name').value = '';
+  if (where === 'move') renderMoveCat(); else renderRoutineCatChips();
+  SFX.click();
+  setTimeout(() => document.getElementById(pre + 'Name').focus(), 60);
+}
+
+function submitNewCat(where) {
+  const pre = where === 'move' ? 'moveCatNew' : 'routineCatNew';
+  const c = createCategory(document.getElementById(pre + 'Name').value, document.getElementById(pre + 'Emoji').value);
+  if (!c) { showToast('give it a name first'); return; }
+  catNewFor = null;
+  save();
+  if (where === 'move') { movePickedTo(c.id); return; }
+  routineCatPick = c.id;
+  SFX.add();
+  renderRoutineCatChips();
+}
+
+function renderRoutineCatChips() {
+  const opts = [['', '📦 none'], ...routineCats().map(c => [c.id, catLabel(c)])];
+  document.getElementById('routineCatChips').innerHTML = opts.map(([val, label]) =>
+    `<button type="button" class="pool-chip owner-chip${(routineCatPick || '') === val ? ' on' : ''}" data-rcat-pick="${escapeHtml(val)}">${escapeHtml(label)}</button>`
+  ).join('') + (catNewFor === 'routine' ? '' : `<button type="button" class="pool-chip cat-new-chip" data-rcat-pick-new>＋ new</button>`);
+  document.getElementById('routineCatNewForm').style.display = catNewFor === 'routine' ? 'flex' : 'none';
 }
 
 function openRoutineEditor(id = null) {
@@ -8353,6 +8806,9 @@ function openRoutineEditor(id = null) {
   routineDays = r && Array.isArray(r.days) ? [...r.days] : [];
   routineOwner = r ? (r.owner || 'all') : 'all';
   document.getElementById('routineDeleteBtn').style.display = r ? 'inline-block' : 'none';
+  routineCatPick = r ? catOf(r) : (getCat(routineCat) ? routineCat : null);
+  catNewFor = null;
+  renderRoutineCatChips();
   renderDayChips();
   renderOwnerChips('routine');
   document.getElementById('routinesListView').style.display = 'none';
@@ -8390,15 +8846,23 @@ function saveRoutine() {
   if (!name) { showToast('give your routine a name'); return; }
   if (!text.trim()) { showToast('add at least one task'); return; }
   const days = [...routineDays].sort((a, b) => a - b);
+  const category = getCat(routineCatPick) ? routineCatPick : null;
 
   if (editingRoutineId) {
     const r = state.routines.find(x => x.id === editingRoutineId);
-    if (r) Object.assign(r, { name, text, days, owner: routineOwner, lastUsed: Date.now() });
+    if (r) {
+      Object.assign(r, { name, text, days, owner: routineOwner, lastUsed: Date.now() });
+      if (category) r.category = category; else delete r.category;
+    }
   } else {
-    state.routines.push({ id: 'r_' + uid(), owner: routineOwner, name, text, days, lastUsed: Date.now() });
+    const r = { id: 'r_' + uid(), owner: routineOwner, name, text, days, lastUsed: Date.now() };
+    if (category) r.category = category;
+    state.routines.push(r);
   }
   if (routineOwner !== 'all' && routineOwner !== state.profile) {
     showToast(`saved for ${getUserName(routineOwner)} — find it under "only for ${getUserName(routineOwner)}"`);
+  } else if (routineCat !== null && routineCat !== '__all' && (category || '__none') !== routineCat) {
+    showToast(`saved in ${category ? catLabel(getCat(category)) : '📦 not sorted'}`);
   }
   save();
   SFX.add();
@@ -8499,13 +8963,25 @@ function renderMasterEditor() {
   if (!all.length) {
     pool.innerHTML = `<div class="master-empty" style="width:100%;">no regular routines yet — make some on the 🔁 routines tab</div>`;
   }
-  all.forEach(r => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'pool-chip' + (masterPicks.includes(r.id) ? ' used' : '');
-    b.dataset.mpAdd = r.id;
-    b.textContent = (masterPicks.includes(r.id) ? '✓ ' : '＋ ') + r.name;
-    pool.appendChild(b);
+  const groups = [
+    ...routineCats().map(c => [catLabel(c), all.filter(r => catOf(r) === c.id)]),
+    ['📦 not sorted', all.filter(r => !catOf(r))]
+  ].filter(g => g[1].length);
+  groups.forEach(([label, rs]) => {
+    if (groups.length > 1) {
+      const h = document.createElement('div');
+      h.className = 'pool-group';
+      h.textContent = label;
+      pool.appendChild(h);
+    }
+    rs.forEach(r => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pool-chip' + (masterPicks.includes(r.id) ? ' used' : '');
+      b.dataset.mpAdd = r.id;
+      b.textContent = (masterPicks.includes(r.id) ? '✓ ' : '＋ ') + r.name;
+      pool.appendChild(b);
+    });
   });
 
   const chips = document.getElementById('masterDayChips');
@@ -9106,6 +9582,28 @@ document.addEventListener('click', (e) => {
   }
   const rTab = e.target.closest('[data-rtab]');
   if (rTab) { setRoutinesTab(rTab.dataset.rtab); return; }
+  // routine categories
+  const rCat = e.target.closest('[data-rcat]');
+  if (rCat) { openRoutineCat(rCat.dataset.rcat); return; }
+  if (e.target.closest('[data-rcat-back]')) { openRoutineCat(null); return; }
+  const rCatEdit = e.target.closest('[data-rcat-edit]');
+  if (rCatEdit) { openCatEditor(rCatEdit.dataset.rcatEdit); return; }
+  if (e.target.closest('[data-rcat-new]')) { openCatEditor(null); return; }
+  if (e.target.closest('#catSaveBtn')) { saveCat(); return; }
+  if (e.target.closest('#catCancelBtn')) { SFX.click(); showRoutineListView(); return; }
+  if (e.target.closest('#catDeleteBtn')) { deleteCat(); return; }
+  const catEmo = e.target.closest('[data-cat-emoji]');
+  if (catEmo) { document.getElementById('catEmojiInput').value = catEmo.dataset.catEmoji; SFX.click(); return; }
+  if (e.target.closest('#routineSelMove')) { openMoveCat(); return; }
+  if (e.target.closest('#moveCatCancel') || e.target.id === 'moveCatModal') { closeMoveCat(); return; }
+  const moveTo = e.target.closest('[data-movecat]');
+  if (moveTo) { movePickedTo(moveTo.dataset.movecat); return; }
+  if (e.target.closest('[data-movecat-new]')) { openNewCatForm('move'); return; }
+  if (e.target.closest('#moveCatNewOk')) { submitNewCat('move'); return; }
+  const rcPick = e.target.closest('[data-rcat-pick]');
+  if (rcPick) { routineCatPick = rcPick.dataset.rcatPick || null; SFX.click(); renderRoutineCatChips(); return; }
+  if (e.target.closest('[data-rcat-pick-new]')) { openNewCatForm('routine'); return; }
+  if (e.target.closest('#routineCatNewOk')) { submitNewCat('routine'); return; }
   if (e.target.closest('#newMasterBtn')) { openMasterEditor(); return; }
   const mAdd = e.target.closest('[data-master-add]');
   if (mAdd) { addMasterToDay(mAdd.dataset.masterAdd); return; }
@@ -9409,6 +9907,7 @@ async function exportData() {
       notes: state.notes,
       routines: state.routines,
       masterRoutines: state.masterRoutines,
+      routineCategories: state.routineCategories,
       pointMemory: state.pointMemory,
       history: state.history,
       showPoints: state.showPoints,
@@ -9488,6 +9987,8 @@ function confirmImport() {
   state.notes = imported.notes || {};
   state.routines = Array.isArray(imported.routines) ? imported.routines : [];
   state.masterRoutines = Array.isArray(imported.masterRoutines) ? imported.masterRoutines : [];
+  state.routineCategories = Array.isArray(imported.routineCategories) ? imported.routineCategories : null;
+  ensureRoutineCategories();
   state.pointMemory = imported.pointMemory && typeof imported.pointMemory === 'object' ? imported.pointMemory : {};
   state.history = imported.history && typeof imported.history === 'object' ? imported.history : {};
   state.showPoints = !!imported.showPoints;
@@ -9547,8 +10048,16 @@ const SHEET_CLOSERS = {
   importModal: () => { pendingImportData = null; document.getElementById('importModal').classList.remove('open'); },
   entrySheet: () => closeEntry(),
   moodSheet: () => closeMoodSheet(),
-  emojiModal: () => closeEmojiEditor()
+  emojiModal: () => closeEmojiEditor(),
+  moveCatModal: () => closeMoveCat()
 };
+
+// Enter in the little category name boxes = save
+[['catNameInput', () => saveCat()], ['moveCatNewName', () => submitNewCat('move')], ['routineCatNewName', () => submitNewCat('routine')]]
+  .forEach(([id, fn]) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); fn(); } });
+  });
 
 function closeSheetById(id) {
   const fn = SHEET_CLOSERS[id];
